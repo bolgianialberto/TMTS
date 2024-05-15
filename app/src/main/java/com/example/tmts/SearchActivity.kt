@@ -1,11 +1,13 @@
 package com.example.tmts
 
 import SearchMovieAdapter
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
 import android.widget.EditText
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,6 +19,7 @@ class SearchActivity : AppCompatActivity() {
 
     private lateinit var tmdbApiClient: TMDbApiClient
     private lateinit var movieAdapter: SearchMovieAdapter
+    private lateinit var ivBackSearch: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,12 +27,14 @@ class SearchActivity : AppCompatActivity() {
 
         tmdbApiClient = TMDbApiClient()
         movieAdapter = SearchMovieAdapter(this, emptyList())
+        ivBackSearch = findViewById(R.id.iv_arrow_back_search)
 
         val rvMovie: RecyclerView = findViewById(R.id.rv_movie)
         rvMovie.layoutManager = LinearLayoutManager(this)
         rvMovie.adapter = movieAdapter
 
         val etSearch: EditText = findViewById(R.id.et_search)
+        etSearch.requestFocus()
 
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -47,6 +52,11 @@ class SearchActivity : AppCompatActivity() {
                 }
             }
         })
+
+        ivBackSearch.setOnClickListener {
+            val intent = Intent(this@SearchActivity, MainActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun searchMovies(query: String) {

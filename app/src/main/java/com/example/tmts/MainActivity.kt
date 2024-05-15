@@ -44,9 +44,11 @@ class MainActivity : AppCompatActivity() {
 
         loadPopularSeries()
 
-        etPopularSearch.setOnClickListener {
-            val intent = Intent(this@MainActivity, SearchActivity::class.java)
-            startActivity(intent)
+        etPopularSearch.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                val intent = Intent(this@MainActivity, SearchActivity::class.java)
+                startActivity(intent)
+            }
         }
 
         btnSearchPopular.setOnClickListener {
