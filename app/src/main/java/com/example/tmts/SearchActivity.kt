@@ -54,8 +54,7 @@ class SearchActivity : AppCompatActivity() {
         })
 
         ivBackSearch.setOnClickListener {
-            val intent = Intent(this@SearchActivity, MainActivity::class.java)
-            startActivity(intent)
+            onBackPressed()
         }
     }
 
