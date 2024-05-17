@@ -1,4 +1,5 @@
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -6,6 +7,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.Media
+import com.example.tmts.MovieDetailsActivity
 import com.example.tmts.R
 
 class PopularMovieAdapter(private val context: Context, private var movies: List<Media>) :
@@ -37,6 +39,12 @@ class PopularMovieAdapter(private val context: Context, private var movies: List
                 .load("https://image.tmdb.org/t/p/w500${movie.posterPath}")
                 .placeholder(R.drawable.movie)
                 .into(imageViewPopular)
+
+            itemView.setOnClickListener {
+                val intent = Intent(context, MovieDetailsActivity::class.java)
+                intent.putExtra("movieId", movie.id)
+                context.startActivity(intent)
+            }
         }
     }
 }
