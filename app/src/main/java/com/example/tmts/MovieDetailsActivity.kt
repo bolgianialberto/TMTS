@@ -63,6 +63,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         val backdropImageView: ImageView = findViewById(R.id.iv_movie_details_backdrop)
         val releaseDate: TextView = findViewById(R.id.tv_movie_details_date)
         val runtime: TextView = findViewById(R.id.tv_movie_details_time)
+        val overview: TextView = findViewById(R.id.tv_movie_details_overview)
 
         movie.backdropPath?.let {
             Glide.with(this)
@@ -80,5 +81,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         val minutes = runtimeMinutes % 60
         val formattedRuntime = "${hours}h ${minutes}m"
         runtime.text = formattedRuntime
+
+        overview.text = movie.overview
     }
 }
