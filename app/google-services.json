@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "447650153594",
+    "project_id": "too-much-to-see",
+    "storage_bucket": "too-much-to-see.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:447650153594:android:c1834337a7877b50eb27c3",
+        "android_client_info": {
+          "package_name": "com.example.tmts"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD7Ik0qVdGsyEz37Li8L7SM9Gzrwc9Gqv0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

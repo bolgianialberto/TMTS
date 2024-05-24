@@ -14,11 +14,12 @@
         android:layout_marginTop="70dp"
         android:src="@drawable/logo" />
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/rl_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/iv_logo"
+        android:orientation="vertical"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:background="@drawable/signup_background"
@@ -41,7 +42,6 @@
             android:id="@+id/edt_email"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_below="@id/tv_login"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
@@ -56,11 +56,11 @@
             android:id="@+id/edt_password"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_below="@id/edt_email"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
             android:background="@drawable/edt_background"
+            android:inputType="textPassword"
             android:hint="Password"
             android:paddingStart="15dp"
             android:paddingEnd="15dp"
@@ -68,10 +68,9 @@
             android:textColorHint="@color/white" />
 
         <Button
-            android:id="@+id/btt_signup"
+            android:id="@+id/btt_login"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:layout_below="@+id/edt_password"
             android:layout_marginStart="20dp"
             android:layout_marginTop="20dp"
             android:layout_marginEnd="20dp"
@@ -79,9 +78,9 @@
             android:backgroundTint="@color/white"
             android:text="Sign In"
             android:textColor="#000000"
-            android:textSize="22dp" />
+            android:textSize="22sp" />
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_logged0"
