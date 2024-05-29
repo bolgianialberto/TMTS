@@ -17,6 +17,7 @@ interface TMDbApiInterface {
     fun getMovieDetails(
         @Path("movie_id") movieId: Int,
         @Query("api_key") apiKey: String
+
     ): Call<MovieDetails>
 
     @GET("movie/popular")

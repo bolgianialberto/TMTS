@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
-    id("com.google.gms.google-services")
 }
 
 android {
@@ -43,8 +42,6 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
-    implementation(libs.firebase.auth.ktx)
-    implementation(libs.firebase.database.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -55,8 +52,10 @@ dependencies {
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 
+    // for navigation bar
+    implementation("com.google.android.material:material:1.2.0")
+
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-database")
-
 }
