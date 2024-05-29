@@ -62,8 +62,13 @@ class SignUpActivity : AppCompatActivity() {
             val name = edtName.text.toString()
             val email = edtEmail.text.toString()
             val password = edtPassword.text.toString()
-            //check pass identity
-            signup(name, email, password)
+            val usernameResult = UsernameRules.checkUsernameRules(edtName.text.toString()).resultId == 1
+            val emailResult = EmailRules.checkEmailRules(edtEmail.text.toString()).resultId == 1
+            val passwordResult = PasswordRules.checkPasswordRules(edtPassword.text.toString()).resultId == 1
+            val confirmPassword = checkEdtPasswordConfirmed()
+            if (usernameResult && emailResult && passwordResult && confirmPassword) {
+                signup(name, email, password)
+            }
         }
 
         edtName.addTextChangedListener(object : TextWatcher {
@@ -212,7 +217,7 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun addUserToDatabase(name: String, email: String, uid: String) {
-        mDbRef.child("users").child(uid).setValue(User(name, email, uid))
+        mDbRef.child("users").child(uid).setValue(User(uid, name, email))
     }
 
     private fun checkEdtPasswordConfirmed(): Boolean {
