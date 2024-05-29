@@ -2,15 +2,12 @@ package com.example.tmts.activities
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Message
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -26,6 +23,7 @@ import com.google.firebase.database.database
 class SignUpActivity : AppCompatActivity() {
 
     private lateinit var edtName: EditText
+    private lateinit var tvUsernameErr: TextView
     private lateinit var edtEmail: EditText
     private lateinit var tvEmailErr: TextView
     private lateinit var edtPassword: EditText
@@ -47,7 +45,8 @@ class SignUpActivity : AppCompatActivity() {
             insets
         }
 
-        edtName = findViewById((R.id.edt_name))
+        edtName = findViewById(R.id.edt_name)
+        tvUsernameErr = findViewById(R.id.tv_username_error)
         edtEmail = findViewById(R.id.edt_email)
         tvEmailErr = findViewById(R.id.tv_email_error)
         edtPassword = findViewById(R.id.edt_password)
@@ -67,13 +66,35 @@ class SignUpActivity : AppCompatActivity() {
             signup(name, email, password)
         }
 
+        edtName.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) { }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val username = s.toString()
+                val result = UsernameRules.checkUsernameRules(username)
+                if (result.resultId < 0) {
+                    showTvUsernameErrorWithMessage(result.message)
+                } else {
+                    hideTvUsernameError()
+                }
+            }
+        })
+
         edtEmail.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) { }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                hideTvEmailError()
+                val email = s.toString()
+                val result = EmailRules.checkEmailRules(email)
+                if (result.resultId < 0) {
+                    showTvEmailErrorWithMessage(result.message)
+                } else {
+                    hideTvEmailError()
+                }
             }
         })
 
@@ -86,7 +107,7 @@ class SignUpActivity : AppCompatActivity() {
                 val password = s.toString()
 
                 // check if password pass all rules
-                val result = checkPasswordRules(password)
+                val result = PasswordRules.checkPasswordRules(password)
                 if (result.resultId < 0) {
                     showTvPasswordErrorWithMessage(result.message)
                 } else {
@@ -109,7 +130,6 @@ class SignUpActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (edtConfirmPassword.text.isNotEmpty() && !checkEdtPasswordConfirmed()){
-                    Log.e("DEBUG", "${edtConfirmPassword.text.toString()} - ${edtConfirmPassword.text.isNotEmpty()} - ${edtPassword.text} - ${checkEdtPasswordConfirmed()} ")
                     showTvConfirmPasswordError()
                 } else {
                     hideTvConfirmPasswordError()
@@ -119,23 +139,61 @@ class SignUpActivity : AppCompatActivity() {
 
     }
 
+    private object UsernameRules {
+        private const val minLength: Int = 2
+        private const val maxLength: Int = 15
 
-    private companion object PasswordRules {
+        fun checkUsernameRules(password: String): UsernameCheckResult {
+            if (password.isEmpty()) {
+                return UsernameCheckResult(0, "Username is empty")
+            }
+            if (password.length < minLength) {
+                return UsernameCheckResult(-1, "Username must be $minLength characters minimum")
+            }
+            if (password.length > maxLength) {
+                return UsernameCheckResult(-2, "Username must be $maxLength characters maximum")
+            }
+            return UsernameCheckResult(1, "Username is ok")
+        }
+    }
+
+    private object EmailRules {
+        fun checkEmailRules(email: String): EmailCheckResult {
+            val emailRegex = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")
+            if (email.matches(emailRegex)) {
+                return EmailCheckResult(1, "Email is ok")
+            }
+            return EmailCheckResult(-1, "Email is not in the correct format")
+        }
+    }
+
+    private object PasswordRules {
         private const val minLength: Int = 6
         private const val maxLength: Int = 15
-        private const val minNumbers: Int = 1
-        private fun checkPasswordRules(password: String): PasswordCheckResult {
+        private const val containsNumber: Boolean = true
+        fun checkPasswordRules(password: String): PasswordCheckResult {
             if (password.isEmpty()) {
                 return PasswordCheckResult(0, "Password is empty")
             }
             if (password.length < minLength) {
                 return PasswordCheckResult(-1, "Password must be $minLength minimum")
             }
+            if (password.length > maxLength) {
+                return PasswordCheckResult(-2, "Password must be $maxLength maximum")
+            }
+            if (containsNumber && !password.any{it.isDigit()}) {
+                return PasswordCheckResult(-2, "Password must contain at least one number")
+            }
             return PasswordCheckResult(1, "Password is ok")
         }
     }
 
-    private class PasswordCheckResult constructor(var resultId: Int, var message: String)
+    private data class UsernameCheckResult (var resultId: Int, var message: String)
+
+    private data class EmailCheckResult (var resultId: Int, var message: String)
+
+    private data class PasswordCheckResult (var resultId: Int, var message: String)
+
 
     private fun signup(name: String, email: String, password: String) {
         mAuth.createUserWithEmailAndPassword(email, password)
@@ -147,7 +205,7 @@ class SignUpActivity : AppCompatActivity() {
                     finish()
                 } else {
                     if (task.exception.toString().startsWith("com.google.firebase.auth.FirebaseAuthUserCollisionException")) {
-                        showTvEmailError()
+                        showTvEmailErrorWithMessage(EmailCheckResult(-2, "Mail is already used").message)
                     }
                 }
             }
@@ -157,12 +215,18 @@ class SignUpActivity : AppCompatActivity() {
         mDbRef.child("users").child(uid).setValue(User(name, email, uid))
     }
 
-    private fun checkUsername() {
-        // TODO
-    }
-
     private fun checkEdtPasswordConfirmed(): Boolean {
         return edtPassword.text.toString() == edtConfirmPassword.text.toString()
+    }
+
+    private fun hideTvUsernameError() {
+        tvUsernameErr.text = ""
+        tvUsernameErr.visibility = View.GONE
+    }
+
+    private fun showTvUsernameErrorWithMessage(message: String) {
+        tvUsernameErr.text = message
+        tvUsernameErr.visibility = View.VISIBLE
     }
 
     private fun hideTvEmailError() {
@@ -170,8 +234,8 @@ class SignUpActivity : AppCompatActivity() {
         tvEmailErr.visibility = View.GONE
     }
 
-    private fun showTvEmailError() {
-        tvEmailErr.text = "Mail is already used"
+    private fun showTvEmailErrorWithMessage(message: String) {
+        tvEmailErr.text = message
         tvEmailErr.visibility = View.VISIBLE
     }
 

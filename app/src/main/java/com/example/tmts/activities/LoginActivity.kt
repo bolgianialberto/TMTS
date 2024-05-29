@@ -2,6 +2,9 @@ package com.example.tmts.activities
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -18,6 +21,7 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var edtEmail: EditText
     private lateinit var edtPassword: EditText
+    private lateinit var tvLoginErr: TextView
     private lateinit var bttLogin: Button
     private lateinit var tvSignUp: TextView
     private lateinit var mAuth: FirebaseAuth
@@ -34,9 +38,30 @@ class LoginActivity : AppCompatActivity() {
 
         edtEmail = findViewById(R.id.edt_email)
         edtPassword = findViewById(R.id.edt_password)
+        tvLoginErr = findViewById(R.id.tv_login_error)
         bttLogin = findViewById(R.id.btt_login)
         tvSignUp = findViewById(R.id.tv_logged1)
         mAuth = FirebaseAuth.getInstance()
+
+        edtEmail.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) { }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                hideTvLoginError()
+            }
+        })
+
+        edtPassword.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) { }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                hideTvLoginError()
+            }
+        })
 
         bttLogin.setOnClickListener {
             val email = edtEmail.text.toString()
@@ -58,9 +83,18 @@ class LoginActivity : AppCompatActivity() {
                     val intent = Intent(this@LoginActivity, MainActivity::class.java)
                     startActivity(intent)
                 } else {
-                    Toast.makeText(this@LoginActivity, "User does not exist", Toast.LENGTH_SHORT).show()
+                    showTvLoginError()
                 }
             }
     }
 
+    private fun hideTvLoginError() {
+        tvLoginErr.text = ""
+        tvLoginErr.visibility = View.GONE
+    }
+
+    private fun showTvLoginError() {
+        tvLoginErr.text = "Username or password is wrong"
+        tvLoginErr.visibility = View.VISIBLE
+    }
 }

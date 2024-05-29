@@ -67,6 +67,16 @@
             android:textColor="@color/white"
             android:textColorHint="@color/white" />
 
+        <TextView
+            android:id="@+id/tv_login_error"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:paddingStart="15dp"
+            android:paddingEnd="15dp"
+            android:textColor="@color/white"
+            android:visibility="gone" />
+
         <Button
             android:id="@+id/btt_login"
             android:layout_width="match_parent"
