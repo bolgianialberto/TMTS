@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MovieDetailsActivity">
+    tools:context=".MediaDetaisActivity">
 
     <ImageView
         android:id="@+id/iv_movie_details_backdrop"
@@ -71,5 +71,14 @@
             android:textSize="16sp"
             android:textColor="@color/white"/>
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_movie_details_overview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="18sp"
+        android:text="overview placeholder"
+        android:padding="20dp"
+        app:layout_constraintTop_toBottomOf="@id/iv_movie_details_backdrop"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

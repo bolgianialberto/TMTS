@@ -1,4 +1,4 @@
-package com.example.tmts.activities
+package com.example.tmts
 
 import android.os.Bundle
 import android.util.Log
@@ -7,19 +7,17 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.tmts.beans.MovieDetails
-import com.example.tmts.R
-import com.example.tmts.TMDbApiClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MovieDetailsActivity : AppCompatActivity() {
+class MediaDetaisActivity : AppCompatActivity() {
 
     private lateinit var tmDbApiClient: TMDbApiClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_movie_details)
+        setContentView(R.layout.activity_media_details)
 
         val intent = intent
 
@@ -62,6 +60,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         val backdropImageView: ImageView = findViewById(R.id.iv_movie_details_backdrop)
         val releaseDate: TextView = findViewById(R.id.tv_movie_details_date)
         val runtime: TextView = findViewById(R.id.tv_movie_details_time)
+        val overview: TextView = findViewById(R.id.tv_movie_details_overview)
 
         movie.backdropPath?.let {
             Glide.with(this)
@@ -79,5 +78,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         val minutes = runtimeMinutes % 60
         val formattedRuntime = "${hours}h ${minutes}m"
         runtime.text = formattedRuntime
+
+        overview.text = movie.overview
     }
 }
