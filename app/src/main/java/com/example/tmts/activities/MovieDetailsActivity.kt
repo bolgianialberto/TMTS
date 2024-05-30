@@ -6,7 +6,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
-import com.example.tmts.MovieDetails
+import com.example.tmts.beans.MovieDetails
 import com.example.tmts.R
 import com.example.tmts.TMDbApiClient
 import retrofit2.Call

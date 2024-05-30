@@ -1,5 +1,7 @@
 package com.example.tmts
 
+import com.example.tmts.beans.MediaResponse
+import com.example.tmts.beans.MovieDetails
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path

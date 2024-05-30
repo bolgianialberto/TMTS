@@ -1,4 +1,4 @@
-package com.example.tmts
+package com.example.tmts.beans
 
 import com.google.gson.annotations.SerializedName
 

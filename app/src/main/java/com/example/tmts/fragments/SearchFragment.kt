@@ -1,17 +1,22 @@
-package com.example.tmts
+package com.example.tmts.fragments
 
-import PopularMovieAdapter
+import com.example.tmts.adapters.PopularMovieAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.tmts.beans.Media
+import com.example.tmts.beans.MediaResponse
+import com.example.tmts.adapters.PopularSerieAdapter
+import com.example.tmts.R
+import com.example.tmts.activities.SearchActivity
+import com.example.tmts.TMDbApiClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

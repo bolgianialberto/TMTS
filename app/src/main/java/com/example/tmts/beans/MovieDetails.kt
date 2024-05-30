@@ -1,5 +1,6 @@
-package com.example.tmts
+package com.example.tmts.beans
 
+import com.example.tmts.beans.Genre
 import com.google.gson.annotations.SerializedName
 
 data class MovieDetails(

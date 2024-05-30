@@ -3,10 +3,10 @@ package com.example.tmts.activities
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.tmts.AccountFragment
-import com.example.tmts.HomeFragment
+import com.example.tmts.fragments.AccountFragment
+import com.example.tmts.fragments.HomeFragment
 import com.example.tmts.R
-import com.example.tmts.SearchFragment
+import com.example.tmts.fragments.SearchFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 

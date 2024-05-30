@@ -1,4 +1,4 @@
-package com.example.tmts
+package com.example.tmts.fragments
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import com.example.tmts.R
 import com.example.tmts.activities.MainEmptyActivity
 import com.google.firebase.auth.FirebaseAuth
 
