@@ -1,5 +1,6 @@
 package com.example.tmts
 
+import com.example.tmts.beans.Genre
 import com.google.gson.annotations.SerializedName
 
 data class SerieDetails (
