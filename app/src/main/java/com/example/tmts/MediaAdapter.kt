@@ -1,4 +1,4 @@
-package com.example.tmts
+package com.example.tmts.adapters
 
 import android.content.Context
 import android.media.browse.MediaBrowser.MediaItem
@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.tmts.R
+import com.example.tmts.beans.Media
 
 class MediaAdapter(
     private val context: Context,

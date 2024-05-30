@@ -1,7 +1,6 @@
-package com.example.tmts
+package com.example.tmts.activities
 
-import SearchMovieAdapter
-import android.content.Intent
+import com.example.tmts.adapters.SearchMovieAdapter
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,6 +10,10 @@ import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.tmts.beans.Media
+import com.example.tmts.beans.MediaResponse
+import com.example.tmts.R
+import com.example.tmts.TMDbApiClient
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response

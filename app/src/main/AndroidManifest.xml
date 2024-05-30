@@ -18,17 +18,24 @@
             android:name=".MediaDetaisActivity"
             android:exported="false" />
         <activity
-            android:name=".SearchActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainEmptyActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".activities.SearchActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.MainActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".activities.LoginActivity"
+            android:exported="false"/>
+        <activity
+            android:name=".activities.SignUpActivity"
+            android:exported="false"/>
     </application>
-
 </manifest>

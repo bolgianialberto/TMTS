@@ -1,3 +1,5 @@
+package com.example.tmts.adapters
+
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -6,7 +8,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.tmts.Media
+import com.example.tmts.beans.Media
 import com.example.tmts.R
 
 class SearchMovieAdapter(private val context: Context, private var movies: List<Media>) :
