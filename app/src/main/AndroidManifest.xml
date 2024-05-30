@@ -15,7 +15,7 @@
         android:theme="@style/Theme.TMDb_example"
         tools:targetApi="31">
         <activity
-            android:name=".MovieDetailsActivity"
+            android:name=".MediaDetaisActivity"
             android:exported="false" />
         <activity
             android:name=".SearchActivity"
