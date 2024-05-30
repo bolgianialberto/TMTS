@@ -7,7 +7,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.Media
-import com.example.tmts.MovieDetailsActivity
+import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.R
 
 class PopularMovieAdapter(private val context: Context, private var movies: List<Media>) :

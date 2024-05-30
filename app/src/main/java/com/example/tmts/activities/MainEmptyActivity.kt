@@ -3,7 +3,6 @@ package com.example.tmts.activities
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.tmts.MainActivity
 import com.google.firebase.auth.FirebaseAuth
 
 class MainEmptyActivity : AppCompatActivity() {

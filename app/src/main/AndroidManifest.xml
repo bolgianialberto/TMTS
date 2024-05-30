@@ -23,13 +23,13 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MovieDetailsActivity"
+            android:name=".activities.MovieDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".SearchActivity"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:exported="false"/>
         <activity
             android:name=".activities.LoginActivity"
