@@ -21,6 +21,9 @@ class MainEmptyActivity : AppCompatActivity() {
             activityIntent = Intent(this, LoginActivity::class.java)
         }
 
+        //TODO: Forse qui bisogna passare anche il current user,
+        // perchè sembra che non ritenga i dati dell'user
+
         startActivity(activityIntent)
         finish()
     }

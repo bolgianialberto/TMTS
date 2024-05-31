@@ -26,9 +26,14 @@ class AccountFragment : Fragment() {
         val currentUser = mAuth.currentUser
 
         val greetingTextView: TextView = view.findViewById(R.id.account_fragment_saluto)
+        val tvUsername: TextView = view.findViewById(R.id.tv_account_username)
         val logoutButton: Button = view.findViewById(R.id.logout_button)
 
+        //Quando si entra in app direttamente (senza login): name = ""
+        // mentre con login, name = "null"
+
         greetingTextView.text = "Ciao, ${currentUser?.displayName}"
+        tvUsername.text = "${currentUser?.displayName}"
 
         logoutButton.setOnClickListener {
             performLogout()

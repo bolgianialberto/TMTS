@@ -1,42 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.AccountFragment">
+
+
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="10dp"
+        >
+
+        <ImageView
+            android:id="@+id/account_icon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="20sp"
+
+            android:src="@drawable/account" />
+
+        <TextView
+            android:id="@+id/tv_account_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            app:layout_constraintStart_toEndOf="@+id/account_icon"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="10sp"
+            android:layout_marginTop="20sp"
+
+            android:text="Username"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+
+        <LinearLayout
+            android:id="@+id/ll_follower"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+
+            app:layout_constraintStart_toEndOf="@id/account_icon"
+            app:layout_constraintTop_toBottomOf="@id/tv_account_username"
+            android:layout_marginStart="10sp">
+
+            <TextView
+                android:id="@+id/tv_follower"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Followers"
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/tv_follower_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="50"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_following"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+
+            app:layout_constraintStart_toEndOf="@id/ll_follower"
+            app:layout_constraintTop_toBottomOf="@id/tv_account_username"
+            android:layout_marginStart="10sp">
+
+            <TextView
+                android:id="@+id/tv_following"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Following"
+                android:textSize="16sp"
+                android:layout_marginStart="4dp" />
+
+            <TextView
+                android:id="@+id/tv_following_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="30"
+                android:textSize="16sp" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center">
+        android:layout_marginTop="150dp"
+        android:layout_marginStart="32dp">
 
         <TextView
-            android:id="@+id/home_fragment_title"
-            android:layout_width="match_parent"
+            android:id="@+id/account_watchlist"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ACCOUNT FRAGMENT"
-            android:textStyle="bold"
-            android:gravity="center"
-            android:textSize="50sp"/>
+
+            android:text="Le tue Watchlist"
+            android:textSize="25sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/account_platforms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+
+            android:text="Piattaforme"
+            android:textSize="25sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/account_seen_movies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+
+            android:text="Film già visti"
+            android:textSize="25sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/account_seen_series"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+
+            android:text="Serie TV già viste"
+            android:textSize="25sp"
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/account_fragment_saluto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+
             android:text="saluto placeholder"
             android:textSize="25sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:id="@+id/home_fragment_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+
+            android:text="ACCOUNT FRAGMENT"
             android:textStyle="bold"
-            />
+            android:textSize="50sp"/>
 
         <Button
             android:id="@+id/logout_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Logout"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="20dp"/>
+            android:layout_marginTop="20dp"
+
+            android:text="Logout"/>
 
     </LinearLayout>
 
-</FrameLayout>
+</RelativeLayout>
