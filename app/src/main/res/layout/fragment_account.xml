@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".fragments.AccountFragment">
-
+    tools:context=".fragments.AccountFragment"
+    android:background="f6f9f0"
+    >
 
 
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="10dp"
@@ -33,12 +34,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
 
+
             app:layout_constraintStart_toEndOf="@+id/account_icon"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginStart="10sp"
             android:layout_marginTop="20sp"
 
             android:text="Username"
+            android:textColor="#1A472A "
             android:textSize="25sp"
             android:textStyle="bold"
             android:gravity="center" />
@@ -59,14 +62,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Followers"
-                android:textSize="16sp"/>
+                android:textColor="#3a6e43"
+                android:textStyle="bold"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/tv_follower_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="50"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="#358247" />
 
         </LinearLayout>
 
@@ -85,18 +91,32 @@
                 android:id="@+id/tv_following"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
                 android:text="Following"
                 android:textSize="16sp"
-                android:layout_marginStart="4dp" />
+                android:textStyle="bold"
+                android:textColor="#3a6e43"/>
 
             <TextView
                 android:id="@+id/tv_following_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="30"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:textColor="#358247" />
 
         </LinearLayout>
+
+        <ImageButton
+            android:id="@+id/ib_dropdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/more_vert_24px"
+            android:background="#0000"
+
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -115,7 +135,8 @@
 
             android:text="Le tue Watchlist"
             android:textSize="25sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="#A6A96F"/>
 
         <TextView
             android:id="@+id/account_platforms"
@@ -125,7 +146,8 @@
 
             android:text="Piattaforme"
             android:textSize="25sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="#A6A96F"/>
 
         <TextView
             android:id="@+id/account_seen_movies"
@@ -135,7 +157,8 @@
 
             android:text="Film già visti"
             android:textSize="25sp"
-            android:textStyle="bold"/>
+            android:textStyle="bold"
+            android:textColor="#A6A96F"/>
 
         <TextView
             android:id="@+id/account_seen_series"
@@ -145,35 +168,36 @@
 
             android:text="Serie TV già viste"
             android:textSize="25sp"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/account_fragment_saluto"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-
-            android:text="saluto placeholder"
-            android:textSize="25sp"
-            android:textStyle="bold"/>
-
-        <TextView
-            android:id="@+id/home_fragment_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-
-            android:text="ACCOUNT FRAGMENT"
             android:textStyle="bold"
-            android:textSize="50sp"/>
+            android:textColor="#A6A96F"/>
 
-        <Button
-            android:id="@+id/logout_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+<!--        <TextView-->
+<!--            android:id="@+id/account_fragment_saluto"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="10dp"-->
 
-            android:text="Logout"/>
+<!--            android:text="saluto placeholder"-->
+<!--            android:textSize="25sp"-->
+<!--            android:textStyle="bold"/>-->
+
+<!--        <TextView-->
+<!--            android:id="@+id/home_fragment_title"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="10dp"-->
+
+<!--            android:text="ACCOUNT FRAGMENT"-->
+<!--            android:textStyle="bold"-->
+<!--            android:textSize="50sp"/>-->
+
+<!--        <Button-->
+<!--            android:id="@+id/logout_button2"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="20dp"-->
+
+<!--            android:text="Logout"/>-->
 
     </LinearLayout>
 
