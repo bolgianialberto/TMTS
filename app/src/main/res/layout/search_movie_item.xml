@@ -4,22 +4,24 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="2dp">
+    android:padding="2dp"
+    android:layout_gravity="">
 
     <ImageView
-        android:id="@+id/iv_search"
+        android:id="@+id/iv_search_backdrop"
         android:layout_width="100dp"
         android:layout_height="150dp"
         android:scaleType="centerCrop"
         android:src="@drawable/movie" />
 
     <TextView
-        android:id="@+id/tv_search"
+        android:id="@+id/tv_search_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginStart="16dp"
         android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:text="placeholder title"/>
 
 </LinearLayout>

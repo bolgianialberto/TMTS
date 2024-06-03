@@ -29,8 +29,8 @@ class SearchMovieAdapter(private val context: Context, private var movies: List<
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val imageViewPoster: ImageView = itemView.findViewById(R.id.iv_search)
-        private val textViewTitle: TextView = itemView.findViewById(R.id.tv_search)
+        private val imageViewPoster: ImageView = itemView.findViewById(R.id.iv_search_backdrop)
+        private val textViewTitle: TextView = itemView.findViewById(R.id.tv_search_title)
 
         fun bind(movie: Media) {
             textViewTitle.text = movie.title
