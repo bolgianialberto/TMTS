@@ -10,12 +10,12 @@ import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.tmts.activities.MediaDetaisActivity
 import com.example.tmts.beans.Media
 import com.example.tmts.beans.MediaResponse
 import com.example.tmts.R
 import com.example.tmts.activities.SearchActivity
 import com.example.tmts.TMDbApiClient
+import com.example.tmts.activities.MediaDetaisActivity
 import com.example.tmts.adapters.MediaAdapter
 import retrofit2.Call
 import retrofit2.Callback

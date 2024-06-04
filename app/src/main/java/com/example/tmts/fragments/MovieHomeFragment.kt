@@ -51,25 +51,26 @@ class MovieHomeFragment : Fragment() {
 
     private fun loadHomeMovies(currentUser: FirebaseUser?) {
         currentUser?.let {
-            mDbRef.child("users").child(it.uid).child("following_shows").get().addOnSuccessListener { snapshot ->
-                val followingMovies = mutableListOf<Int>()
+            mDbRef.child("users").child(it.uid).child("following_movies").get().addOnSuccessListener { snapshot ->
+                val followingMovies = mutableListOf<String>()
                 snapshot.children.forEach { child ->
-                    child.getValue(Int::class.java)?.let { movieId ->
+                    child.key?.let { movieId ->
                         followingMovies.add(movieId)
                     }
                 }
                 fetchMovieDetails(followingMovies)
             }.addOnFailureListener { exception ->
                 // Handle any errors
+                println("Errore nel recupero dei dati: ${exception.message}")
             }
         }
     }
 
-    private fun fetchMovieDetails(movieIds: List<Int>) {
+    private fun fetchMovieDetails(movieIds: List<String>) {
         val movieDetailsList = mutableListOf<MovieDetails>()
 
         for (movieId in movieIds) {
-            val call = tmdbApiClient.getClient().getMovieDetails(movieId, tmdbApiClient.getApiKey())
+            val call = tmdbApiClient.getClient().getMovieDetails((movieId).toInt(), tmdbApiClient.getApiKey())
 
             call.enqueue(object: Callback<MovieDetails> {
                 override fun onResponse(
