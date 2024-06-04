@@ -1,5 +1,6 @@
 package com.example.tmts.fragments
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -20,6 +21,8 @@ class HomeFragment : Fragment() {
 
         btnFilm = view.findViewById(R.id.btn_film);
         btnSerie = view.findViewById(R.id.btn_serie);
+
+        toggleButtonColor(btnFilm)
 
         btnFilm.setOnClickListener {
             toggleButtonColor(btnFilm)
@@ -46,7 +49,7 @@ class HomeFragment : Fragment() {
         btnSerie.isSelected = false
 
         button.isSelected = true
-        button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.selectedColor))
+        button.setBackgroundColor(resources.getColor(R.color.selectedColor))
 
         val nonClickedButton = if (button.id == R.id.btn_film) btnSerie else btnFilm
         nonClickedButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.unselectedColor))

@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".fragments.HomeFragment">
 
+    <!--
     <TextView
         android:id="@+id/tv_logo_home_fragment"
         android:layout_width="match_parent"
@@ -18,41 +19,53 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+    -->
 
     <LinearLayout
         android:id="@+id/topNavigationView"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@id/tv_logo_home_fragment"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/fl_home_fragment"
-        android:weightSum="100"
-        android:layout_margin="10dp">
+        app:layout_constraintBottom_toTopOf="@id/fl_home_fragment">
 
-        <Button
-            android:id="@+id/btn_film"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="50"
-            android:text="FILM"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:backgroundTint="@color/selectedColor"
-            android:textColor="@color/white"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:weightSum="100">
 
-        <Button
-            android:id="@+id/btn_serie"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="50"
-            android:text="SERIE TV"
-            android:textSize="16sp"
-            android:gravity="center"
-            android:backgroundTint="@color/unselectedColor"
-            android:textColor="@color/white"/>
+            <Button
+                android:id="@+id/btn_film"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="50"
+                android:text="FILM"
+                android:textSize="16sp"
+                android:gravity="center"
+
+                android:textColor="@color/black"
+                android:background="@drawable/rectangular_button"/>
+
+            <Button
+                android:id="@+id/btn_serie"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="50"
+                android:text="SERIE TV"
+                android:textSize="16sp"
+                android:gravity="center"
+
+                android:textColor="@color/black"
+                android:background="@drawable/rectangular_button"/>
+        </LinearLayout>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@drawable/rectangular_button"/>
     </LinearLayout>
 
     <FrameLayout
@@ -62,6 +75,6 @@
         app:layout_constraintTop_toBottomOf="@id/topNavigationView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
