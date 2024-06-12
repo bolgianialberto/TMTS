@@ -1,6 +1,5 @@
 package com.example.tmts.fragments
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -49,10 +48,12 @@ class HomeFragment : Fragment() {
         btnSerie.isSelected = false
 
         button.isSelected = true
-        button.setBackgroundColor(resources.getColor(R.color.selectedColor))
+        button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.selectedColor))
+        button.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
 
         val nonClickedButton = if (button.id == R.id.btn_film) btnSerie else btnFilm
         nonClickedButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.unselectedColor))
+        nonClickedButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
     }
 
     private fun replaceFragment(fragment: Fragment) {

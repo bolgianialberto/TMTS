@@ -15,7 +15,8 @@ import com.example.tmts.beans.MediaResponse
 import com.example.tmts.R
 import com.example.tmts.activities.SearchActivity
 import com.example.tmts.TMDbApiClient
-import com.example.tmts.activities.MediaDetaisActivity
+import com.example.tmts.activities.MovieDetaisActivity
+import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.adapters.MediaAdapter
 import retrofit2.Call
 import retrofit2.Callback
@@ -35,15 +36,20 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         tmdbApiClient = TMDbApiClient()
         popularMovieAdapter = MediaAdapter(requireContext(), emptyList()) { movie ->
-            val intent = Intent(requireContext(), MediaDetaisActivity::class.java)
+            val intent = Intent(requireContext(), MovieDetaisActivity::class.java)
             intent.putExtra("movieId", movie.id)
             startActivity(intent)
         }
         popularSerieAdapter = MediaAdapter(requireContext(), emptyList()) {serie ->
-            val intent = Intent(requireContext(), MediaDetaisActivity::class.java)
+            val intent = Intent(requireContext(), SerieDetailsActivity::class.java)
             intent.putExtra("serieId", serie.id)
             startActivity(intent)
         }
@@ -64,7 +70,9 @@ class SearchFragment : Fragment() {
         loadPopularMedia(
             call = tmdbApiClient.getClient().getPopularMovies(tmdbApiClient.getApiKey(), 1),
             adapter = popularMovieAdapter
+
         )
+
         loadPopularMedia(
             call = tmdbApiClient.getClient().getPopularSeries(tmdbApiClient.getApiKey(), 1),
             adapter = popularSerieAdapter
@@ -83,8 +91,6 @@ class SearchFragment : Fragment() {
             val intent = Intent(requireContext(), SearchActivity::class.java)
             startActivity(intent)
         }
-
-        return view
     }
 
     private fun loadPopularMedia(call: Call<MediaResponse>, adapter: MediaAdapter){

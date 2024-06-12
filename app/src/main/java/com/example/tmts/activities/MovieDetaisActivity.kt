@@ -22,7 +22,7 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MediaDetaisActivity : AppCompatActivity() {
+class MovieDetaisActivity : AppCompatActivity() {
 
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
@@ -43,7 +43,10 @@ class MediaDetaisActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_media_details)
+        setContentView(R.layout.activity_movie_details)
+
+        val intent = intent
+        val movieId = intent.getIntExtra("movieId", -1)
 
         mAuth = FirebaseAuth.getInstance()
         currentUser = mAuth.currentUser ?: run {
@@ -56,10 +59,7 @@ class MediaDetaisActivity : AppCompatActivity() {
 
         followingMoviesRef = mDbRef.child("users").child(currentUser.uid).child("following_movies")
 
-        val intent = intent
-        val movieId = intent.getIntExtra("movieId", -1)
-
-        ivBackSearch = findViewById(R.id.iv_arrow_back_media_details)
+        ivBackSearch = findViewById(R.id.iv_arrow_back_movie_details)
         btnFollowUnfollow = findViewById(R.id.btn_follow_unfollow)
         titleTextView = findViewById(R.id.tv_movie_details_title)
         backdropImageView = findViewById(R.id.iv_movie_details_backdrop)

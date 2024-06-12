@@ -10,7 +10,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MediaDetaisActivity"
+    tools:context=".activities.MovieDetaisActivity"
     android:paddingBottom="10dp">
 
     <ImageView
@@ -24,7 +24,7 @@
         app:layout_constraintDimensionRatio="16:9"/>
 
     <Button
-        android:id="@+id/iv_arrow_back_media_details"
+        android:id="@+id/iv_arrow_back_movie_details"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:background="@drawable/arrow_back_white"
