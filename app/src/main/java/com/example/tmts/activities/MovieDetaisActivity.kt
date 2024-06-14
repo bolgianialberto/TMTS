@@ -17,6 +17,7 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import retrofit2.Call
 import retrofit2.Callback
@@ -152,8 +153,8 @@ class MovieDetaisActivity : AppCompatActivity() {
         originalLanguage.text = movie.original_language
 
         // plus button
-        val btnFollowUnfollow: Button = findViewById(R.id.btn_follow_unfollow)
-        val followingMoviesRef = mDbRef.child("users").child(currentUser!!.uid).child("following_movies")
+        //val btnFollowUnfollow: Button = findViewById(R.id.btn_follow_unfollow)
+        //val followingMoviesRef = mDbRef.child("users").child(currentUser!!.uid).child("following_movies")
         val movieIdToCheck: String = (movie.id).toString()
 
         btnFollowUnfollow.setOnClickListener{
@@ -165,7 +166,9 @@ class MovieDetaisActivity : AppCompatActivity() {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.add)
                     } else {
                         // Il film non è presente nei seguiti, aggiungilo
-                        followingMoviesRef.child(movieIdToCheck).setValue(true)
+                        followingMoviesRef.child(movieIdToCheck)
+                            .child("timestamp")
+                            .setValue(ServerValue.TIMESTAMP)
                         btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
                     }
                 }
@@ -181,7 +184,6 @@ class MovieDetaisActivity : AppCompatActivity() {
 
     private fun setInitialButtonState(movieId: Int) {
         currentUser?.let {
-            val followingMoviesRef = mDbRef.child("users").child(it.uid).child("following_movies")
             val movieIdToCheck: String = movieId.toString()
 
             followingMoviesRef.addListenerForSingleValueEvent(object: ValueEventListener {
