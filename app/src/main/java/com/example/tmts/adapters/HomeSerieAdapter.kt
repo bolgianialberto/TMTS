@@ -1,16 +1,19 @@
 package com.example.tmts.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.OnCheckButtonClickListener
 import com.example.tmts.R
+import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SerieDetails
@@ -46,30 +49,30 @@ class HomeSerieAdapter(
         private val textViewEpisodeNumber: TextView = itemView.findViewById(R.id.tv_home_serie_episode_number)
         private val textViewEpisodeName: TextView = itemView.findViewById(R.id.tv_home_serie_episode_title)
         private val buttonCheck: Button = itemView.findViewById(R.id.btn_home_serie_check)
+        private val llSerieInfo: LinearLayout = itemView.findViewById(R.id.ll_serie_info)
 
         fun bind(episode: EpisodeDetails, clickListener: OnCheckButtonClickListener) {
             Glide.with(context)
-                .load(getPosterUrl(episode.posterPath, episode.seriePosterPath))
+                .load("https://image.tmdb.org/t/p/w500${episode.seriePosterPath}")
                 .placeholder(R.drawable.movie)
                 .into(imageViewBackdrop)
 
             textViewSerieTitle.text = episode.serieName ?: ""
 
-            textViewEpisodeNumber.text = "S${episode.season_number} E${episode.episode_number}"
+            textViewEpisodeNumber.text = "S${episode.season_number} | E${episode.episode_number}"
 
             textViewEpisodeName.text = episode.title
+
+            llSerieInfo.setOnClickListener {
+                val intent = Intent(context, SerieDetailsActivity::class.java)
+                intent.putExtra("serieId", episode.serieId)
+                context.startActivity(intent)
+            }
 
             buttonCheck.setOnClickListener {
                 val newNextToSee = "${episode.season_number}_${episode.episode_number}"
                 clickListener.onCheckButtonClicked(episode.serieId.toString())
             }
-        }
-    }
-    private fun getPosterUrl(posterPath: String?, seriePosterPath: String): String {
-        return if (!posterPath.isNullOrBlank()) {
-            "https://image.tmdb.org/t/p/w500$posterPath"
-        } else {
-            "https://image.tmdb.org/t/p/w500$seriePosterPath"
         }
     }
 }

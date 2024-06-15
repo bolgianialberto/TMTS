@@ -25,7 +25,6 @@ import retrofit2.Response
 class SearchFragment : Fragment() {
     private lateinit var popularMovieAdapter: MediaAdapter
     private lateinit var popularSerieAdapter: MediaAdapter
-    // private lateinit var etPopularSearch: EditText
     private lateinit var btnSearchPopular: ImageView
 
     override fun onCreateView(

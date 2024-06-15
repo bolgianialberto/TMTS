@@ -1,15 +1,18 @@
 package com.example.tmts.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.R
+import com.example.tmts.activities.MovieDetaisActivity
 import com.example.tmts.beans.MovieDetails
 
 class HomeMovieAdapter(
@@ -42,6 +45,7 @@ class HomeMovieAdapter(
         private val textViewTime: TextView = itemView.findViewById(R.id.tv_home_movie_time)
         private val textViewGenres: TextView = itemView.findViewById(R.id.tv_home_movie_genres)
         private val buttonCheck: Button = itemView.findViewById(R.id.btn_home_movie_check)
+        private val llMovieInfo: LinearLayout = itemView.findViewById(R.id.ll_movie_info)
 
         fun bind(movie: MovieDetails) {
             Glide.with(context)
@@ -60,7 +64,11 @@ class HomeMovieAdapter(
             val genresString = movie.genres.joinToString(" / ") { it.name }
             textViewGenres.text = genresString
 
-            // Add any click listeners or additional binding logic here if needed
+            llMovieInfo.setOnClickListener {
+                val intent = Intent(context, MovieDetaisActivity::class.java)
+                intent.putExtra("movieId", movie.id)
+                context.startActivity(intent)
+            }
         }
     }
 }

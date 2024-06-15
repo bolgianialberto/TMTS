@@ -1,6 +1,7 @@
 package com.example.tmts.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +10,8 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.R
+import com.example.tmts.activities.MovieDetaisActivity
+import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.beans.SerieDetails
 
 class SearchSerieAdapter(private val context: Context, private var series: List<SerieDetails>):
@@ -51,6 +54,12 @@ class SearchSerieAdapter(private val context: Context, private var series: List<
                 // genres
                 val genresString = serie.genres.joinToString(" / ") { it.name }
                 textViewGenres.text = genresString
+
+                itemView.setOnClickListener {
+                    val intent = Intent(context, SerieDetailsActivity::class.java)
+                    intent.putExtra("serieId", serie.id)
+                    context.startActivity(intent)
+                }
             }
         }
 

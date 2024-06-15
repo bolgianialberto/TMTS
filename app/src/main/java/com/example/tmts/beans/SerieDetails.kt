@@ -17,4 +17,5 @@ data class SerieDetails (
     @SerializedName("last_air_date") val last_air_date: String,
     @SerializedName("number_of_episodes") val total_number_of_episodes: Int,
     @SerializedName("number_of_seasons") val number_of_seasons: Int,
+    @SerializedName("networks") val networks: List<Network>,
     )

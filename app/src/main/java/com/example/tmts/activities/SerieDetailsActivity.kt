@@ -1,19 +1,22 @@
 package com.example.tmts.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.TMDbApiClient
-import com.example.tmts.beans.MovieDetails
+import com.example.tmts.adapters.NetworkAdapter
+import com.example.tmts.adapters.SeasonAdapter
 import com.example.tmts.beans.SeasonDetails
 import com.example.tmts.beans.SerieDetails
 import com.google.firebase.auth.FirebaseAuth
@@ -24,14 +27,10 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
-    private lateinit var tmDbApiClient: TMDbApiClient
     private lateinit var currentUser: FirebaseUser
     private lateinit var followingSeriesRef: DatabaseReference
     private lateinit var ivBackSearch: Button
@@ -45,6 +44,9 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var originCountry: TextView
     private lateinit var originalLanguage: TextView
     private lateinit var firstReleaseDate: TextView
+    private lateinit var llSeasons: LinearLayout
+    private lateinit var rvNetwork: RecyclerView
+    private lateinit var networkAdapter: NetworkAdapter
     private var serieId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,12 +77,21 @@ class SerieDetailsActivity : AppCompatActivity() {
         originCountry = findViewById(R.id.tv_serie_details_origin_country)
         originalLanguage = findViewById(R.id.tv_serie_details_origin_language)
         firstReleaseDate = findViewById(R.id.tv_serie_details_release_date)
+        networkAdapter = NetworkAdapter(this, emptyList())
+        rvNetwork = findViewById(R.id.rv_serie_networks)
+        llSeasons = findViewById(R.id.ll_seasons)
+
+        rvNetwork.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvNetwork.adapter = networkAdapter
 
         if (serieId != -1) {
-            tmDbApiClient = TMDbApiClient()
-            getSerieDetails(serieId)
+            MediaRepository.getSerieDetails(
+                serieId,
+                onSuccess = ::updateUI,
+                onError = ::onError,
+            )
         } else {
-            Log.e("MovieDetailsActivity", "Movie ID not found")
+            Log.e("MovieDetailsActivity", "Serie ID not found")
             finish()
         }
 
@@ -90,28 +101,8 @@ class SerieDetailsActivity : AppCompatActivity() {
 
         setInitialButtonState(serieId)
     }
-
-    private fun getSerieDetails(serieId: Int) {
-        val call = tmDbApiClient.getClient().getSerieDetails(serieId, tmDbApiClient.getApiKey())
-
-        call.enqueue(object: Callback<SerieDetails> {
-            override fun onResponse(call: Call<SerieDetails>, response: Response<SerieDetails>) {
-                if (response.isSuccessful) {
-                    val serie = response.body()
-                    if (serie != null) {
-                        updateUI(serie)
-                    } else {
-                        Log.e("MovieDetailsActivity", "Movie details not found")
-                    }
-                } else {
-                    Log.e("MovieDetailsActivity", "Error ${response.code()}: ${response.message()}")
-                }
-            }
-
-            override fun onFailure(call: Call<SerieDetails>, t: Throwable) {
-                Log.e("MovieDetailsActivity", "Network Error: ${t.message}")
-            }
-        })
+    private fun onError(){
+        Log.e("SerieDetailsActivity", "Something went wrong")
     }
 
     private fun updateUI(serie: SerieDetails) {
@@ -156,6 +147,17 @@ class SerieDetailsActivity : AppCompatActivity() {
         // plus button
         val serieIdToCheck: String = (serie.id).toString()
 
+        // networks
+        networkAdapter.updateMedia(serie.networks)
+
+        // seasons
+        llSeasons.setOnClickListener {
+            val intent = Intent(this, SeasonDetailsActivity::class.java)
+            intent.putExtra("serieId", serieId)
+            this.startActivity(intent)
+        }
+
+        // follow/unfollow
         btnFollowUnfollow.setOnClickListener{
             followingSeriesRef.addListenerForSingleValueEvent(object: ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -188,39 +190,21 @@ class SerieDetailsActivity : AppCompatActivity() {
             val seasonRef = seriesRef.child("seasons").child(n_season.toString())
             seasonRef.child("status").setValue("notWatched")
 
-            getSeasonDetails(serie.id, n_season) { seasonDetails ->
-                seasonDetails?.let {
-                    val episodesRef = seasonRef.child("episodes")
+            MediaRepository.getSeasonDetails(
+                serieId,
+                n_season,
+                onSuccess = {season ->
+                    season?.let {
+                        val episodesRef = seasonRef.child("episodes")
 
-                    for (n_episode in 1..it.number_of_episodes) {
-                        episodesRef.child(n_episode.toString()).setValue(false)
+                        for (n_episode in 1..it.number_of_episodes) {
+                            episodesRef.child(n_episode.toString()).setValue(false)
+                        }
                     }
-                }
-            }
+                },
+                onError = ::onError
+            )
         }
-    }
-
-    private fun getSeasonDetails(serieId: Int, seasonNumber: Int, callback: (SeasonDetails?) -> Unit) {
-        val call = tmDbApiClient.getClient().getSeasonDetails(serieId, seasonNumber, tmDbApiClient.getApiKey())
-
-        call.enqueue(object: Callback<SeasonDetails> {
-            override fun onResponse(call: Call<SeasonDetails>, response: Response<SeasonDetails>) {
-                if (response.isSuccessful) {
-                    val season = response.body()
-                    if (season != null) {
-                        callback(season)
-                    } else {
-                        Log.e("MovieDetailsActivity", "Movie details not found")
-                    }
-                } else {
-                    Log.e("MovieDetailsActivity", "Error ${response.code()}: ${response.message()}")
-                }
-            }
-
-            override fun onFailure(call: Call<SeasonDetails>, t: Throwable) {
-                Log.e("MovieDetailsActivity", "Network Error: ${t.message}")
-            }
-        })
     }
 
     private fun setInitialButtonState(serieId: Int) {

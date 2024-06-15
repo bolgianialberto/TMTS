@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.tmts.R
 import com.example.tmts.TMDbApiClient
@@ -35,6 +36,9 @@ class SearchActivity : AppCompatActivity() {
         etSearch = findViewById(R.id.et_search)
         etSearch.requestFocus()
 
+        toggleButtonColor(btnFilm)
+        replaceFragment(SearchMovieFragment())
+
         etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 // Non utilizzato in questo caso
@@ -51,10 +55,12 @@ class SearchActivity : AppCompatActivity() {
         })
 
         btnFilm.setOnClickListener {
+            toggleButtonColor(btnFilm)
             replaceFragment(SearchMovieFragment())
         }
 
         btnSerie.setOnClickListener {
+            toggleButtonColor(btnSerie)
             replaceFragment(SearchSerieFragment())
         }
 
@@ -73,6 +79,21 @@ class SearchActivity : AppCompatActivity() {
             performSearch(query)
         }
         fragmentTransaction.commit()
+    }
+
+    private fun toggleButtonColor(button: Button) {
+        if (button.isSelected) return
+
+        btnFilm.isSelected = false
+        btnSerie.isSelected = false
+
+        button.isSelected = true
+        button.setBackgroundColor(ContextCompat.getColor(this, R.color.selectedColor))
+        button.setTextColor(ContextCompat.getColor(this, R.color.black))
+
+        val nonClickedButton = if (button.id == R.id.btn_film) btnSerie else btnFilm
+        nonClickedButton.setBackgroundColor(ContextCompat.getColor(this, R.color.unselectedColor))
+        nonClickedButton.setTextColor(ContextCompat.getColor(this, R.color.gray))
     }
 
     private fun performSearch(query: String) {
