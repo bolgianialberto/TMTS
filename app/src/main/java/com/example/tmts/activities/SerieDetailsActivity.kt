@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.TMDbApiClient
@@ -159,51 +160,19 @@ class SerieDetailsActivity : AppCompatActivity() {
 
         // follow/unfollow
         btnFollowUnfollow.setOnClickListener{
-            followingSeriesRef.addListenerForSingleValueEvent(object: ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.hasChild(serieIdToCheck)) {
-                        // la serie è presente nei seguiti, rimuovilo
-                        followingSeriesRef.child(serieIdToCheck).removeValue()
+            FirebaseInteraction.checkSerieExistance(
+                serieId ) {exists ->
+                if(exists) {
+                    FirebaseInteraction.removeSerieFromFollowing(serieId) {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.add)
-                    } else {
-                        // la serie non è presente nei seguiti, aggiungilo
-                        addSerieToDB(serie)
+                    }
+
+                } else {
+                    FirebaseInteraction.addSerieToFollowing(serieId) {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
                     }
                 }
-
-                override fun onCancelled(error: DatabaseError) {
-                    println("Errore nel recupero dei dati: ${error.message}")
-                }
-
-            })
-        }
-
-    }
-
-    private fun addSerieToDB(serie: SerieDetails) {
-        val seriesRef = followingSeriesRef.child(serie.id.toString())
-        seriesRef.child("nextToSee").setValue("1_1")
-        seriesRef.child("timestamp").setValue(ServerValue.TIMESTAMP)
-
-        for (n_season in 1..serie.number_of_seasons){
-            val seasonRef = seriesRef.child("seasons").child(n_season.toString())
-            seasonRef.child("status").setValue("notWatched")
-
-            MediaRepository.getSeasonDetails(
-                serieId,
-                n_season,
-                onSuccess = {season ->
-                    season?.let {
-                        val episodesRef = seasonRef.child("episodes")
-
-                        for (n_episode in 1..it.number_of_episodes) {
-                            episodesRef.child(n_episode.toString()).setValue(false)
-                        }
-                    }
-                },
-                onError = ::onError
-            )
+            }
         }
     }
 

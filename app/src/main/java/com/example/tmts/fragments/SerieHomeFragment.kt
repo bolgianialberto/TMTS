@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.OnCheckButtonClickListener
 import com.example.tmts.R
@@ -29,6 +30,7 @@ class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
     private lateinit var followingSeriesRef: DatabaseReference
+    private lateinit var watchedSeriesRef: DatabaseReference
     private lateinit var seriesRef: DatabaseReference
     private var currentUser: FirebaseUser? = null
     val episodeDetailsList = mutableListOf<Pair<EpisodeDetails, Long>>()
@@ -46,6 +48,7 @@ class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
         currentUser = mAuth.currentUser
 
         followingSeriesRef = mDbRef.child("users").child(currentUser!!.uid).child("following_series")
+        watchedSeriesRef = mDbRef.child("users").child(currentUser!!.uid).child("watched_series")
 
         homeSerieAdapter = HomeSerieAdapter(requireContext(), emptyList(), this)
 
@@ -126,76 +129,110 @@ class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
     override fun onCheckButtonClicked(serieId: String) {
         seriesRef = followingSeriesRef.child(serieId)
 
+        FirebaseInteraction.getNextToSee(serieId.toInt()) {nextToSeePair ->
+            FirebaseInteraction.updateNextToSee(
+                serieId.toInt(),
+                nextToSeePair!!.first,
+                nextToSeePair!!.second,
+            ) {
+                loadHomeSerie()
+            }
+        }
+
+        /*
         seriesRef.child("nextToSee").addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val nextToSeeValue = snapshot.getValue(String::class.java)
-                updateNextToSee(nextToSeeValue)
+                updateNextToSee(nextToSeeValue, serieId)
+
             }
 
             override fun onCancelled(error: DatabaseError) {
                 Log.e("SerieHomeFragment", "Errore durante il recupero di nextToSee: ${error.message}")
             }
         })
+
+         */
     }
 
-    private fun updateNextToSee(nextToSee: String?) {
+    /*
+    private fun updateNextToSee(nextToSee: String?, serieId: String) {
         val (currentSeasonNumberStr, currentEpisodeNumberStr) = nextToSee!!.split("_")
         var seasonNumber = currentSeasonNumberStr.toInt()
         var episodeNumber = currentEpisodeNumberStr.toInt()
 
-        // settare a true l'episodio appena visto
+        // Settare a true l'episodio appena visto
         seriesRef.child("seasons")
             .child(seasonNumber.toString())
             .child("episodes")
             .child(currentEpisodeNumberStr)
             .setValue(true)
 
-        // trovare il prossimo episodio
-        val nextEpisodeRef = seriesRef
-            .child("seasons")
-            .child(currentSeasonNumberStr)
-            .child("episodes")
-            .child((episodeNumber + 1).toString())
+        // Funzione ricorsiva per trovare il prossimo episodio non visto
+        fun findNextEpisode(seasonNumber: Int, episodeNumber: Int) {
+            val nextEpisodeRef = seriesRef
+                .child("seasons")
+                .child(seasonNumber.toString())
+                .child("episodes")
+                .child(episodeNumber.toString())
 
-        nextEpisodeRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val episodeExists = snapshot.exists()
-                if (episodeExists) {
-                    episodeNumber++
-                    val newNext = "${seasonNumber}_$episodeNumber"
-                    seriesRef.child("nextToSee").setValue(newNext)
-                    loadHomeSerie()
-                } else {
-                    // Se l'episodio non esiste, controlla la prossima stagione
-                    val nextSeasonRef = seriesRef
-                        .child("seasons")
-                        .child((seasonNumber + 1).toString())
+            nextEpisodeRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists() && snapshot.getValue(Boolean::class.java) == true) {
+                        // Se l'episodio è già visto, passa al successivo
+                        findNextEpisode(seasonNumber, episodeNumber + 1)
+                    } else if (snapshot.exists()) {
+                        // Se l'episodio esiste ed è non visto, aggiornalo come prossimo da vedere
+                        val newNext = "${seasonNumber}_$episodeNumber"
+                        seriesRef.child("nextToSee").setValue(newNext)
+                        loadHomeSerie()
+                    } else {
+                        // Se l'episodio non esiste, controlla la prossima stagione
+                        seriesRef.child("seasons").child(seasonNumber.toString()).child("status").setValue(true)
 
-                    nextSeasonRef.addListenerForSingleValueEvent(object : ValueEventListener {
-                        override fun onDataChange(snapshot: DataSnapshot) {
-                            val seasonExists = snapshot.exists()
-                            if (seasonExists) {
-                                seasonNumber++
-                                episodeNumber = 1
-                                val newNext = "${seasonNumber}_$episodeNumber"
-                                seriesRef.child("nextToSee").setValue(newNext)
-                            } else {
-                                // Se non esistono più episodi o stagioni, impostare nextToSee a null
-                                seriesRef.child("nextToSee").setValue(null)
+                        val nextSeasonRef = seriesRef
+                            .child("seasons")
+                            .child((seasonNumber + 1).toString())
+
+                        nextSeasonRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                            override fun onDataChange(snapshot: DataSnapshot) {
+                                if (snapshot.exists()) {
+                                    // Se la stagione successiva esiste, inizia dal primo episodio
+                                    findNextEpisode(seasonNumber + 1, 1)
+                                } else {
+                                    // Se non esistono più stagioni, imposta nextToSee a null e rimuovi la serie
+                                    seriesRef.child("nextToSee").setValue(null)
+                                    seriesRef.removeValue()
+                                        .addOnCompleteListener { task ->
+                                            if (task.isSuccessful) {
+                                                Log.d("Firebase", "Serie rimossa con successo")
+                                            } else {
+                                                Log.e("Firebase", "Errore nella rimozione della serie", task.exception)
+                                            }
+                                        }
+                                    // Aggiungi la serie alle serie viste
+                                    watchedSeriesRef.child(serieId).setValue(true)
+                                    loadHomeSerie()
+                                }
                             }
-                            loadHomeSerie() // Spostato qui per evitare duplicati
-                        }
 
-                        override fun onCancelled(error: DatabaseError) {
-                            Log.e("SerieHomeFragment", "Errore durante il controllo della prossima stagione: ${error.message}")
-                        }
-                    })
+                            override fun onCancelled(error: DatabaseError) {
+                                Log.e("SerieHomeFragment", "Errore durante il controllo della prossima stagione: ${error.message}")
+                            }
+                        })
+                    }
                 }
-            }
 
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("SerieHomeFragment", "Errore durante il controllo del prossimo episodio: ${error.message}")
-            }
-        })
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("SerieHomeFragment", "Errore durante il controllo del prossimo episodio: ${error.message}")
+                }
+            })
+        }
+
+        // Inizia la ricerca del prossimo episodio non visto
+        findNextEpisode(seasonNumber, episodeNumber + 1)
     }
+
+     */
+
 }

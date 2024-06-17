@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tmts.MediaRepository
+import com.example.tmts.OnCheckButtonClickListener
 import com.example.tmts.R
 import com.example.tmts.TMDbApiClient
 import com.example.tmts.adapters.HomeMovieAdapter
@@ -24,12 +25,15 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class MovieHomeFragment : Fragment() {
+class MovieHomeFragment : Fragment(), OnCheckButtonClickListener {
     private lateinit var tmdbApiClient: TMDbApiClient
     private lateinit var homeMovieAdapter: HomeMovieAdapter
     private lateinit var mAuth: FirebaseAuth
     private lateinit var mDbRef: DatabaseReference
     private lateinit var followingMoviesRef: DatabaseReference
+    private lateinit var watchedMoviesRef: DatabaseReference
+    private lateinit var movieRef: DatabaseReference
+    private var currentUser: FirebaseUser? = null
     val movieDetailsList = mutableListOf<Pair<MovieDetails, Long>>()
     val followingMovies = mutableListOf<Pair<String, Long>>()
     override fun onCreateView(
@@ -42,22 +46,26 @@ class MovieHomeFragment : Fragment() {
         tmdbApiClient = TMDbApiClient()
         mDbRef = FirebaseDatabase.getInstance().getReference()
         mAuth = FirebaseAuth.getInstance()
-        val currentUser = mAuth.currentUser
+        currentUser = mAuth.currentUser
 
         followingMoviesRef = mDbRef.child("users").child(currentUser!!.uid).child("following_movies")
+        watchedMoviesRef = mDbRef.child("users").child(currentUser!!.uid).child("watched_movies")
 
-        homeMovieAdapter = HomeMovieAdapter(requireContext(), emptyList())
+        homeMovieAdapter = HomeMovieAdapter(requireContext(), emptyList(), this)
 
         val recyclerView: RecyclerView = view.findViewById(R.id.rv_home_movie)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = homeMovieAdapter
 
-        loadHomeMovies(currentUser)
+        loadHomeMovies()
 
         return view
     }
 
-    private fun loadHomeMovies(currentUser: FirebaseUser?) {
+    private fun loadHomeMovies() {
+        movieDetailsList.clear()
+        followingMovies.clear()
+
         followingMoviesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 followingMovies.clear() // Pulisci la lista prima di aggiungere nuovi elementi
@@ -102,6 +110,29 @@ class MovieHomeFragment : Fragment() {
 
     private fun onError(){
         Log.e("MovieDetailsActivity", "Something went wrong")
+    }
+
+    override fun onCheckButtonClicked(movieId: String) {
+        movieRef = followingMoviesRef.child(movieId)
+
+        movieRef.removeValue()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    loadHomeMovies()
+                    Log.d("Firebase", "Film rimosso con successo")
+                } else {
+                    Log.e("Firebase", "Errore nella rimozione del film", task.exception)
+                }
+            }
+
+        watchedMoviesRef.child(movieId).setValue(true)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Log.d("Firebase", "Film aggiunto con successo")
+                } else {
+                    Log.e("Firebase", "Errore nell'aggiunta del film", task.exception)
+                }
+            }
     }
 
 }

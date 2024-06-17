@@ -11,13 +11,15 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.tmts.OnCheckButtonClickListener
 import com.example.tmts.R
 import com.example.tmts.activities.MovieDetaisActivity
 import com.example.tmts.beans.MovieDetails
 
 class HomeMovieAdapter(
     private val context: Context,
-    private var mediaItems: List<MovieDetails>
+    private var mediaItems: List<MovieDetails>,
+    private val clickListener: OnCheckButtonClickListener
 ) : RecyclerView.Adapter<HomeMovieAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -27,7 +29,7 @@ class HomeMovieAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val mediaItem = mediaItems[position]
-        holder.bind(mediaItem)
+        holder.bind(mediaItem, clickListener)
     }
 
     override fun getItemCount(): Int {
@@ -47,7 +49,7 @@ class HomeMovieAdapter(
         private val buttonCheck: Button = itemView.findViewById(R.id.btn_home_movie_check)
         private val llMovieInfo: LinearLayout = itemView.findViewById(R.id.ll_movie_info)
 
-        fun bind(movie: MovieDetails) {
+        fun bind(movie: MovieDetails, clickListener: OnCheckButtonClickListener) {
             Glide.with(context)
                 .load("https://image.tmdb.org/t/p/w500${movie.posterPath}")
                 .placeholder(R.drawable.movie)
@@ -68,6 +70,10 @@ class HomeMovieAdapter(
                 val intent = Intent(context, MovieDetaisActivity::class.java)
                 intent.putExtra("movieId", movie.id)
                 context.startActivity(intent)
+            }
+
+            buttonCheck.setOnClickListener {
+                clickListener.onCheckButtonClicked(movie.id.toString())
             }
         }
     }

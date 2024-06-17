@@ -3,7 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="10dp">
+    android:padding="10dp"
+    android:background="@drawable/rounded_border"
+    android:layout_marginBottom="2dp">
 
     <TextView
         android:id="@+id/tv_season_title"

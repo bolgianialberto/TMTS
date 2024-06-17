@@ -58,8 +58,10 @@ class SeasonDetailsActivity : AppCompatActivity() {
                 nSeason,
                 onSuccess = {season ->
                     seasonsList.add(season)
+                    season.serieId = serie.id
                     if (seasonsList.size == serie.number_of_seasons) {
-                        seasonAdapter.updateMedia(seasonsList)
+                        val sortedSeasonList = seasonsList.sortedBy { it.season_number }
+                        seasonAdapter.updateMedia(sortedSeasonList)
                     }
                 },
                 onError = {
