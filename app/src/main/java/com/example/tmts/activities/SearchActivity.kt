@@ -10,13 +10,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.tmts.R
-import com.example.tmts.TMDbApiClient
 import com.example.tmts.fragments.SearchMovieFragment
 import com.example.tmts.fragments.SearchSerieFragment
 
 class SearchActivity : AppCompatActivity() {
-
-    private lateinit var tmdbApiClient: TMDbApiClient
     private lateinit var ivBackSearch: ImageView
     private lateinit var btnFilm: Button
     private lateinit var btnSerie: Button
@@ -27,7 +24,6 @@ class SearchActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search)
 
-        tmdbApiClient = TMDbApiClient()
         ivBackSearch = findViewById(R.id.iv_arrow_back_search)
 
         btnFilm = findViewById(R.id.btn_film)

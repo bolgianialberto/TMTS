@@ -8,6 +8,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
+import com.example.tmts.FirebaseInteraction
+import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.TMDbApiClient
 import com.example.tmts.beans.MovieDetails
@@ -24,12 +26,6 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class MovieDetaisActivity : AppCompatActivity() {
-
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var mDbRef: DatabaseReference
-    private lateinit var tmDbApiClient: TMDbApiClient
-    private lateinit var currentUser: FirebaseUser
-    private lateinit var followingMoviesRef: DatabaseReference
     private lateinit var ivBackSearch: Button
     private lateinit var btnFollowUnfollow: Button
     private lateinit var titleTextView: TextView
@@ -49,17 +45,6 @@ class MovieDetaisActivity : AppCompatActivity() {
         val intent = intent
         val movieId = intent.getIntExtra("movieId", -1)
 
-        mAuth = FirebaseAuth.getInstance()
-        currentUser = mAuth.currentUser ?: run {
-            Log.e("MediaDetailsActivity", "User not logged in")
-            finish()
-            return
-        }
-
-        mDbRef = FirebaseDatabase.getInstance().getReference()
-
-        followingMoviesRef = mDbRef.child("users").child(currentUser.uid).child("following_movies")
-
         ivBackSearch = findViewById(R.id.iv_arrow_back_movie_details)
         btnFollowUnfollow = findViewById(R.id.btn_follow_unfollow)
         titleTextView = findViewById(R.id.tv_movie_details_title)
@@ -72,13 +57,12 @@ class MovieDetaisActivity : AppCompatActivity() {
         originCountry = findViewById(R.id.tv_origin_country)
         originalLanguage = findViewById(R.id.tv_origin_language)
 
-        if (movieId != -1) {
-            tmDbApiClient = TMDbApiClient()
-            getMovieDetails(movieId)
-        } else {
-            Log.e("MovieDetailsActivity", "Movie ID not found")
-            finish()
-        }
+
+        MediaRepository.getMovieDetails(
+            movieId,
+            onSuccess = ::updateUI,
+            onError = ::onError
+        )
 
         ivBackSearch.setOnClickListener {
             onBackPressed()
@@ -87,27 +71,8 @@ class MovieDetaisActivity : AppCompatActivity() {
         setInitialButtonState(movieId)
     }
 
-    private fun getMovieDetails(movieId: Int) {
-        val call = tmDbApiClient.getClient().getMovieDetails(movieId, tmDbApiClient.getApiKey())
-
-        call.enqueue(object: Callback<MovieDetails> {
-            override fun onResponse(call: Call<MovieDetails>, response: Response<MovieDetails>) {
-                if (response.isSuccessful) {
-                    val movie = response.body()
-                    if (movie != null) {
-                        updateUI(movie)
-                    } else {
-                        Log.e("MovieDetailsActivity", "Movie details not found")
-                    }
-                } else {
-                    Log.e("MovieDetailsActivity", "Error ${response.code()}: ${response.message()}")
-                }
-            }
-
-            override fun onFailure(call: Call<MovieDetails>, t: Throwable) {
-                Log.e("MovieDetailsActivity", "Network Error: ${t.message}")
-            }
-        })
+    private fun onError(){
+        Log.e("MovieDetailsActivity", "Something went wrong")
     }
 
     private fun updateUI(movie: MovieDetails) {
@@ -158,48 +123,30 @@ class MovieDetaisActivity : AppCompatActivity() {
         val movieIdToCheck: String = (movie.id).toString()
 
         btnFollowUnfollow.setOnClickListener{
-            followingMoviesRef.addListenerForSingleValueEvent(object: ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    if (snapshot.hasChild(movieIdToCheck)) {
-                        // Il film è presente nei seguiti, rimuovilo
-                        followingMoviesRef.child(movieIdToCheck).removeValue()
+            FirebaseInteraction.checkMovieExistanceInFollowing(movieIdToCheck.toInt()){ exists ->
+                if(exists) {
+                    FirebaseInteraction.removeMovieFromFollowing(movieIdToCheck.toInt()) {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.add)
-                    } else {
-                        // Il film non è presente nei seguiti, aggiungilo
-                        followingMoviesRef.child(movieIdToCheck)
-                            .child("timestamp")
-                            .setValue(ServerValue.TIMESTAMP)
+                    }
+                } else {
+                    FirebaseInteraction.addMovieToFollowing(movieIdToCheck.toInt()) {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
                     }
                 }
 
-                override fun onCancelled(error: DatabaseError) {
-                    println("Errore nel recupero dei dati: ${error.message}")
-                }
-
-            })
+            }
         }
 
     }
 
     private fun setInitialButtonState(movieId: Int) {
-        currentUser?.let {
-            val movieIdToCheck: String = movieId.toString()
+        FirebaseInteraction.checkMovieExistanceInFollowing(movieId){ exists ->
+            if(exists) {
+                btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
+            } else {
+                btnFollowUnfollow.setBackgroundResource(R.drawable.add)
+            }
 
-            followingMoviesRef.addListenerForSingleValueEvent(object: ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val btnFollowUnfollow: Button = findViewById(R.id.btn_follow_unfollow)
-                    if (snapshot.hasChild(movieIdToCheck)) {
-                        btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
-                    } else {
-                        btnFollowUnfollow.setBackgroundResource(R.drawable.add)
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    println("Errore nel recupero dei dati: ${error.message}")
-                }
-            })
         }
     }
 }

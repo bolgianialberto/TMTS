@@ -30,28 +30,9 @@ class EpisodeAdapter(
     private val serieId: Int,
     private var mediaItems: List<EpisodeDetails>
 ) : RecyclerView.Adapter<EpisodeAdapter.ViewHolder>() {
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var mDbRef: DatabaseReference
-    private lateinit var currentUser: FirebaseUser
-    private lateinit var followingSeriesRef: DatabaseReference
-    private lateinit var serieRef: DatabaseReference
-    private lateinit var episodeRef: DatabaseReference
-    private lateinit var tvEpisodeTitle: TextView
-    private lateinit var btnCheck: Button
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.episode_item, parent, false)
-
-        mAuth = FirebaseAuth.getInstance()
-        currentUser = mAuth.currentUser!!
-        if (currentUser == null) {
-            Log.e("FirebaseCheck", "User is not authenticated")
-            return ViewHolder(view)
-        }
-
-        mDbRef = FirebaseDatabase.getInstance().getReference()
-        followingSeriesRef = mDbRef.child("users").child(currentUser.uid).child("following_series")
-
         return ViewHolder(view)
     }
 
@@ -89,7 +70,7 @@ class EpisodeAdapter(
             Log.d("FirebaseCheck", "Binding episode: ${mediaItem.episode_number}")
 
             // se già seguo la serie allora aggiorno il colore del check per gli episodi già visti
-            FirebaseInteraction.checkSerieExistance(
+            FirebaseInteraction.checkSerieExistanceInFollowing(
                 serieId,) { exists ->
                 if (exists) {
                     Log.d("FirebaseCheck", "Serie exists: ${mediaItem.serieId}")
@@ -101,7 +82,7 @@ class EpisodeAdapter(
 
             // se clicco sul check devo iniziare a seguire la serie se prima non la seguivo
             btnCheck.setOnClickListener {
-                FirebaseInteraction.checkSerieExistance(
+                FirebaseInteraction.checkSerieExistanceInFollowing(
                     serieId) { exists ->
                         if (exists) {
                             Log.d("FirebaseCheck", "Serie exists: ${mediaItem.serieId}")
@@ -145,31 +126,5 @@ class EpisodeAdapter(
                 btnCheck.background = ContextCompat.getDrawable(context, R.drawable.check)
             }
         }
-
-        val serieRef = followingSeriesRef.child(mediaItem.serieId.toString())
-        val episodeRef = serieRef
-            .child("seasons")
-            .child(mediaItem.season_number.toString())
-            .child("episodes")
-            .child(mediaItem.episode_number.toString())
-
-        episodeRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(episodeSnapshot: DataSnapshot) {
-                if (episodeSnapshot.exists()) {
-                    val episodeValue = episodeSnapshot.getValue(Boolean::class.java)
-                    Log.d("FirebaseCheck", "Episode value: $episodeValue")
-                    if (episodeValue == true) {
-                    } else {
-                    }
-                } else {
-                    Log.d("FirebaseCheck", "Episode does not exist")
-                    btnCheck.background = ContextCompat.getDrawable(context, R.drawable.check)
-                }
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                Log.w("FirebaseCheck", "loadEpisode:onCancelled", databaseError.toException())
-            }
-        })
     }
 }

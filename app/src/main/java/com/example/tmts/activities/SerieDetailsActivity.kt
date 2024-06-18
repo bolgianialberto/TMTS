@@ -30,10 +30,6 @@ import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 
 class SerieDetailsActivity : AppCompatActivity() {
-    private lateinit var mAuth: FirebaseAuth
-    private lateinit var mDbRef: DatabaseReference
-    private lateinit var currentUser: FirebaseUser
-    private lateinit var followingSeriesRef: DatabaseReference
     private lateinit var ivBackSearch: Button
     private lateinit var btnFollowUnfollow: Button
     private lateinit var titleTextView: TextView
@@ -56,16 +52,6 @@ class SerieDetailsActivity : AppCompatActivity() {
 
         val intent = intent
         serieId = intent.getIntExtra("serieId", -1)
-
-        mAuth = FirebaseAuth.getInstance()
-        currentUser = mAuth.currentUser ?: run {
-            Log.e("MediaDetailsActivity", "User not logged in")
-            finish()
-            return
-        }
-
-        mDbRef = FirebaseDatabase.getInstance().getReference()
-        followingSeriesRef = mDbRef.child("users").child(currentUser.uid).child("following_series")
 
         ivBackSearch = findViewById(R.id.iv_arrow_back_serie_details)
         btnFollowUnfollow = findViewById(R.id.btn_follow_unfollow)
@@ -160,7 +146,7 @@ class SerieDetailsActivity : AppCompatActivity() {
 
         // follow/unfollow
         btnFollowUnfollow.setOnClickListener{
-            FirebaseInteraction.checkSerieExistance(
+            FirebaseInteraction.checkSerieExistanceInFollowing(
                 serieId ) {exists ->
                 if(exists) {
                     FirebaseInteraction.removeSerieFromFollowing(serieId) {
@@ -177,23 +163,13 @@ class SerieDetailsActivity : AppCompatActivity() {
     }
 
     private fun setInitialButtonState(serieId: Int) {
-        currentUser?.let {
-            val serieIdToCheck: String = serieId.toString()
+        FirebaseInteraction.checkSerieExistanceInFollowing(serieId){ exists ->
+            if(exists) {
+                btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
+            } else {
+                btnFollowUnfollow.setBackgroundResource(R.drawable.add)
+            }
 
-            followingSeriesRef.addListenerForSingleValueEvent(object: ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val btnFollowUnfollow: Button = findViewById(R.id.btn_follow_unfollow)
-                    if (snapshot.hasChild(serieIdToCheck)) {
-                        btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
-                    } else {
-                        btnFollowUnfollow.setBackgroundResource(R.drawable.add)
-                    }
-                }
-
-                override fun onCancelled(error: DatabaseError) {
-                    println("Errore nel recupero dei dati: ${error.message}")
-                }
-            })
         }
     }
 }

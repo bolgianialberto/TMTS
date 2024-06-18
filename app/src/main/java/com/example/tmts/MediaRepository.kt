@@ -183,4 +183,57 @@ object MediaRepository {
             }
         })
     }
+
+    fun searchSeriesByTitle(
+        query: String,
+        onSuccess: (series: MediaResponse, query: String) -> Unit,
+        onError: () -> Unit
+    ){
+        val call = tmdbApiClient.getClient().searchSerie(tmdbApiClient.getApiKey(), query, 1)
+
+        call.enqueue(object: Callback<MediaResponse> {
+            override fun onResponse(call: Call<MediaResponse>, response: Response<MediaResponse>) {
+                if (response.isSuccessful) {
+                    val series = response.body()
+                    if (series!= null) {
+                        onSuccess.invoke(series, query)
+                    } else {
+                        onError.invoke()
+                    }
+                } else {
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<MediaResponse>, t: Throwable) {
+                onError.invoke()
+            }
+        })
+    }
+
+    fun searchMoviesByTitle(
+        query: String,
+        onSuccess: (movies: MediaResponse, query: String) -> Unit,
+        onError: () -> Unit
+    ){
+        val call = tmdbApiClient.getClient().searchMovies(tmdbApiClient.getApiKey(), query, 1)
+        call.enqueue(object: Callback<MediaResponse> {
+            override fun onResponse(
+                call: Call<MediaResponse>,
+                response: Response<MediaResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val movies = response.body()
+                    if ( movies != null ) {
+                        onSuccess.invoke(movies, query)
+                    } else {
+                        onError.invoke()                    }
+                } else {
+                    onError.invoke()                }
+            }
+
+            override fun onFailure(call: Call<MediaResponse>, t: Throwable) {
+                onError.invoke()            }
+        })
+    }
 }
