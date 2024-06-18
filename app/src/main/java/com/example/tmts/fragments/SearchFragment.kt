@@ -10,23 +10,17 @@ import android.widget.ImageView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.tmts.MediaDetaisActivity
+import com.example.tmts.MediaRepository
 import com.example.tmts.beans.Media
-import com.example.tmts.beans.MediaResponse
 import com.example.tmts.R
 import com.example.tmts.activities.SearchActivity
-import com.example.tmts.TMDbApiClient
+import com.example.tmts.activities.MovieDetaisActivity
+import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.adapters.MediaAdapter
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class SearchFragment : Fragment() {
-
-    private lateinit var tmdbApiClient: TMDbApiClient
     private lateinit var popularMovieAdapter: MediaAdapter
     private lateinit var popularSerieAdapter: MediaAdapter
-    // private lateinit var etPopularSearch: EditText
     private lateinit var btnSearchPopular: ImageView
 
     override fun onCreateView(
@@ -35,77 +29,58 @@ class SearchFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_search, container, false)
+        return view
+    }
 
-        tmdbApiClient = TMDbApiClient()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        btnSearchPopular = view.findViewById(R.id.btn_search_popular)
+
         popularMovieAdapter = MediaAdapter(requireContext(), emptyList()) { movie ->
-            val intent = Intent(requireContext(), MediaDetaisActivity::class.java)
+            val intent = Intent(requireContext(), MovieDetaisActivity::class.java)
             intent.putExtra("movieId", movie.id)
             startActivity(intent)
         }
         popularSerieAdapter = MediaAdapter(requireContext(), emptyList()) {serie ->
-            val intent = Intent(requireContext(), MediaDetaisActivity::class.java)
+            val intent = Intent(requireContext(), SerieDetailsActivity::class.java)
             intent.putExtra("serieId", serie.id)
             startActivity(intent)
         }
 
-        //etPopularSearch = view.findViewById(R.id.et_search_popular)
-        btnSearchPopular = view.findViewById(R.id.btn_search_popular)
-
         val rvPopularMovie: RecyclerView = view.findViewById(R.id.rv_popular_movies)
-        rvPopularMovie.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        rvPopularMovie.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvPopularMovie.adapter = popularMovieAdapter
 
         val rvPopularSerie: RecyclerView = view.findViewById(R.id.rv_popular_series)
-        rvPopularSerie.layoutManager =
-            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        rvPopularSerie.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvPopularSerie.adapter = popularSerieAdapter
 
-        loadPopularMedia(
-            call = tmdbApiClient.getClient().getPopularMovies(tmdbApiClient.getApiKey(), 1),
-            adapter = popularMovieAdapter
-        )
-        loadPopularMedia(
-            call = tmdbApiClient.getClient().getPopularSeries(tmdbApiClient.getApiKey(), 1),
-            adapter = popularSerieAdapter
+        MediaRepository.getPopularMovies(
+            onSuccess = ::onPopularMoviesFetched,
+            onError = ::onError
         )
 
-        /*
-        etPopularSearch.setOnFocusChangeListener { _, hasFocus ->
-            if (hasFocus) {
-                val intent = Intent(requireContext(), SearchActivity::class.java)
-                startActivity(intent)
-            }
-        }
-        */
+        MediaRepository.getPopularSeries(
+            onSuccess = ::onPopularSeriesFetched,
+            onError = ::onError
+        )
 
         btnSearchPopular.setOnClickListener {
             val intent = Intent(requireContext(), SearchActivity::class.java)
             startActivity(intent)
         }
-
-        return view
     }
 
-    private fun loadPopularMedia(call: Call<MediaResponse>, adapter: MediaAdapter){
-        call.enqueue(object : Callback<MediaResponse> {
-            override fun onResponse(call: Call<MediaResponse>, response: Response<MediaResponse>) {
-                if (response.isSuccessful) {
-                    val mediaResponse = response.body()
-                    val mediaItems: List<Media>? = mediaResponse?.results
-                    if (mediaItems != null) {
-                        adapter.updateMedia(mediaItems)
-                    } else {
-                        Log.e("API Call", "La risposta non contiene media.")
-                    }
-                } else {
-                    Log.e("API Call", "Errore nella chiamata API: ${response.code()}")
-                }
-            }
+    private fun onPopularMoviesFetched(movies: List<Media>){
+        popularMovieAdapter.updateMedia(movies)
+    }
 
-            override fun onFailure(call: Call<MediaResponse>, t: Throwable) {
-                Log.e("API Call", "Errore di rete: ${t.message}")
-            }
-        })
+    private fun onPopularSeriesFetched(movies: List<Media>){
+        popularSerieAdapter.updateMedia(movies)
+    }
+
+    private fun onError(){
+        Log.e("API call", "errore")
     }
 }

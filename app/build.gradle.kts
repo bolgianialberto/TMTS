@@ -59,6 +59,7 @@ dependencies {
     // for navigation bar
     implementation("com.google.android.material:material:1.2.0")
 
+    // firebase
     implementation(platform("com.google.firebase:firebase-bom:33.0.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-database")

@@ -10,8 +10,8 @@
         android:icon="@drawable/search"/>
     <item
         android:id="@+id/chat"
-        android:title="Chat"
-        android:icon="@drawable/chat"/>
+        android:title="Community"
+        android:icon="@drawable/forum"/>
     <item
         android:id="@+id/account"
         android:title="Account"
