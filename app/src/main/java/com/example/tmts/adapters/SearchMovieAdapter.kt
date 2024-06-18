@@ -1,6 +1,7 @@
 package com.example.tmts.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,10 +9,11 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.tmts.beans.Media
 import com.example.tmts.R
+import com.example.tmts.activities.MovieDetaisActivity
+import com.example.tmts.beans.MovieDetails
 
-class SearchMovieAdapter(private val context: Context, private var movies: List<Media>) :
+class SearchMovieAdapter(private val context: Context, private var movies: List<MovieDetails>) :
     RecyclerView.Adapter<SearchMovieAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,19 +31,41 @@ class SearchMovieAdapter(private val context: Context, private var movies: List<
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        private val imageViewPoster: ImageView = itemView.findViewById(R.id.iv_search)
-        private val textViewTitle: TextView = itemView.findViewById(R.id.tv_search)
+        private val imageViewPoster: ImageView = itemView.findViewById(R.id.iv_search_page_movie_backdrop)
+        private val textViewTitle: TextView = itemView.findViewById(R.id.tv_search_page_movie_title)
+        private val textViewTime: TextView = itemView.findViewById(R.id.tv_search_page_movie_time)
+        private val textViewGenres: TextView = itemView.findViewById(R.id.tv_search_page_movie_genres)
 
-        fun bind(movie: Media) {
-            textViewTitle.text = movie.title
+        fun bind(movie: MovieDetails) {
+            // image
             Glide.with(context)
                 .load("https://image.tmdb.org/t/p/w500${movie.posterPath}")
                 .placeholder(R.drawable.movie)
                 .into(imageViewPoster)
+
+            // title
+            textViewTitle.text = movie.title
+
+            // runtime
+            val runtimeMinutes = movie.runtime
+            val hours = runtimeMinutes / 60
+            val minutes = runtimeMinutes % 60
+            val formattedRuntime = "${hours}h ${minutes}m"
+            textViewTime.text = formattedRuntime
+
+            // genres
+            val genresString = movie.genres.joinToString(" / ") { it.name }
+            textViewGenres.text = genresString
+
+            itemView.setOnClickListener {
+                val intent = Intent(context, MovieDetaisActivity::class.java)
+                intent.putExtra("movieId", movie.id)
+                context.startActivity(intent)
+            }
         }
     }
 
-    fun updateMovies(newMovies: List<Media>) {
+    fun updateMovies(newMovies: List<MovieDetails>) {
         movies = newMovies
         notifyDataSetChanged()
     }
