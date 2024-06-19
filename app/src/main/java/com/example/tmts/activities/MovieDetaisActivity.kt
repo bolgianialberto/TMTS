@@ -1,29 +1,19 @@
 package com.example.tmts.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
-import com.example.tmts.TMDbApiClient
 import com.example.tmts.beans.MovieDetails
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
-import com.google.firebase.database.ValueEventListener
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MovieDetaisActivity : AppCompatActivity() {
     private lateinit var ivBackSearch: Button
@@ -37,6 +27,7 @@ class MovieDetaisActivity : AppCompatActivity() {
     private lateinit var genresImageView: ImageView
     private lateinit var originCountry: TextView
     private lateinit var originalLanguage: TextView
+    private lateinit var llComments: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +47,7 @@ class MovieDetaisActivity : AppCompatActivity() {
         genresImageView = findViewById(R.id.iv_genres)
         originCountry = findViewById(R.id.tv_origin_country)
         originalLanguage = findViewById(R.id.tv_origin_language)
-
+        llComments = findViewById(R.id.ll_comments)
 
         MediaRepository.getMovieDetails(
             movieId,
@@ -127,16 +118,23 @@ class MovieDetaisActivity : AppCompatActivity() {
                 if(exists) {
                     FirebaseInteraction.removeMovieFromFollowing(movieIdToCheck.toInt()) {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.add)
+                        FirebaseInteraction.removeFollowerFromMovie(movie.id)
                     }
                 } else {
                     FirebaseInteraction.addMovieToFollowing(movieIdToCheck.toInt()) {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
+                        FirebaseInteraction.addFollowerToMovie(movie.id)
                     }
                 }
 
             }
         }
 
+        llComments.setOnClickListener{
+            val intent = Intent(this, ReviewsMovieActivity::class.java)
+            intent.putExtra("movieId", movie.id)
+            startActivity(intent)
+        }
     }
 
     private fun setInitialButtonState(movieId: Int) {

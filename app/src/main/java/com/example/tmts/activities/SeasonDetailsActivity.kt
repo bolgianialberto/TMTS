@@ -28,6 +28,7 @@ class SeasonDetailsActivity : AppCompatActivity() {
 
         val intent = intent
         val serieId = intent.getIntExtra("serieId", -1)
+        val serieTitle = intent.getStringExtra("serieTitle")
 
         btnBackArrow = findViewById(R.id.iv_arrow_back_season_details)
         tvSerieTitle = findViewById(R.id.tv_season_details_serie_title)
@@ -59,6 +60,7 @@ class SeasonDetailsActivity : AppCompatActivity() {
                 onSuccess = {season ->
                     seasonsList.add(season)
                     season.serieId = serie.id
+                    season.serieName = serie.title
                     if (seasonsList.size == serie.number_of_seasons) {
                         val sortedSeasonList = seasonsList.sortedBy { it.season_number }
                         seasonAdapter.updateMedia(sortedSeasonList)

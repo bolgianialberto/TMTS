@@ -53,7 +53,7 @@ class SeasonAdapter (
             tvSeasonTitle.text = mediaItem.title
 
             rvEpisode.layoutManager = LinearLayoutManager(itemView.context)
-            rvEpisode.adapter = EpisodeAdapter(context, mediaItem.serieId, mediaItem.episodes)
+            rvEpisode.adapter = EpisodeAdapter(context, mediaItem.serieId, mediaItem.serieName, mediaItem.episodes)
         }
     }
 }

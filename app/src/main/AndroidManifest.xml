@@ -15,6 +15,15 @@
         android:theme="@style/Theme.TMDb_example"
         tools:targetApi="31">
         <activity
+            android:name=".activities.CreateReviewActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.ReviewsMovieActivity"
+            android:exported="false" />
+        <activity
+            android:name=".activities.EpisodeDetailsActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.SeasonDetailsActivity"
             android:exported="false" />
         <activity

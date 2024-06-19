@@ -1,7 +1,9 @@
 package com.example.tmts
 
+import android.icu.text.SimpleDateFormat
 import android.util.Log
 import androidx.core.content.ContextCompat
+import com.example.tmts.beans.Review
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -10,14 +12,99 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
+import java.util.Date
+import java.util.Locale
 
 object FirebaseInteraction {
     var mDbRef = FirebaseDatabase.getInstance().getReference()
     var mAuth = FirebaseAuth.getInstance()
     val user = mAuth.currentUser!!
-    val followingSeriesRef = mDbRef.child("users").child(user.uid).child("following_series")
-    val followingMoviesRef = mDbRef.child("users").child(user.uid).child("following_movies")
-    val watchedMoviesRef = mDbRef.child("users").child(user.uid).child("watched_movies")
+    val userRef = mDbRef.child("users").child(user.uid)
+    val followingSeriesRef = userRef.child("following_series")
+    val followingMoviesRef = userRef.child("following_movies")
+    val watchedMoviesRef = userRef.child("watched_movies")
+    val moviesRef = mDbRef.child("shows").child("movies")
+    val seriesRef = mDbRef.child("shows").child("series")
+    val reviewsRef = mDbRef.child("reviews")
+
+
+    fun getUsername(userId: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+        val usernameRef = mDbRef.child("users").child(userId).child("name")
+
+        usernameRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val username = snapshot.getValue(String::class.java)
+                if (username != null) {
+                    onSuccess(username)
+                } else {
+                    onFailure("Username not found for user ID: ${user.uid}")
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure(error.message)
+            }
+        })
+    }
+
+    fun getReviewsForMovie(
+        movieId: String,
+        onSuccess: (List<Review>) -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val MoviesReviewsRef = moviesRef.child(movieId).child("reviews")
+
+        MoviesReviewsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val reviews = mutableListOf<Review>()
+                val reviewIds = mutableListOf<String>()
+
+                // Step 1: Collect all review IDs for the movie
+                for (reviewSnapshot in snapshot.children) {
+                    val reviewId = reviewSnapshot.key
+                    Log.d("reviewId", "${reviewId}")
+                    reviewId?.let {
+                        reviewIds.add(it)
+                    }
+                }
+
+                // Step 2: Fetch details for each review using its ID
+                reviewIds.forEach { id ->
+                    val reviewDetailsRef = reviewsRef.child(id)
+
+                    reviewDetailsRef.addValueEventListener(object : ValueEventListener {
+                        override fun onDataChange(reviewSnapshot: DataSnapshot) {
+
+                            val usId = reviewSnapshot.child("idUser").getValue(String::class.java)
+                            val movId = reviewSnapshot.child("idShow").getValue(String::class.java)
+                            val comment = reviewSnapshot.child("comment").getValue(String::class.java)
+                            val date = reviewSnapshot.child("date").getValue(String::class.java)
+
+                            Log.d("Boh", "${usId} ${movId} ${comment} ${date}")
+
+                            val r = Review(usId, movId, comment, date)
+                            Log.d("r", "${r}")
+                            reviews.add(r)
+
+                            // Check if this is the last review being fetched
+                            if (reviews.size == reviewIds.size) {
+
+                                onSuccess(reviews)
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            onError(error.message)
+                        }
+                    })
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onError(error.message)
+            }
+        })
+    }
 
     fun getFollowingSeries(callback: (List<Triple<String, String, Long>>) -> Unit){
         followingSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -173,6 +260,137 @@ object FirebaseInteraction {
             }
     }
 
+    fun removeFollowerFromMovie(movieId: Int, onSuccess: (() -> Unit)? = null) {
+        val movieRef = moviesRef.child(movieId.toString())
+        val followersRef = movieRef.child("followers")
+
+        followersRef.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val followersList = task.result?.children?.map { it.value.toString() }?.toMutableList() ?: mutableListOf()
+
+                if (followersList.contains(user.uid)) {
+                    followersList.remove(user.uid)
+                    followersRef.setValue(followersList).addOnCompleteListener { setValueTask ->
+                        if (setValueTask.isSuccessful) {
+                            onSuccess?.invoke()
+                            Log.d("Firebase", "Utente rimosso con successo dai follower del film")
+                        } else {
+                            Log.e("Firebase", "Errore durante la rimozione dell'utente dai follower del film", setValueTask.exception)
+                        }
+                    }
+                } else {
+                    onSuccess?.invoke()
+                    Log.d("Firebase", "Utente non presente nella lista dei follower")
+                }
+            } else {
+                Log.e("Firebase", "Errore durante il recupero della lista dei follower", task.exception)
+            }
+        }
+    }
+
+    fun removeFollowerFromSeries(seriesId: Int, onSuccess: (() -> Unit)? = null) {
+        val seriesRef = seriesRef.child(seriesId.toString())
+        val followersRef = seriesRef.child("followers")
+
+        followersRef.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val followersList = task.result?.children?.map { it.value.toString() }?.toMutableList() ?: mutableListOf()
+
+                if (followersList.contains(user.uid)) {
+                    followersList.remove(user.uid)
+                    followersRef.setValue(followersList).addOnCompleteListener { setValueTask ->
+                        if (setValueTask.isSuccessful) {
+                            onSuccess?.invoke()
+                            Log.d("Firebase", "Utente rimosso con successo dai follower della serie")
+                        } else {
+                            Log.e("Firebase", "Errore durante la rimozione dell'utente dai follower della serie", setValueTask.exception)
+                        }
+                    }
+                } else {
+                    onSuccess?.invoke()
+                    Log.d("Firebase", "Utente non presente nella lista dei follower")
+                }
+            } else {
+                Log.e("Firebase", "Errore durante il recupero della lista dei follower", task.exception)
+            }
+        }
+    }
+
+    private fun getCurrentDateTime(): String {
+        val sdf = SimpleDateFormat("d MMM yyyy", Locale.getDefault())
+        return sdf.format(Date())
+    }
+
+    fun addReviewToMovie(
+        movieId: String,
+        comment: String,
+        onSuccess: (() -> Unit)? = null,
+        onFailure: ((Exception) -> Unit)? = null
+    ) {
+        val movieReviewsRef = moviesRef.child(movieId).child("reviews")
+
+        // Generate a unique ID for the new review
+        val newReviewRef = reviewsRef.push()
+        val reviewId = newReviewRef.key
+
+        val currentDate = getCurrentDateTime()
+
+        if (reviewId != null) {
+            val review = Review(
+                idUser = user.uid,
+                idShow = movieId,
+                comment = comment,
+                date = currentDate
+            )
+
+            // Save the review to the "reviews" node
+            newReviewRef.setValue(review).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    // Add the review ID to the movie's reviews list
+                    movieReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
+                        if (task2.isSuccessful) {
+                            onSuccess?.invoke()
+                        } else {
+                            onFailure?.invoke(task2.exception ?: Exception("Failed to add review ID to movie's reviews list"))
+                        }
+                    }
+                } else {
+                    onFailure?.invoke(task.exception ?: Exception("Failed to save review"))
+                }
+            }
+        } else {
+            onFailure?.invoke(Exception("Failed to generate review ID"))
+        }
+    }
+
+    fun addFollowerToSeries(seriesId: Int, onSuccess: (() -> Unit)? = null) {
+        val seriesRef = seriesRef.child(seriesId.toString())
+        val followersRef = seriesRef.child("followers")
+
+        followersRef.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val followersList = task.result?.children?.map { it.value.toString() }?.toMutableList() ?: mutableListOf()
+
+                if (!followersList.contains(user.uid)) {
+                    followersList.add(user.uid)
+                    followersRef.setValue(followersList).addOnCompleteListener { setValueTask ->
+                        if (setValueTask.isSuccessful) {
+                            onSuccess?.invoke()
+                            Log.d("Firebase", "Utente aggiunto con successo ai follower della serie")
+                        } else {
+                            Log.e("Firebase", "Errore durante l'aggiunta dell'utente ai follower della serie", setValueTask.exception)
+                        }
+                    }
+                } else {
+                    onSuccess?.invoke()
+                    Log.d("Firebase", "Utente già presente nella lista dei follower")
+                }
+            } else {
+                Log.e("Firebase", "Errore durante il recupero della lista dei follower", task.exception)
+            }
+        }
+    }
+
     fun addSerieToFollowing(serieId: Int, onSuccess: (() -> Unit)? = null) {
         MediaRepository.getSerieDetails(
             serieId,
@@ -229,6 +447,33 @@ object FirebaseInteraction {
             }
     }
 
+    fun addFollowerToMovie(movieId: Int, onSuccess: (() -> Unit)? = null) {
+        val movieRef = moviesRef.child(movieId.toString())
+        val followersRef = movieRef.child("followers")
+
+        followersRef.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val followersList = task.result?.children?.map { it.value.toString() }?.toMutableList() ?: mutableListOf()
+
+                if (!followersList.contains(user.uid)) {
+                    followersList.add(user.uid)
+                    followersRef.setValue(followersList).addOnCompleteListener { setValueTask ->
+                        if (setValueTask.isSuccessful) {
+                            onSuccess?.invoke()
+                            Log.d("Firebase", "Utente aggiunto con successo ai follower del film")
+                        } else {
+                            Log.e("Firebase", "Errore durante l'aggiunta dell'utente ai follower del film", setValueTask.exception)
+                        }
+                    }
+                } else {
+                    onSuccess?.invoke()
+                    Log.d("Firebase", "Utente già presente nella lista dei follower")
+                }
+            } else {
+                Log.e("Firebase", "Errore durante il recupero della lista dei follower", task.exception)
+            }
+        }
+    }
 
     fun addMovieToWatched(movieId: Int) {
         watchedMoviesRef.child(movieId.toString()).setValue(true)

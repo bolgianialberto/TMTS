@@ -141,6 +141,7 @@ class SerieDetailsActivity : AppCompatActivity() {
         llSeasons.setOnClickListener {
             val intent = Intent(this, SeasonDetailsActivity::class.java)
             intent.putExtra("serieId", serieId)
+            intent.putExtra("serieTitle", serie.title)
             this.startActivity(intent)
         }
 
@@ -151,11 +152,13 @@ class SerieDetailsActivity : AppCompatActivity() {
                 if(exists) {
                     FirebaseInteraction.removeSerieFromFollowing(serieId) {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.add)
+                        FirebaseInteraction.removeFollowerFromSeries(serieId)
                     }
 
                 } else {
                     FirebaseInteraction.addSerieToFollowing(serieId) {
                         btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
+                        FirebaseInteraction.addFollowerToSeries(serieId)
                     }
                 }
             }

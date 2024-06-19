@@ -10,7 +10,7 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activities.SerieDetaisActivity"
+        tools:context=".activities.SerieDetailsActivity"
         android:paddingBottom="10dp">
 
         <ImageView
@@ -50,6 +50,7 @@
                 android:layout_height="wrap_content"
                 android:text="placeholder"
                 android:textSize="24sp"
+                android:textStyle="bold"
                 android:textColor="@color/white"/>
 
             <HorizontalScrollView
@@ -99,7 +100,7 @@
             app:layout_constraintTop_toBottomOf="@id/iv_serie_details_backdrop"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/rv_seasons"
+            app:layout_constraintBottom_toTopOf="@id/ll_seasons"
             android:orientation="horizontal"
             android:padding="10dp">
 

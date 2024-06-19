@@ -10,6 +10,7 @@ data class SeasonDetails (
     @SerializedName("overview") val overview: String,
     @SerializedName("season_number") val season_number: Int,
     var serieId: Int = 0,
+    var serieName: String? = null
 ){
     val number_of_episodes: Int
         get() = episodes.size
