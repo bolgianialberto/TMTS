@@ -48,7 +48,6 @@
             android:id="@+id/rv_reviews"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="10dp"
             tools:listitem="@layout/review_item"/>
 
     </LinearLayout>
@@ -62,6 +61,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@color/unselectedColor"
-        app:borderWidth="0dp"/>
+        app:borderWidth="0dp"
+        app:maxImageSize="35dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
