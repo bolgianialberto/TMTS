@@ -9,8 +9,8 @@
         android:title="Search"
         android:icon="@drawable/search"/>
     <item
-        android:id="@+id/chat"
-        android:title="Community"
+        android:id="@+id/explore"
+        android:title="Explore"
         android:icon="@drawable/forum"/>
     <item
         android:id="@+id/account"
