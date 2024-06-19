@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/rounded_border"
+        android:padding="3dp">
+    <!-- LinearLayout for User Name and Date -->
+        <LinearLayout
+            android:id="@+id/ll_user_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/ll_comment_activity_content"
+            android:background="@color/lightergray">
+
+            <!-- TextView for User Name -->
+            <TextView
+                android:id="@+id/tv_comment_activity_user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User Name"
+                android:textSize="16sp"
+                android:textStyle="bold"/>
+
+            <!-- TextView for Comment Date -->
+            <TextView
+                android:id="@+id/tv_comment_activity_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Date"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp"/>
+
+        </LinearLayout>
+
+        <!-- LinearLayout for User Comments or Photos -->
+        <LinearLayout
+            android:id="@+id/ll_comment_activity_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/ll_user_info"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- TextView for User Comments -->
+            <TextView
+                android:id="@+id/tv_comment_activity_user_comments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="User comments will be displayed here"
+                android:textSize="14sp"
+                android:padding="8dp"
+                android:background="@color/white"/>
+
+            <!-- ImageView for User Photos (Optional) -->
+            <ImageView
+                android:id="@+id/iv_comment_activity_user_photo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:src="@drawable/image"
+                android:scaleType="centerCrop"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
