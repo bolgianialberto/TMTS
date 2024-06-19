@@ -5,15 +5,10 @@
     android:layout_height="match_parent"
     tools:context=".fragments.ExploreMoviesFragment">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Explore Movies" />
-
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_home_movie"
+        android:id="@+id/rv_explore_movie"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:listitem="@layout/home_movie_item"/>
+        tools:listitem="@layout/explore_movie_item"/>
 
 </FrameLayout>
