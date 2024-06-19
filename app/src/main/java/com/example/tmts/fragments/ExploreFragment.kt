@@ -7,9 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.fragment.app.Fragment
+import com.example.tmts.MediaDetaisActivity
 import com.example.tmts.R
 import com.example.tmts.adapters.ExploreAdapter
-import com.example.tmts.beans.Media
 
 class ExploreFragment : Fragment() {
     private lateinit var exploreAdapter: ExploreAdapter
@@ -29,7 +29,7 @@ class ExploreFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_explore, container, false)
         bttExploreSearch = view.findViewById(R.id.btt_search_explore)
         exploreAdapter = ExploreAdapter(requireContext(), emptyList()) { exploreItem ->
-            val intent = Intent(requireContext(), Media::class.java)
+            val intent = Intent(requireContext(), MediaDetaisActivity::class.java)
             intent.putExtra("userId", exploreItem.id)
             startActivity(intent)
         }
