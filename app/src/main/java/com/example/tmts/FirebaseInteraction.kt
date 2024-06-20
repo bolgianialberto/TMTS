@@ -1,7 +1,9 @@
 package com.example.tmts
 
 import android.icu.text.SimpleDateFormat
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import com.example.tmts.beans.Review
 import com.google.firebase.auth.FirebaseAuth
@@ -12,6 +14,9 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.StorageException
+import com.google.firebase.storage.StorageReference
 import java.util.Date
 import java.util.Locale
 
@@ -26,6 +31,7 @@ object FirebaseInteraction {
     val moviesRef = mDbRef.child("shows").child("movies")
     val seriesRef = mDbRef.child("shows").child("series")
     val reviewsRef = mDbRef.child("reviews")
+    val reviewImagesRef = FirebaseStorage.getInstance().reference
 
 
     fun getUsername(userId: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
@@ -47,14 +53,28 @@ object FirebaseInteraction {
         })
     }
 
+    fun getReviewRefInStorage(
+        review: Review,
+        onSuccess: (StorageReference) -> Unit,
+        onError: (String) -> Unit
+    ){
+        val filePath = "reviews/${review.id}.jpg" // Assumi che review abbia un campo reviewId
+        val reviewImageRef = reviewImagesRef.child(filePath)
+        if(reviewImageRef != null){
+            onSuccess(reviewImageRef)
+        } else {
+            onError("Review image not found")
+        }
+    }
+
     fun getReviewsForMovie(
         movieId: String,
         onSuccess: (List<Review>) -> Unit,
         onError: (String) -> Unit
     ) {
-        val MoviesReviewsRef = moviesRef.child(movieId).child("reviews")
+        val movieReviewsRef = moviesRef.child(movieId).child("reviews")
 
-        MoviesReviewsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        movieReviewsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val reviews = mutableListOf<Review>()
                 val reviewIds = mutableListOf<String>()
@@ -62,7 +82,7 @@ object FirebaseInteraction {
                 // Step 1: Collect all review IDs for the movie
                 for (reviewSnapshot in snapshot.children) {
                     val reviewId = reviewSnapshot.key
-                    Log.d("reviewId", "${reviewId}")
+                    Log.d("reviewId", "$reviewId")
                     reviewId?.let {
                         reviewIds.add(it)
                     }
@@ -72,23 +92,30 @@ object FirebaseInteraction {
                 reviewIds.forEach { id ->
                     val reviewDetailsRef = reviewsRef.child(id)
 
-                    reviewDetailsRef.addValueEventListener(object : ValueEventListener {
+                    reviewDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(reviewSnapshot: DataSnapshot) {
-
+                            val revId = reviewSnapshot.child("id").getValue(String::class.java)
                             val usId = reviewSnapshot.child("idUser").getValue(String::class.java)
                             val movId = reviewSnapshot.child("idShow").getValue(String::class.java)
                             val comment = reviewSnapshot.child("comment").getValue(String::class.java)
                             val date = reviewSnapshot.child("date").getValue(String::class.java)
+                            val imageUrl = reviewSnapshot.child("imageUrl").getValue(String::class.java)
 
-                            Log.d("Boh", "${usId} ${movId} ${comment} ${date}")
+                            Log.d("ReviewDetails", "$usId $movId $comment $date $imageUrl")
 
-                            val r = Review(usId, movId, comment, date)
-                            Log.d("r", "${r}")
-                            reviews.add(r)
+                            val review = Review(
+                                id = revId,
+                                idUser = usId,
+                                idShow = movId,
+                                comment = comment,
+                                date = date,
+                                imageUrl = imageUrl
+                            )
+                            Log.d("ReviewObject", "$review")
+                            reviews.add(review)
 
                             // Check if this is the last review being fetched
                             if (reviews.size == reviewIds.size) {
-
                                 onSuccess(reviews)
                             }
                         }
@@ -105,6 +132,7 @@ object FirebaseInteraction {
             }
         })
     }
+
 
     fun getFollowingSeries(callback: (List<Triple<String, String, Long>>) -> Unit){
         followingSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -324,44 +352,85 @@ object FirebaseInteraction {
     fun addReviewToMovie(
         movieId: String,
         comment: String,
+        uri: Uri?,
         onSuccess: (() -> Unit)? = null,
         onFailure: ((Exception) -> Unit)? = null
     ) {
         val movieReviewsRef = moviesRef.child(movieId).child("reviews")
 
-        // Generate a unique ID for the new review
+        // Genera un ID unico per la nuova recensione
         val newReviewRef = reviewsRef.push()
         val reviewId = newReviewRef.key
 
         val currentDate = getCurrentDateTime()
 
         if (reviewId != null) {
-            val review = Review(
-                idUser = user.uid,
-                idShow = movieId,
-                comment = comment,
-                date = currentDate
-            )
+            if (uri != null) {
+                val filePath = "reviews/$reviewId.jpg"
+                val imageRef = reviewImagesRef.child(filePath)
 
-            // Save the review to the "reviews" node
-            newReviewRef.setValue(review).addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    // Add the review ID to the movie's reviews list
-                    movieReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
-                        if (task2.isSuccessful) {
-                            onSuccess?.invoke()
-                        } else {
-                            onFailure?.invoke(task2.exception ?: Exception("Failed to add review ID to movie's reviews list"))
+                imageRef.putFile(uri).addOnSuccessListener {
+                    imageRef.downloadUrl.addOnSuccessListener { imageUrl ->
+                        val review = Review(
+                            id = reviewId,
+                            idUser = user.uid,
+                            idShow = movieId,
+                            comment = comment,
+                            date = currentDate,
+                            imageUrl = imageUrl.toString()
+                        )
+
+                        // Salva la recensione nel nodo "reviews"
+                        newReviewRef.setValue(review).addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // Aggiungi l'ID della recensione alla lista delle recensioni del film
+                                movieReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
+                                    if (task2.isSuccessful) {
+                                        onSuccess?.invoke()
+                                    } else {
+                                        onFailure?.invoke(task2.exception ?: Exception("Failed to add review ID to movie's reviews list"))
+                                    }
+                                }
+                            } else {
+                                onFailure?.invoke(task.exception ?: Exception("Failed to save review"))
+                            }
                         }
+                    }.addOnFailureListener { exception ->
+                        onFailure?.invoke(exception)
                     }
-                } else {
-                    onFailure?.invoke(task.exception ?: Exception("Failed to save review"))
+                }.addOnFailureListener { exception ->
+                    onFailure?.invoke(exception)
+                }
+            } else {
+                val review = Review(
+                    id = reviewId,
+                    idUser = user.uid,
+                    idShow = movieId,
+                    comment = comment,
+                    date = currentDate
+                )
+
+                // Salva la recensione nel nodo "reviews"
+                newReviewRef.setValue(review).addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        // Aggiungi l'ID della recensione alla lista delle recensioni del film
+                        movieReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
+                            if (task2.isSuccessful) {
+                                onSuccess?.invoke()
+                            } else {
+                                onFailure?.invoke(task2.exception ?: Exception("Failed to add review ID to movie's reviews list"))
+                            }
+                        }
+                    } else {
+                        onFailure?.invoke(task.exception ?: Exception("Failed to save review"))
+                    }
                 }
             }
         } else {
             onFailure?.invoke(Exception("Failed to generate review ID"))
         }
     }
+
 
     fun addFollowerToSeries(seriesId: Int, onSuccess: (() -> Unit)? = null) {
         val seriesRef = seriesRef.child(seriesId.toString())

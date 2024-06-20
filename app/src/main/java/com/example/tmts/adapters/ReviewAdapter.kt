@@ -5,11 +5,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
 import com.example.tmts.beans.Review
+import com.google.firebase.storage.FirebaseStorage
 
 class ReviewAdapter (
     private val context: Context,
@@ -38,6 +41,7 @@ class ReviewAdapter (
         private val tvUserName: TextView = itemView.findViewById(R.id.tv_comment_activity_user_name)
         private val tvDate: TextView = itemView.findViewById(R.id.tv_comment_activity_date)
         private val tvComment: TextView = itemView.findViewById(R.id.tv_comment_activity_user_comments)
+        private val ivPhoto: ImageView = itemView.findViewById(R.id.iv_comment_activity_user_photo)
         fun bind(review: Review) {
             Log.d("review", "${review}")
             tvDate.text = review.date
@@ -58,7 +62,23 @@ class ReviewAdapter (
                 )
             }
 
-
+            FirebaseInteraction.getReviewRefInStorage(
+                review,
+                onSuccess = {reviewImageRef ->
+                    reviewImageRef.downloadUrl.addOnSuccessListener { uri ->
+                        Glide.with(context)
+                            .load(uri)
+                            .into(ivPhoto)
+                        ivPhoto.visibility = View.VISIBLE
+                    }.addOnFailureListener { exception ->
+                        Log.e("FirebaseStorage", "Errore durante il download dell'immagine", exception)
+                        ivPhoto.visibility = View.GONE
+                    }
+                },
+                onError = {message ->
+                    Log.d("ReviewAdapter", message)
+                }
+            )
         }
     }
 }
