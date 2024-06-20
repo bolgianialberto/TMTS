@@ -26,10 +26,10 @@ class ExploreFragment : Fragment() {
 
         bttExplore.setOnClickListener {
             toggleButtonColor(bttExplore)
-            replaceFragment(ExploreMoviesFragment())}
+            replaceFragment(ExploreShowsFragment())}
         bttChat.setOnClickListener {
             toggleButtonColor(bttChat)
-            replaceFragment(SerieHomeFragment())
+            replaceFragment(ChatFragment())
         }
 
         return view
@@ -37,7 +37,7 @@ class ExploreFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        replaceFragment(ExploreMoviesFragment())
+        replaceFragment(ExploreShowsFragment())
     }
 
     private fun toggleButtonColor(button: Button) {

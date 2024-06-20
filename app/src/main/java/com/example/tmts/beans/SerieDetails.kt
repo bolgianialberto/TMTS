@@ -1,10 +1,8 @@
 package com.example.tmts.beans
 
-import com.example.tmts.beans.Genre
 import com.google.gson.annotations.SerializedName
-import java.io.Serial
 
-data class SerieDetails (
+data class SerieDetails(
     @SerializedName("id") val id: Int,
     @SerializedName("original_name") val title: String,
     @SerializedName("original_language") val original_language: String,
