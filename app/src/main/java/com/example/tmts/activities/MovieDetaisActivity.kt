@@ -7,7 +7,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RatingBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
@@ -28,6 +31,8 @@ class MovieDetaisActivity : AppCompatActivity() {
     private lateinit var originCountry: TextView
     private lateinit var originalLanguage: TextView
     private lateinit var llComments: LinearLayout
+    private lateinit var btnRate: Button
+    private lateinit var btnAddToWatchlist: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +53,8 @@ class MovieDetaisActivity : AppCompatActivity() {
         originCountry = findViewById(R.id.tv_origin_country)
         originalLanguage = findViewById(R.id.tv_origin_language)
         llComments = findViewById(R.id.ll_comments)
+        btnRate = findViewById(R.id.btn_rate)
+        btnAddToWatchlist = findViewById(R.id.btn_watchlist)
 
         MediaRepository.getMovieDetails(
             movieId,
@@ -135,6 +142,43 @@ class MovieDetaisActivity : AppCompatActivity() {
             intent.putExtra("movieId", movie.id)
             startActivity(intent)
         }
+
+        btnRate.setOnClickListener {
+            val builder = AlertDialog.Builder(this@MovieDetaisActivity)
+            val inflater = layoutInflater
+            val dialogView = inflater.inflate(R.layout.rate_layout, null)
+            builder.setView(dialogView)
+
+            val ratingBar = dialogView.findViewById<RatingBar>(R.id.ratingBar)
+
+            builder.setTitle("Rate this movie")
+                .setPositiveButton("Ok"){ dialog, which ->
+                    // Ottieni il valore delle stelle selezionate
+                    val rating = ratingBar.rating
+
+                    // add movieId:rating to users/userId/ratings
+                    FirebaseInteraction.addRatingToUser(
+                        movie.id.toString(),
+                        rating.toDouble(),
+                        onSuccess = {
+                            FirebaseInteraction.updateMovieRatingAverage(
+                                movie.id.toString(),
+                                rating.toDouble(),
+                                onSuccess = {
+                                    Toast.makeText(this@MovieDetaisActivity, "Rating selected: $rating", Toast.LENGTH_SHORT).show()
+                                },
+                                onError = ::onError
+                            )
+                        },
+                        onError = ::onError
+                    )
+                }
+                .setNegativeButton("Cancel"){dialog, which ->
+                    dialog.dismiss()}
+
+            val alertDialog = builder.create()
+            alertDialog.show()
+        }
     }
 
     private fun setInitialButtonState(movieId: Int) {
@@ -146,5 +190,9 @@ class MovieDetaisActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    fun onError(message: String){
+        Log.d("MovieDetailsActivity", message)
     }
 }
