@@ -40,6 +40,8 @@ class AccountFragment : Fragment() {
     private lateinit var tvBio: TextView
     private lateinit var tvUsername: TextView
     private lateinit var ibDropDown: ImageButton
+    private lateinit var tvFollowerCount: TextView
+    private lateinit var tvFollowingCount: TextView
 
     val currentUser = mAuth.currentUser!!
 
@@ -64,6 +66,8 @@ class AccountFragment : Fragment() {
         tvBio = view.findViewById(R.id.tv_bio)
         ibDropDown = view.findViewById(R.id.ib_dropdown)
         ivAccountIcon = view.findViewById(R.id.account_icon)
+        tvFollowerCount = view.findViewById(R.id.tv_follower_count)
+        tvFollowingCount = view.findViewById(R.id.tv_following_count)
 
         // Fetch user's display name and change the view accordingly
         userIdRef.child("name").addValueEventListener(object: ValueEventListener {
@@ -82,6 +86,8 @@ class AccountFragment : Fragment() {
 
         // Load previously written user bio, if it exists, otherwise set default bio
         loadUserBio(userBioRef, tvBio)
+
+        loadUserFollowerData(userIdRef, )
 
         // Set view or buttons listeners
         ivAccountIcon.setOnClickListener{
@@ -111,24 +117,35 @@ class AccountFragment : Fragment() {
             }
         }
 
+
+
         return view
     }
 
-    private fun performLogout(): Boolean {
-        mAuth.signOut()
-        val intent = Intent(requireContext(), MainEmptyActivity::class.java)
-        startActivity(intent)
-        return true
-    }
+    private fun loadUserFollowerData(userIdRef: DatabaseReference) {
+        // Check number of users following me from Firebase
+        userIdRef.child("follower_users").addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val followerCount = snapshot.getValue(String::class.java)
+                tvFollowerCount.text = (followerCount ?: "0")
+            }
 
-    private fun editProfileIcon(): Boolean {
-        selectImageFromGallery()
-        return true
-    }
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
 
-    private fun editProfile(userBioRef: DatabaseReference): Boolean {
-        showEditBioDialog(userBioRef)
-        return true
+        // Check number of users I follow from Firebase
+        userIdRef.child("following_users").addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val followingCount = snapshot.getValue(String::class.java)
+                tvFollowingCount.text = (followingCount ?: "0")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
     }
 
     private fun loadUserBio(userBioRef: DatabaseReference, tvBio: TextView) {
@@ -142,6 +159,16 @@ class AccountFragment : Fragment() {
                 TODO("Not yet implemented")
             }
         })
+    }
+
+    private fun editProfileIcon(): Boolean {
+        selectImageFromGallery()
+        return true
+    }
+
+    private fun editProfile(userBioRef: DatabaseReference): Boolean {
+        showEditBioDialog(userBioRef)
+        return true
     }
 
     private fun showEditBioDialog(userBioRef: DatabaseReference) {
@@ -170,7 +197,7 @@ class AccountFragment : Fragment() {
             .setView(dialogView)
             .setPositiveButton("Save") {dialog, _ ->
                 val newBio = editTextBio.text.toString()
-                tvBio.text = newBio
+                tvBio.setText(newBio)
                 saveBioToFirebase(userBioRef, newBio)
                 dialog.dismiss()
             }
@@ -191,7 +218,12 @@ class AccountFragment : Fragment() {
             }
     }
 
-
+    private fun performLogout(): Boolean {
+        mAuth.signOut()
+        val intent = Intent(requireContext(), MainEmptyActivity::class.java)
+        startActivity(intent)
+        return true
+    }
 
     private fun selectImageFromGallery() {
         selectImageFromGalleryResult.launch("image/*")
