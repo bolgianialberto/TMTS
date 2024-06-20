@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupMenu
@@ -21,6 +22,7 @@ import com.example.tmts.activities.MainEmptyActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
@@ -32,6 +34,9 @@ class AccountFragment : Fragment() {
     private var mAuth = FirebaseAuth.getInstance()
     private var mStorage = FirebaseStorage.getInstance().getReference()
     private lateinit var ivAccountIcon: ImageView
+    private lateinit var etBio: EditText
+    private lateinit var tvUsername: TextView
+    private lateinit var ibDropDown: ImageButton
 
     val currentUser = mAuth.currentUser!!
 
@@ -41,11 +46,24 @@ class AccountFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_account, container, false)
-        val userRef = mDbRef.child("users").child(currentUser.uid)
 
-        val tvUsername: TextView = view.findViewById(R.id.tv_account_username)
+        // Fetch user id Firebase reference
+        val userIdRef = mDbRef.child("users").child(currentUser.uid)
 
-        userRef.child("name").addValueEventListener(object: ValueEventListener {
+        // Fetch user id Firebase reference
+        val userBioRef = mDbRef.child("users").child(currentUser.uid).child("bio")
+
+        // Fetch user's Firebase image reference
+        val userImageRef = mStorage.child("users").child(currentUser.uid).child("profileImage")
+
+        // Initialize views
+        tvUsername = view.findViewById(R.id.tv_account_username)
+        etBio = view.findViewById(R.id.tv_bio)
+        ibDropDown = view.findViewById(R.id.ib_dropdown)
+        ivAccountIcon = view.findViewById(R.id.account_icon)
+
+        // Fetch user's display name and change the view accordingly
+        userIdRef.child("name").addValueEventListener(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val name = snapshot.getValue(String::class.java)
                 tvUsername.text = "$name"
@@ -56,26 +74,13 @@ class AccountFragment : Fragment() {
             }
         })
 
-        val userImageRef = mStorage.child("users").child(currentUser.uid).child("profileImage")
-
-        //val logoutButton: Button = view.findViewById(R.id.logout_button2)
-        val ibDropDown: ImageButton = view.findViewById(R.id.ib_dropdown)
-
-        //Quando si entra in app direttamente (senza login): name = ""
-        // mentre con login, name = "null"
-
-        //greetingTextView.text = "Ciao, ${currentUser?.displayName}"
-
-
-//        logoutButton.setOnClickListener {
-//            performLogout()
-//        }
-
-        //TODO: Fare in modo che qui ivAccountIcon venga impostata a quello che è stato caricato su Firebase, se presente
-
-        ivAccountIcon = view.findViewById(R.id.account_icon)
+        // Load previously uploaded image by user, if it exists, otherwise load default image
         loadUserImage(userImageRef, ivAccountIcon)
 
+        // Load previously written user bio, if it exists, otherwise set default bio
+        loadUserBio(userBioRef, etBio)
+
+        // Set view or buttons listeners
         ivAccountIcon.setOnClickListener{
             val popup = PopupMenu(requireContext(), it)
             val inflater: MenuInflater = popup.menuInflater
@@ -103,7 +108,13 @@ class AccountFragment : Fragment() {
             }
         }
 
+
+
         return view
+    }
+
+    private fun loadUserBio(userBioRef: DatabaseReference, etBio: EditText) {
+
     }
 
     private fun editProfileIcon(): Boolean {
