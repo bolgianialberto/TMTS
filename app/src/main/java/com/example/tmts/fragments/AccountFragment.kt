@@ -1,8 +1,11 @@
 package com.example.tmts.fragments
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.View
@@ -34,7 +37,7 @@ class AccountFragment : Fragment() {
     private var mAuth = FirebaseAuth.getInstance()
     private var mStorage = FirebaseStorage.getInstance().getReference()
     private lateinit var ivAccountIcon: ImageView
-    private lateinit var etBio: EditText
+    private lateinit var tvBio: TextView
     private lateinit var tvUsername: TextView
     private lateinit var ibDropDown: ImageButton
 
@@ -58,7 +61,7 @@ class AccountFragment : Fragment() {
 
         // Initialize views
         tvUsername = view.findViewById(R.id.tv_account_username)
-        etBio = view.findViewById(R.id.tv_bio)
+        tvBio = view.findViewById(R.id.tv_bio)
         ibDropDown = view.findViewById(R.id.ib_dropdown)
         ivAccountIcon = view.findViewById(R.id.account_icon)
 
@@ -78,7 +81,7 @@ class AccountFragment : Fragment() {
         loadUserImage(userImageRef, ivAccountIcon)
 
         // Load previously written user bio, if it exists, otherwise set default bio
-        loadUserBio(userBioRef, etBio)
+        loadUserBio(userBioRef, tvBio)
 
         // Set view or buttons listeners
         ivAccountIcon.setOnClickListener{
@@ -101,30 +104,14 @@ class AccountFragment : Fragment() {
             popup.show()
             popup.setOnMenuItemClickListener {
                 when(it.itemId) {
-                    R.id.edit_profile -> editProfile()
+                    R.id.edit_profile -> editProfile(userBioRef)
                     R.id.logout_button -> performLogout()
                 }
                 true
             }
         }
 
-
-
         return view
-    }
-
-    private fun loadUserBio(userBioRef: DatabaseReference, etBio: EditText) {
-
-    }
-
-    private fun editProfileIcon(): Boolean {
-        selectImageFromGallery()
-        return true
-    }
-
-    private fun editProfile(): Boolean {
-        //TODO: to be implemented
-        return true
     }
 
     private fun performLogout(): Boolean {
@@ -134,12 +121,83 @@ class AccountFragment : Fragment() {
         return true
     }
 
+    private fun editProfileIcon(): Boolean {
+        selectImageFromGallery()
+        return true
+    }
+
+    private fun editProfile(userBioRef: DatabaseReference): Boolean {
+        showEditBioDialog(userBioRef)
+        return true
+    }
+
+    private fun loadUserBio(userBioRef: DatabaseReference, tvBio: TextView) {
+        userBioRef.addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val bio = snapshot.getValue(String::class.java)
+                tvBio.text = (bio ?: "Write something about you...")
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                TODO("Not yet implemented")
+            }
+        })
+    }
+
+    private fun showEditBioDialog(userBioRef: DatabaseReference) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_bio, null)
+        val editTextBio = dialogView.findViewById<EditText>(R.id.et_bio)
+        val textViewError = dialogView.findViewById<TextView>(R.id.tv_bio_error)
+
+        editTextBio.addTextChangedListener(object: TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (s != null && s.length >= 97) {// TODO: not hardcoded pls
+                    textViewError.text = "Character limit reached!"
+                    textViewError.visibility = View.VISIBLE
+                } else {
+                    textViewError.visibility = View.GONE
+                }
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
+        editTextBio.setText(tvBio.text.toString())
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("Edit your profile bio")
+            .setView(dialogView)
+            .setPositiveButton("Save") {dialog, _ ->
+                val newBio = editTextBio.text.toString()
+                tvBio.text = newBio
+                saveBioToFirebase(userBioRef, newBio)
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") {dialog, _ ->
+                dialog.dismiss()
+            }
+            .create()
+            .show()
+    }
+
+    private fun saveBioToFirebase(userBioRef: DatabaseReference, newBio: String) {
+        userBioRef.setValue(newBio)
+            .addOnSuccessListener {
+                Toast.makeText(requireContext(), "Bio updated successfully!", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to update bio!", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+
+
     private fun selectImageFromGallery() {
         selectImageFromGalleryResult.launch("image/*")
     }
 
     private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) {
-
             uri: Uri? -> uri?.let {
             //TODO: Se faccio upload di 1 immagine, poi switch fragment, poi ritorno a fare upload immagine, mi porta a un crash
 

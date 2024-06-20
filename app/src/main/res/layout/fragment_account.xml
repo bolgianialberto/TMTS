@@ -52,7 +52,7 @@
                 android:textStyle="bold"
                 android:gravity="center" />
 
-            <EditText
+            <TextView
                 android:id="@+id/tv_bio"
                 android:layout_width="200sp"
                 android:layout_height="wrap_content"
@@ -64,10 +64,6 @@
 
                 android:maxLength="97"
                 android:textSize="15sp"
-
-                android:background="@android:color/transparent"
-                android:inputType="textMultiLine"
-                android:textColor="#808080"
 
                 android:hint="Write something about you..." />
 
