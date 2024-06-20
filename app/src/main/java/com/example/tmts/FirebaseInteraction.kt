@@ -18,6 +18,8 @@ object FirebaseInteraction {
     val followingSeriesRef = mDbRef.child("users").child(user.uid).child("following_series")
     val followingMoviesRef = mDbRef.child("users").child(user.uid).child("following_movies")
     val watchedMoviesRef = mDbRef.child("users").child(user.uid).child("watched_movies")
+    val followedUsersRef = mDbRef.child("users").child(user.uid).child("followed")
+    val followersUsersRef = mDbRef.child("users").child(user.uid).child("followers")
 
     fun getFollowingSeries(callback: (List<Triple<String, String, Long>>) -> Unit){
         followingSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -62,6 +64,50 @@ object FirebaseInteraction {
             override fun onCancelled(error: DatabaseError) {
                 Log.e("Firebase", "Errore nel recupero dei dati: ${error.message}")
                 // Chiamata della callback con lista vuota in caso di errore
+                callback(emptyList())
+            }
+        })
+    }
+
+    fun getFollowedUsers(callback: (List<String>) -> Unit, ){
+        FirebaseInteraction.followedUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val followed = mutableListOf<String>()
+
+                snapshot.children.forEach { child ->
+                    val followedID = child.key
+                    if (followedID != null) {//TODO: forse devo fare anche check se l'id effettivamente è id di un utente
+                        followed.add(followedID)
+                    }
+                }
+
+                callback(followed)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Errore nel recupero dei dati: ${error.message}")
+                callback(emptyList())
+            }
+        })
+    }
+
+    fun getFollowersUsers(callback: (List<String>) -> Unit, ){
+        FirebaseInteraction.followersUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val followers = mutableListOf<String>()
+
+                snapshot.children.forEach { child ->
+                    val followerID = child.key
+                    if (followerID != null) {//TODO: forse devo fare anche check se l'id effettivamente è id di un utente
+                        followers.add(followerID)
+                    }
+                }
+
+                callback(followers)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Errore nel recupero dei dati: ${error.message}")
                 callback(emptyList())
             }
         })

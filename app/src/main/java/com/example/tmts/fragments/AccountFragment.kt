@@ -20,6 +20,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
 import com.example.tmts.activities.MainEmptyActivity
 import com.google.firebase.auth.FirebaseAuth
@@ -32,7 +33,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
 
-class AccountFragment : Fragment() {
+class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteraction.kt
     private var mDbRef = FirebaseDatabase.getInstance().getReference()
     private var mAuth = FirebaseAuth.getInstance()
     private var mStorage = FirebaseStorage.getInstance().getReference()
@@ -87,7 +88,8 @@ class AccountFragment : Fragment() {
         // Load previously written user bio, if it exists, otherwise set default bio
         loadUserBio(userBioRef, tvBio)
 
-        loadUserFollowerData(userIdRef, )
+        // Load user's follower data from Firebase
+        loadUserFollowerData(userIdRef, tvFollowerCount, tvFollowingCount)
 
         // Set view or buttons listeners
         ivAccountIcon.setOnClickListener{
@@ -117,35 +119,24 @@ class AccountFragment : Fragment() {
             }
         }
 
-
-
         return view
     }
 
-    private fun loadUserFollowerData(userIdRef: DatabaseReference) {
-        // Check number of users following me from Firebase
-        userIdRef.child("follower_users").addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val followerCount = snapshot.getValue(String::class.java)
-                tvFollowerCount.text = (followerCount ?: "0")
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-        })
+    private fun loadUserFollowerData(
+        userIdRef: DatabaseReference,
+        tvFollowerCount: TextView,
+        tvFollowingCount: TextView
+    ) {
+        // Set number of users following me from Firebase
+        FirebaseInteraction.getFollowersUsers { followers ->
+            tvFollowerCount.text = followers.size.toString()
+        }
 
         // Check number of users I follow from Firebase
-        userIdRef.child("following_users").addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val followingCount = snapshot.getValue(String::class.java)
-                tvFollowingCount.text = (followingCount ?: "0")
-            }
+        FirebaseInteraction.getFollowedUsers { followed ->
+            tvFollowingCount.text = followed.size.toString()
+        }
 
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-        })
     }
 
     private fun loadUserBio(userBioRef: DatabaseReference, tvBio: TextView) {
