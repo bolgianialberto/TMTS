@@ -183,6 +183,54 @@ object FirebaseInteraction {
         })
     }
 
+    fun getUserRateOnMovie(
+        movieId: String,
+        onSuccess: ((Float) -> Unit)?,
+        onError: (String) -> Unit
+    ){
+        userRatingsRef.child(movieId).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    // Estrai il valore della chiave movieId
+                    val rating = dataSnapshot.getValue(Float::class.java)
+                    if (rating != null) {
+                        onSuccess?.invoke(rating)
+                    } else {
+                        onError.invoke("Il valore della chiave $movieId non è un float valido.")
+                    }
+                } else {
+                    // La chiave specificata non esiste
+                    onError.invoke("La chiave $movieId non esiste.")
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Gestisci eventuali errori
+                onError.invoke("Errore: ${databaseError.message}")
+            }
+        })
+    }
+
+    fun checkUserRatingExistance(
+        movieId: Int,
+        onSuccess: (Boolean) -> Unit,
+        onError: (String) -> Unit
+    ){
+        userRatingsRef.child(movieId.toString()).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    onSuccess.invoke(true)
+                } else {
+                    onSuccess.invoke(false)
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                onError.invoke("Errore: ${databaseError.message}")
+            }
+        })
+    }
+
     fun checkSerieExistanceInFollowing(
         serieId: Int,
         callback: (Boolean) -> Unit
@@ -356,7 +404,7 @@ object FirebaseInteraction {
      */
     fun addRatingToUser(
         mediaId: String,
-        rating: Double,
+        rating: Float,
         onSuccess: (() -> Unit)?,
         onError: (String) -> Unit
     ){
@@ -786,7 +834,7 @@ object FirebaseInteraction {
 
     fun updateMovieRatingAverage(
         movieId: String,
-        rating: Double,
+        newRate: Float,
         onSuccess: (() -> Unit)?,
         onError: (String) -> Unit
     ){
@@ -794,28 +842,61 @@ object FirebaseInteraction {
 
         movieRef.addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
-                if(snapshot.exists()){
-                    val currentTotalRatings = snapshot.child("n_ratings").getValue(Int::class.java) ?: 0
-                    val currentAverageRate = snapshot.child("average_rate").getValue(Double::class.java) ?: 0.0
+                val currentTotalRatings = snapshot.child("n_ratings").getValue(Int::class.java) ?: 0
 
-                    val newTotalRatings = currentTotalRatings + 1
-                    val newAverageRate = ((currentAverageRate * currentTotalRatings) + rating) / newTotalRatings
+                val currentAverageRate = snapshot.child("average_rate").getValue(Double::class.java) ?: 0.0
 
-                    val updates = mapOf(
-                        "n_ratings" to newTotalRatings,
-                        "average_rate" to newAverageRate
-                    )
+                checkUserRatingExistance(
+                    movieId.toInt(),
+                    onSuccess = {exists ->
+                        Log.d("exists", "${exists}")
+                        if(exists){
+                            getUserRateOnMovie(
+                                movieId,
+                                onSuccess = {oldRate ->
 
-                    movieRef.updateChildren(updates).addOnCompleteListener { updateTask ->
-                        if (updateTask.isSuccessful) {
-                            onSuccess?.invoke()
+                                    Log.d("old", "${oldRate}")
+                                    val newAverageRate = ((currentAverageRate * currentTotalRatings) - oldRate + newRate) / currentTotalRatings
+
+                                    val updates = mapOf(
+                                        "average_rate" to newAverageRate
+                                    )
+
+                                    movieRef.updateChildren(updates).addOnCompleteListener { updateTask ->
+                                        if (updateTask.isSuccessful) {
+                                            onSuccess?.invoke()
+                                        } else {
+                                            onError(updateTask.exception?.message ?: "Unknown error occurred while updating movie rating")
+                                        }
+                                    }
+
+                                },
+                                onError = {message ->
+                                    Log.d("UpdateRating", message)
+                                }
+                            )
                         } else {
-                            onError(updateTask.exception?.message ?: "Unknown error occurred while updating movie rating")
+                            val newTotalRatings = currentTotalRatings + 1
+                            val newAverageRate = ((currentAverageRate * currentTotalRatings) + newRate) / newTotalRatings
+
+                            val updates = mapOf(
+                                "n_ratings" to newTotalRatings,
+                                "average_rate" to newAverageRate
+                            )
+
+                            movieRef.updateChildren(updates).addOnCompleteListener { updateTask ->
+                                if (updateTask.isSuccessful) {
+                                    onSuccess?.invoke()
+                                } else {
+                                    onError(updateTask.exception?.message ?: "Unknown error occurred while updating movie rating")
+                                }
+                            }
                         }
+                    },
+                    onError = {message ->
+                        Log.d("UpdateRating", message)
                     }
-                } else {
-                    onError("Movie not found")
-                }
+                )
             }
 
             override fun onCancelled(error: DatabaseError) {
