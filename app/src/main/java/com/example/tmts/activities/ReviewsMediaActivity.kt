@@ -12,23 +12,26 @@ import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.adapters.ReviewAdapter
+import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.MovieDetails
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class ReviewsMovieActivity : AppCompatActivity() {
-    private lateinit var tvMovieName: TextView
+class ReviewsMediaActivity : AppCompatActivity() {
+    private lateinit var tvMediaName: TextView
     private lateinit var btnAddComment: FloatingActionButton
     private lateinit var btnArrowBack: Button
     private lateinit var rvReview: RecyclerView
     private lateinit var reviewsAdapter: ReviewAdapter
+    private lateinit var mediaType: String
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_movie_reviews)
+        setContentView(R.layout.activity_media_reviews)
 
         val intent = intent
-        val movieId = intent.getIntExtra("movieId", -1)
+        val mediaId = intent.getIntExtra("mediaId", -1)
+        mediaType = intent.getStringExtra("mediaType") ?: "movie"
 
-        tvMovieName = findViewById(R.id.tv_comment_activity_movie_title)
+        tvMediaName = findViewById(R.id.tv_comment_activity_media_title)
         btnAddComment = findViewById(R.id.fab_add_comment)
         btnArrowBack = findViewById(R.id.iv_arrow_back_comment_activity)
         rvReview = findViewById(R.id.rv_reviews)
@@ -37,22 +40,24 @@ class ReviewsMovieActivity : AppCompatActivity() {
         rvReview.layoutManager = LinearLayoutManager(this)
         rvReview.adapter = reviewsAdapter
 
-        MediaRepository.getMovieDetails(
-            movieId,
+        MediaRepository.getMediaDetails(
+            mediaId,
+            mediaType,
             onSuccess = ::updateUI,
             onError = ::onError
         )
     }
 
-    private fun updateUI(movie: MovieDetails){
-        tvMovieName.text = movie.title
+    private fun updateUI(media: MediaDetails){
+        tvMediaName.text = media.title
 
         btnArrowBack.setOnClickListener{
             onBackPressed()
         }
 
-        FirebaseInteraction.getReviewsForMovie(
-            movie.id.toString(),
+        FirebaseInteraction.getReviewsForMedia(
+            media.id.toString(),
+            mediaType,
             onSuccess = { reviews ->
                 reviewsAdapter.updateMedia(reviews)
             },
@@ -63,7 +68,8 @@ class ReviewsMovieActivity : AppCompatActivity() {
 
         btnAddComment.setOnClickListener{
             val intent = Intent(this, CreateReviewActivity::class.java)
-            intent.putExtra("movieId", movie.id)
+            intent.putExtra("movieId", media.id)
+            intent.putExtra("mediaType", if (media is MovieDetails) "movie" else "series")
             startActivity(intent)
         }
     }

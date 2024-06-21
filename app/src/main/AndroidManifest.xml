@@ -18,7 +18,7 @@
             android:name=".activities.CreateReviewActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.ReviewsMovieActivity"
+            android:name=".activities.ReviewsMediaActivity"
             android:exported="false" />
         <activity
             android:name=".activities.EpisodeDetailsActivity"

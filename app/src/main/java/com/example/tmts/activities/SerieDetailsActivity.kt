@@ -44,6 +44,7 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var llSeasons: LinearLayout
     private lateinit var rvNetwork: RecyclerView
     private lateinit var networkAdapter: NetworkAdapter
+    private lateinit var llComments: LinearLayout
     private var serieId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,6 +68,7 @@ class SerieDetailsActivity : AppCompatActivity() {
         networkAdapter = NetworkAdapter(this, emptyList())
         rvNetwork = findViewById(R.id.rv_serie_networks)
         llSeasons = findViewById(R.id.ll_seasons)
+        llComments = findViewById(R.id.ll_comments)
 
         rvNetwork.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvNetwork.adapter = networkAdapter
@@ -143,6 +145,13 @@ class SerieDetailsActivity : AppCompatActivity() {
             intent.putExtra("serieId", serieId)
             intent.putExtra("serieTitle", serie.title)
             this.startActivity(intent)
+        }
+
+        llComments.setOnClickListener{
+            val intent = Intent(this, ReviewsMediaActivity::class.java)
+            intent.putExtra("mediaId", serie.id)
+            intent.putExtra("mediaType", "serie")
+            startActivity(intent)
         }
 
         // follow/unfollow

@@ -13,6 +13,7 @@
         tools:context=".activities.MovieDetaisActivity"
         android:paddingBottom="10dp">
 
+        <!-- Background Image -->
         <ImageView
             android:id="@+id/iv_movie_details_backdrop"
             android:layout_width="0dp"
@@ -23,6 +24,37 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintDimensionRatio="16:9"/>
 
+        <!-- LinearLayout for rating and star icon -->
+        <LinearLayout
+            android:id="@+id/ll_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="averageRate"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:visibility="invisible"/>
+
+            <ImageView
+                android:id="@+id/iv_filled_star"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/filledstar"
+                android:layout_marginStart="4dp"
+                android:visibility="invisible"/>
+        </LinearLayout>
+
+        <!-- Back Button -->
         <Button
             android:id="@+id/iv_arrow_back_movie_details"
             android:layout_width="30dp"
@@ -33,7 +65,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- LinearLayout wrapping title, date info, and genres info -->
+        <!-- Title, Date, Genres -->
         <LinearLayout
             android:id="@+id/ll_title_date_genres"
             android:layout_width="wrap_content"
@@ -96,6 +128,7 @@
             </HorizontalScrollView>
         </LinearLayout>
 
+        <!-- Action Buttons -->
         <LinearLayout
             android:id="@+id/ll_action_bar"
             android:layout_width="match_parent"
@@ -104,6 +137,7 @@
             app:layout_constraintTop_toBottomOf="@id/ll_title_date_genres"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/ll_overview"
             android:gravity="center_horizontal"
             android:layout_margin="10dp">
 
@@ -149,8 +183,7 @@
 
         </LinearLayout>
 
-
-
+        <!-- Overview -->
         <LinearLayout
             android:id="@+id/ll_overview"
             android:layout_width="match_parent"
@@ -171,6 +204,7 @@
 
         </LinearLayout>
 
+        <!-- Info Box -->
         <LinearLayout
             android:id="@+id/ll_info_box"
             android:layout_width="match_parent"
@@ -253,6 +287,7 @@
 
         </LinearLayout>
 
+        <!-- Comments Section -->
         <LinearLayout
             android:id="@+id/ll_comments"
             android:layout_width="match_parent"
@@ -291,6 +326,7 @@
                 android:src="@drawable/arrow_front" />
         </LinearLayout>
 
+        <!-- Users Who Follow Section -->
         <LinearLayout
             android:id="@+id/ll_users_who_follow"
             android:layout_width="match_parent"

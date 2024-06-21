@@ -33,6 +33,8 @@ class MovieDetaisActivity : AppCompatActivity() {
     private lateinit var llComments: LinearLayout
     private lateinit var btnRate: Button
     private lateinit var btnAddToWatchlist: Button
+    private lateinit var tvAverageRate: TextView
+    private lateinit var ivFilledStar: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +57,8 @@ class MovieDetaisActivity : AppCompatActivity() {
         llComments = findViewById(R.id.ll_comments)
         btnRate = findViewById(R.id.btn_rate)
         btnAddToWatchlist = findViewById(R.id.btn_watchlist)
+        tvAverageRate = findViewById(R.id.tv_rating)
+        ivFilledStar = findViewById(R.id.iv_filled_star)
 
         MediaRepository.getMovieDetails(
             movieId,
@@ -116,6 +120,20 @@ class MovieDetaisActivity : AppCompatActivity() {
         // origin language
         originalLanguage.text = movie.original_language
 
+        // average rate
+        FirebaseInteraction.getAverageRateForMovie(
+            movie.id,
+            onSuccess = {averageRate ->
+                if(averageRate != 0.0F){
+                    val formattedRate = String.format("%.1f", averageRate)
+                    tvAverageRate.text = "$formattedRate/5"
+                    tvAverageRate.visibility = View.VISIBLE
+                    ivFilledStar.visibility = View.VISIBLE
+                }
+            },
+            onError = ::onError
+        )
+
         // plus button
         //val btnFollowUnfollow: Button = findViewById(R.id.btn_follow_unfollow)
         //val followingMoviesRef = mDbRef.child("users").child(currentUser!!.uid).child("following_movies")
@@ -139,8 +157,9 @@ class MovieDetaisActivity : AppCompatActivity() {
         }
 
         llComments.setOnClickListener{
-            val intent = Intent(this, ReviewsMovieActivity::class.java)
-            intent.putExtra("movieId", movie.id)
+            val intent = Intent(this, ReviewsMediaActivity::class.java)
+            intent.putExtra("mediaId", movie.id)
+            intent.putExtra("mediaType", "movie")
             startActivity(intent)
         }
 
@@ -210,6 +229,7 @@ class MovieDetaisActivity : AppCompatActivity() {
                                 if (rating == 0.0f) {
                                     dialog.dismiss()
                                 } else {
+                                    btnRate.setBackgroundResource(R.drawable.outlined_filled_star)
                                     // Aggiorna la media delle valutazioni del film
                                     FirebaseInteraction.updateMovieRatingAverage(
                                         movie.id.toString(),
@@ -262,7 +282,7 @@ class MovieDetaisActivity : AppCompatActivity() {
             movieId,
             onSuccess = {exists ->
                 if(exists){
-                    btnRate.setBackgroundResource(R.drawable.filledstar)
+                    btnRate.setBackgroundResource(R.drawable.outlined_filled_star)
                 } else {
                     btnRate.setBackgroundResource(R.drawable.star)
                 }

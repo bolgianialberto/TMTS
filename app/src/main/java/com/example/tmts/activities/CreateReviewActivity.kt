@@ -22,6 +22,7 @@ class CreateReviewActivity : AppCompatActivity() {
     private lateinit var btnAddPhoto: FloatingActionButton
     private lateinit var ivReviewPhoto: ImageView
     private var selectedImageUri: Uri? = null
+    private lateinit var mediaType: String
 
     companion object {
         private const val REQUEST_PICK_IMAGE = 100
@@ -32,6 +33,7 @@ class CreateReviewActivity : AppCompatActivity() {
         setContentView(R.layout.activity_create_review)
 
         val movieId = intent.getIntExtra("movieId", -1)
+        mediaType = intent.getStringExtra("mediaType") ?: "movie"
 
         btnClose = findViewById(R.id.btn_close)
         btnPost = findViewById(R.id.btn_post)
@@ -39,10 +41,11 @@ class CreateReviewActivity : AppCompatActivity() {
         btnAddPhoto = findViewById(R.id.fab_add_photo)
         ivReviewPhoto = findViewById(R.id.iv_photo_review)
 
-        MediaRepository.getMovieDetails(
+        MediaRepository.getMediaDetails(
             movieId,
-            onSuccess = { movie ->
-                etReview.hint = "Write your review about ${movie.title}"
+            mediaType,
+            onSuccess = { media ->
+                etReview.hint = "Write your review about ${media.title}"
             },
             onError = {
                 Log.e("CreateReviewActivity", "Failed to fetch movie details")
@@ -58,8 +61,9 @@ class CreateReviewActivity : AppCompatActivity() {
             if (review.isEmpty()) {
                 Toast.makeText(this, "Please write a review before posting.", Toast.LENGTH_SHORT).show()
             } else {
-                FirebaseInteraction.addReviewToMovie(
+                FirebaseInteraction.addReviewToMedia(
                     movieId.toString(),
+                    mediaType,
                     review,
                     selectedImageUri,
                     onSuccess = {

@@ -68,14 +68,19 @@ object FirebaseInteraction {
         }
     }
 
-    fun getReviewsForMovie(
-        movieId: String,
+    fun getReviewsForMedia(
+        mediaId: String,
+        mediaType: String,
         onSuccess: (List<Review>) -> Unit,
         onError: (String) -> Unit
     ) {
-        val movieReviewsRef = moviesRef.child(movieId).child("reviews")
+        val mediaReviewsRef = if (mediaType == "movie") {
+            moviesRef.child(mediaId).child("reviews")
+        } else {
+            seriesRef.child(mediaId).child("reviews")
+        }
 
-        movieReviewsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        mediaReviewsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val reviews = mutableListOf<Review>()
                 val reviewIds = mutableListOf<String>()
@@ -179,6 +184,31 @@ object FirebaseInteraction {
                 Log.e("Firebase", "Errore nel recupero dei dati: ${error.message}")
                 // Chiamata della callback con lista vuota in caso di errore
                 callback(emptyList())
+            }
+        })
+    }
+
+    fun getAverageRateForMovie(
+        movieId: Int,
+        onSuccess: (Float) -> Unit,
+        onError: (String) -> Unit
+    ){
+        moviesRef.child(movieId.toString()).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    val averageRate = dataSnapshot.child("average_rate").getValue(Double::class.java)
+                    if (averageRate != null) {
+                        onSuccess.invoke(averageRate.toFloat()) // Converti in float e ritorna il valore
+                    } else {
+                        onSuccess.invoke(0.0F) // Ritorna 0.0 se average_rate è null
+                    }
+                } else {
+                    onSuccess.invoke(0.0F) // Ritorna 0.0 se il film non esiste nel database
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                onError.invoke("Errore: ${databaseError.message}")
             }
         })
     }
@@ -424,14 +454,19 @@ object FirebaseInteraction {
     - shows/movies/movieId
     - users/userId/reviews
      */
-    fun addReviewToMovie(
-        movieId: String,
+    fun addReviewToMedia(
+        mediaId: String,
+        mediaType: String,
         comment: String,
         uri: Uri?,
         onSuccess: (() -> Unit)? = null,
         onFailure: ((Exception) -> Unit)? = null
     ) {
-        val movieReviewsRef = moviesRef.child(movieId).child("reviews")
+        val mediaReviewsRef = if (mediaType == "movie") {
+            moviesRef.child(mediaId).child("reviews")
+        } else {
+            seriesRef.child(mediaId).child("reviews")
+        }
         val userReviewsRef = userRef.child("reviews")
 
         // Genera un ID unico per la nuova recensione
@@ -450,7 +485,7 @@ object FirebaseInteraction {
                         val review = Review(
                             id = reviewId,
                             idUser = user.uid,
-                            idShow = movieId,
+                            idShow = mediaId,
                             comment = comment,
                             date = currentDate,
                             imageUrl = imageUrl.toString()
@@ -459,8 +494,8 @@ object FirebaseInteraction {
                         // Salva la recensione nel nodo "reviews"
                         newReviewRef.setValue(review).addOnCompleteListener { task ->
                             if (task.isSuccessful) {
-                                // Aggiungi l'ID della recensione alla lista delle recensioni del film
-                                movieReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
+                                // Aggiungi l'ID della recensione alla lista delle recensioni del media
+                                mediaReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
                                     if (task2.isSuccessful) {
                                         // Aggiungi l'ID della recensione alla lista delle recensioni dell'utente
                                         userReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task3 ->
@@ -471,7 +506,7 @@ object FirebaseInteraction {
                                             }
                                         }
                                     } else {
-                                        onFailure?.invoke(task2.exception ?: Exception("Failed to add review ID to movie's reviews list"))
+                                        onFailure?.invoke(task2.exception ?: Exception("Failed to add review ID to media's reviews list"))
                                     }
                                 }
                             } else {
@@ -488,7 +523,7 @@ object FirebaseInteraction {
                 val review = Review(
                     id = reviewId,
                     idUser = user.uid,
-                    idShow = movieId,
+                    idShow = mediaId,
                     comment = comment,
                     date = currentDate
                 )
@@ -496,8 +531,8 @@ object FirebaseInteraction {
                 // Salva la recensione nel nodo "reviews"
                 newReviewRef.setValue(review).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        // Aggiungi l'ID della recensione alla lista delle recensioni del film
-                        movieReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
+                        // Aggiungi l'ID della recensione alla lista delle recensioni del media
+                        mediaReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
                             if (task2.isSuccessful) {
                                 // Aggiungi l'ID della recensione alla lista delle recensioni dell'utente
                                 userReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task3 ->
@@ -508,7 +543,7 @@ object FirebaseInteraction {
                                     }
                                 }
                             } else {
-                                onFailure?.invoke(task2.exception ?: Exception("Failed to add review ID to movie's reviews list"))
+                                onFailure?.invoke(task2.exception ?: Exception("Failed to add review ID to media's reviews list"))
                             }
                         }
                     } else {
@@ -520,8 +555,6 @@ object FirebaseInteraction {
             onFailure?.invoke(Exception("Failed to generate review ID"))
         }
     }
-
-
 
     fun addFollowerToSeries(seriesId: Int, onSuccess: (() -> Unit)? = null) {
         val seriesRef = seriesRef.child(seriesId.toString())
