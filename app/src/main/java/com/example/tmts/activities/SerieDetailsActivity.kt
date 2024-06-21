@@ -7,7 +7,10 @@ import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RatingBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -45,6 +48,7 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var rvNetwork: RecyclerView
     private lateinit var networkAdapter: NetworkAdapter
     private lateinit var llComments: LinearLayout
+    private lateinit var btnRate: Button
     private var serieId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +73,7 @@ class SerieDetailsActivity : AppCompatActivity() {
         rvNetwork = findViewById(R.id.rv_serie_networks)
         llSeasons = findViewById(R.id.ll_seasons)
         llComments = findViewById(R.id.ll_comments)
+        btnRate = findViewById(R.id.btn_rate)
 
         rvNetwork.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvNetwork.adapter = networkAdapter
@@ -172,6 +177,110 @@ class SerieDetailsActivity : AppCompatActivity() {
                 }
             }
         }
+
+        btnRate.setOnClickListener {
+            val builder = AlertDialog.Builder(this@SerieDetailsActivity)
+            val inflater = layoutInflater
+            val dialogView = inflater.inflate(R.layout.rate_layout, null)
+            builder.setView(dialogView)
+
+            val ratingBar = dialogView.findViewById<RatingBar>(R.id.ratingBar)
+
+            // Controlla se l'utente ha già votato il film
+            FirebaseInteraction.checkUserRatingExistance(
+                serie.id.toInt(),
+                onSuccess = { exists ->
+                    if (exists) {
+                        // Se l'utente ha già votato, recupera il voto precedente
+                        FirebaseInteraction.getUserRateOnMedia(
+                            serie.id.toString(),
+                            onSuccess = { oldRating ->
+                                // Imposta il RatingBar al voto precedente dell'utente
+                                ratingBar.rating = oldRating
+
+                                builder.setTitle("Rate this serie")
+                                    .setPositiveButton("Ok") { dialog, which ->
+                                        val rating = ratingBar.rating
+                                        if (rating == 0.0f) {
+                                            dialog.dismiss()
+                                        } else {
+                                            // Aggiorna la media delle valutazioni del film
+                                            FirebaseInteraction.updateMediaRatingAverage(
+                                                serie.id.toString(),
+                                                "serie",
+                                                rating,
+                                                onSuccess = {
+                                                    // Aggiungi il voto dell'utente con successo
+                                                    FirebaseInteraction.addRatingToUser(
+                                                        serie.id.toString(),
+                                                        rating,
+                                                        onSuccess = {
+                                                            Toast.makeText(
+                                                                this@SerieDetailsActivity,
+                                                                "Rating selected: $rating",
+                                                                Toast.LENGTH_SHORT
+                                                            ).show()
+                                                        },
+                                                        onError = ::onError
+                                                    )
+                                                },
+                                                onError = ::onError
+                                            )
+                                        }
+                                    }
+                                    .setNegativeButton("Cancel") { dialog, which ->
+                                        dialog.dismiss()
+                                    }
+
+                                val alertDialog = builder.create()
+                                alertDialog.show()
+                            },
+                            onError = ::onError
+                        )
+                    } else {
+                        // L'utente non ha ancora votato, usa il rating di default (0.0)
+                        builder.setTitle("Rate this movie")
+                            .setPositiveButton("Ok") { dialog, which ->
+                                val rating = ratingBar.rating
+                                if (rating == 0.0f) {
+                                    dialog.dismiss()
+                                } else {
+                                    btnRate.setBackgroundResource(R.drawable.outlined_filled_star)
+                                    // Aggiorna la media delle valutazioni del film
+                                    FirebaseInteraction.updateMediaRatingAverage(
+                                        serie.id.toString(),
+                                        "serie",
+                                        rating,
+                                        onSuccess = {
+                                            // Aggiungi il voto dell'utente con successo
+                                            FirebaseInteraction.addRatingToUser(
+                                                serie.id.toString(),
+                                                rating,
+                                                onSuccess = {
+                                                    Toast.makeText(
+                                                        this@SerieDetailsActivity,
+                                                        "Rating selected: $rating",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                },
+                                                onError = ::onError
+                                            )
+                                        },
+                                        onError = ::onError
+                                    )
+                                }
+                            }
+                            .setNegativeButton("Cancel") { dialog, which ->
+                                dialog.dismiss()
+                            }
+
+                        val alertDialog = builder.create()
+                        alertDialog.show()
+                    }
+                },
+                onError = ::onError
+            )
+        }
     }
 
     private fun setInitialButtonState(serieId: Int) {
@@ -183,5 +292,9 @@ class SerieDetailsActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    fun onError(message: String){
+        Log.d("MovieDetailsActivity", message)
     }
 }

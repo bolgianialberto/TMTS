@@ -213,12 +213,12 @@ object FirebaseInteraction {
         })
     }
 
-    fun getUserRateOnMovie(
-        movieId: String,
+    fun getUserRateOnMedia(
+        mediaId: String,
         onSuccess: ((Float) -> Unit)?,
         onError: (String) -> Unit
     ){
-        userRatingsRef.child(movieId).addListenerForSingleValueEvent(object : ValueEventListener {
+        userRatingsRef.child(mediaId).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     // Estrai il valore della chiave movieId
@@ -226,11 +226,11 @@ object FirebaseInteraction {
                     if (rating != null) {
                         onSuccess?.invoke(rating)
                     } else {
-                        onError.invoke("Il valore della chiave $movieId non è un float valido.")
+                        onError.invoke("Il valore della chiave $mediaId non è un float valido.")
                     }
                 } else {
                     // La chiave specificata non esiste
-                    onError.invoke("La chiave $movieId non esiste.")
+                    onError.invoke("La chiave $mediaId non esiste.")
                 }
             }
 
@@ -242,11 +242,11 @@ object FirebaseInteraction {
     }
 
     fun checkUserRatingExistance(
-        movieId: Int,
+        mediaId: Int,
         onSuccess: (Boolean) -> Unit,
         onError: (String) -> Unit
     ){
-        userRatingsRef.child(movieId.toString()).addListenerForSingleValueEvent(object : ValueEventListener {
+        userRatingsRef.child(mediaId.toString()).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     onSuccess.invoke(true)
@@ -865,27 +865,32 @@ object FirebaseInteraction {
         }
     }
 
-    fun updateMovieRatingAverage(
-        movieId: String,
+    fun updateMediaRatingAverage(
+        mediaId: String,
+        mediaType: String,
         newRate: Float,
         onSuccess: (() -> Unit)?,
         onError: (String) -> Unit
     ){
-        val movieRef = moviesRef.child(movieId)
+        val mediaRef = if(mediaType.equals("movie")){
+            moviesRef.child(mediaId)
+        } else {
+            seriesRef.child(mediaId)
+        }
 
-        movieRef.addListenerForSingleValueEvent(object: ValueEventListener{
+        mediaRef.addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 val currentTotalRatings = snapshot.child("n_ratings").getValue(Int::class.java) ?: 0
 
                 val currentAverageRate = snapshot.child("average_rate").getValue(Double::class.java) ?: 0.0
 
                 checkUserRatingExistance(
-                    movieId.toInt(),
+                    mediaId.toInt(),
                     onSuccess = {exists ->
                         Log.d("exists", "${exists}")
                         if(exists){
-                            getUserRateOnMovie(
-                                movieId,
+                            getUserRateOnMedia(
+                                mediaId,
                                 onSuccess = {oldRate ->
 
                                     Log.d("old", "${oldRate}")
@@ -895,7 +900,7 @@ object FirebaseInteraction {
                                         "average_rate" to newAverageRate
                                     )
 
-                                    movieRef.updateChildren(updates).addOnCompleteListener { updateTask ->
+                                    mediaRef.updateChildren(updates).addOnCompleteListener { updateTask ->
                                         if (updateTask.isSuccessful) {
                                             onSuccess?.invoke()
                                         } else {
@@ -917,7 +922,7 @@ object FirebaseInteraction {
                                 "average_rate" to newAverageRate
                             )
 
-                            movieRef.updateChildren(updates).addOnCompleteListener { updateTask ->
+                            mediaRef.updateChildren(updates).addOnCompleteListener { updateTask ->
                                 if (updateTask.isSuccessful) {
                                     onSuccess?.invoke()
                                 } else {

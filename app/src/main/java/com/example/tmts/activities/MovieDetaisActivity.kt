@@ -177,7 +177,7 @@ class MovieDetaisActivity : AppCompatActivity() {
                 onSuccess = { exists ->
                     if (exists) {
                         // Se l'utente ha già votato, recupera il voto precedente
-                        FirebaseInteraction.getUserRateOnMovie(
+                        FirebaseInteraction.getUserRateOnMedia(
                             movie.id.toString(),
                             onSuccess = { oldRating ->
                                 // Imposta il RatingBar al voto precedente dell'utente
@@ -190,8 +190,9 @@ class MovieDetaisActivity : AppCompatActivity() {
                                             dialog.dismiss()
                                         } else {
                                             // Aggiorna la media delle valutazioni del film
-                                            FirebaseInteraction.updateMovieRatingAverage(
+                                            FirebaseInteraction.updateMediaRatingAverage(
                                                 movie.id.toString(),
+                                                "movie",
                                                 rating,
                                                 onSuccess = {
                                                     // Aggiungi il voto dell'utente con successo
@@ -231,8 +232,9 @@ class MovieDetaisActivity : AppCompatActivity() {
                                 } else {
                                     btnRate.setBackgroundResource(R.drawable.outlined_filled_star)
                                     // Aggiorna la media delle valutazioni del film
-                                    FirebaseInteraction.updateMovieRatingAverage(
+                                    FirebaseInteraction.updateMediaRatingAverage(
                                         movie.id.toString(),
+                                        "movie",
                                         rating,
                                         onSuccess = {
                                             // Aggiungi il voto dell'utente con successo
