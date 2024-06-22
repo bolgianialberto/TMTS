@@ -17,6 +17,7 @@ import com.example.tmts.activities.SearchActivity
 import com.example.tmts.activities.MovieDetaisActivity
 import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.adapters.MediaAdapter
+import com.example.tmts.beans.MediaDetails
 
 class SearchFragment : Fragment() {
     private lateinit var popularMovieAdapter: MediaAdapter

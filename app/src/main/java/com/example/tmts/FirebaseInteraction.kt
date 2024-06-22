@@ -5,7 +5,13 @@ import android.net.Uri
 import android.util.Log
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import com.example.tmts.beans.Media
+import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.Review
+import com.example.tmts.beans.Watchlist
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.TaskCompletionSource
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -33,6 +39,63 @@ object FirebaseInteraction {
     val reviewsRef = mDbRef.child("reviews")
     val reviewImagesRef = FirebaseStorage.getInstance().reference
     val userRatingsRef = userRef.child("ratings")
+    val watchlistRef = userRef.child("watchlists")
+
+    fun fetchWatchlistsWithDetails(onSuccess: (List<Watchlist>) -> Unit, onError: (String) -> Unit) {
+        watchlistRef.get().addOnSuccessListener { snapshot ->
+            val watchlistTasks = snapshot.children.mapNotNull { watchlistSnapshot ->
+                val name = watchlistSnapshot.key ?: return@mapNotNull null
+                val movieIds = watchlistSnapshot.child("movies").children.mapNotNull { it.key?.toIntOrNull() }
+                val seriesIds = watchlistSnapshot.child("series").children.mapNotNull { it.key?.toIntOrNull() }
+
+                fetchMediaDetailsForWatchlist(name, movieIds, seriesIds)
+            }
+
+            Tasks.whenAllSuccess<Watchlist>(watchlistTasks)
+                .addOnSuccessListener { watchlists ->
+                    onSuccess(watchlists)
+                }
+                .addOnFailureListener { exception ->
+                    onError(exception.message ?: "Error fetching watchlists")
+                }
+        }.addOnFailureListener { exception ->
+            onError(exception.message ?: "Error fetching watchlists")
+        }
+    }
+
+    private fun fetchMediaDetailsForWatchlist(name: String, movieIds: List<Int>, seriesIds: List<Int>): Task<Watchlist> {
+        val movieDetailsTasks = movieIds.map { mediaId ->
+            fetchMediaDetails(mediaId, "movie")
+        }
+
+        val seriesDetailsTasks = seriesIds.map { mediaId ->
+            fetchMediaDetails(mediaId, "serie")
+        }
+
+        return Tasks.whenAllSuccess<Media>(movieDetailsTasks + seriesDetailsTasks).continueWith { task ->
+            val medias = task.result ?: emptyList()
+            Watchlist(name, medias)
+        }
+    }
+
+    private fun fetchMediaDetails(mediaId: Int, mediaType: String): Task<MediaDetails> {
+        val taskCompletionSource = TaskCompletionSource<MediaDetails>()
+        MediaRepository.getMediaDetails(mediaId, mediaType,
+            onSuccess = { mediaDetails ->
+                // Esempio di mappatura esplicita da MovieDetails a Media
+                val media: Media = Media(
+                    id = mediaDetails.id,
+                    title = mediaDetails.title,
+                    original_name = mediaDetails.title,
+                    posterPath = mediaDetails.posterPath
+                )
+                taskCompletionSource.setResult(media)
+            },
+            onError = {
+                taskCompletionSource.setException(Exception("Failed to fetch media details"))
+            })
+        return taskCompletionSource.task
+    }
 
 
     fun getUsername(userId: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
@@ -188,12 +251,19 @@ object FirebaseInteraction {
         })
     }
 
-    fun getAverageRateForMovie(
-        movieId: Int,
+    fun getAverageRateForMedia(
+        mediaId: Int,
+        mediaType: String,
         onSuccess: (Float) -> Unit,
         onError: (String) -> Unit
     ){
-        moviesRef.child(movieId.toString()).addListenerForSingleValueEvent(object : ValueEventListener {
+        val mediaRef = if(mediaType.equals("movie")){
+            moviesRef
+        } else {
+            seriesRef
+        }
+
+        mediaRef.child(mediaId.toString()).addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val averageRate = dataSnapshot.child("average_rate").getValue(Double::class.java)
@@ -426,6 +496,30 @@ object FirebaseInteraction {
     private fun getCurrentDateTime(): String {
         val sdf = SimpleDateFormat("d MMM yyyy", Locale.getDefault())
         return sdf.format(Date())
+    }
+
+    fun addMediaToWatchlist(
+        mediaId: Int,
+        watchlistName: String,
+        mediaType: String,
+        onSuccess: (() -> Unit)?,
+        onError: (String) -> Unit
+    ) {
+        val watchlistNameRef = watchlistRef.child(watchlistName)
+        val mediaField = if (mediaType == "movie") "movies" else "series"
+
+        val mediaRef = watchlistNameRef
+            .child(mediaField)
+            .child(mediaId.toString())
+
+        mediaRef.setValue(true)
+            .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                onSuccess?.invoke()
+            } else {
+                onError.invoke("Media not added to watchlist")
+            }
+        }
     }
 
     /*

@@ -49,6 +49,8 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var networkAdapter: NetworkAdapter
     private lateinit var llComments: LinearLayout
     private lateinit var btnRate: Button
+    private lateinit var tvAverageRate: TextView
+    private lateinit var ivFilledStar: ImageView
     private var serieId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,6 +76,8 @@ class SerieDetailsActivity : AppCompatActivity() {
         llSeasons = findViewById(R.id.ll_seasons)
         llComments = findViewById(R.id.ll_comments)
         btnRate = findViewById(R.id.btn_rate)
+        tvAverageRate = findViewById(R.id.tv_rating)
+        ivFilledStar = findViewById(R.id.iv_filled_star)
 
         rvNetwork.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvNetwork.adapter = networkAdapter
@@ -94,6 +98,7 @@ class SerieDetailsActivity : AppCompatActivity() {
         }
 
         setInitialButtonState(serieId)
+        setInitialRateState(serieId)
     }
     private fun onError(){
         Log.e("SerieDetailsActivity", "Something went wrong")
@@ -137,6 +142,21 @@ class SerieDetailsActivity : AppCompatActivity() {
 
         // origin language
         originalLanguage.text = serie.original_language
+
+        // average rate
+        FirebaseInteraction.getAverageRateForMedia(
+            serie.id,
+            "serie",
+            onSuccess = {averageRate ->
+                if(averageRate != 0.0F){
+                    val formattedRate = String.format("%.1f", averageRate)
+                    tvAverageRate.text = "$formattedRate/5"
+                    tvAverageRate.visibility = View.VISIBLE
+                    ivFilledStar.visibility = View.VISIBLE
+                }
+            },
+            onError = ::onError
+        )
 
         // plus button
         val serieIdToCheck: String = (serie.id).toString()
@@ -215,6 +235,7 @@ class SerieDetailsActivity : AppCompatActivity() {
                                                         serie.id.toString(),
                                                         rating,
                                                         onSuccess = {
+                                                            updateUI(serie)
                                                             Toast.makeText(
                                                                 this@SerieDetailsActivity,
                                                                 "Rating selected: $rating",
@@ -239,7 +260,7 @@ class SerieDetailsActivity : AppCompatActivity() {
                         )
                     } else {
                         // L'utente non ha ancora votato, usa il rating di default (0.0)
-                        builder.setTitle("Rate this movie")
+                        builder.setTitle("Rate this serie")
                             .setPositiveButton("Ok") { dialog, which ->
                                 val rating = ratingBar.rating
                                 if (rating == 0.0f) {
@@ -257,6 +278,7 @@ class SerieDetailsActivity : AppCompatActivity() {
                                                 serie.id.toString(),
                                                 rating,
                                                 onSuccess = {
+                                                    updateUI(serie)
                                                     Toast.makeText(
                                                         this@SerieDetailsActivity,
                                                         "Rating selected: $rating",
@@ -292,6 +314,20 @@ class SerieDetailsActivity : AppCompatActivity() {
             }
 
         }
+    }
+
+    private fun setInitialRateState(mediaId: Int){
+        FirebaseInteraction.checkUserRatingExistance(
+            mediaId,
+            onSuccess = {exists ->
+                if(exists){
+                    btnRate.setBackgroundResource(R.drawable.outlined_filled_star)
+                } else {
+                    btnRate.setBackgroundResource(R.drawable.star)
+                }
+            },
+            onError = ::onError
+        )
     }
 
     fun onError(message: String){

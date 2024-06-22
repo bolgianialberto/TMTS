@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.R
 import com.example.tmts.beans.Media
+import com.example.tmts.beans.MediaDetails
 
 class MediaAdapter(
     private val context: Context,

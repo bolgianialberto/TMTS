@@ -7,7 +7,7 @@ data class MovieDetails(
     @SerializedName("id") override val id: Int,
     @SerializedName("original_title") override val title: String,
     @SerializedName("backdrop_path") val backdropPath: String?,
-    @SerializedName("poster_path") val posterPath: String?,
+    @SerializedName("poster_path") override val posterPath: String?,
     @SerializedName("genres") val genres: List<Genre>,
     @SerializedName("overview") val overview: String,
     @SerializedName("release_date") val releaseDate: String,

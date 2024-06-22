@@ -12,11 +12,16 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
+import com.example.tmts.adapters.AddToWatchlistAdapter
+import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.MovieDetails
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class MovieDetaisActivity : AppCompatActivity() {
     private lateinit var ivBackSearch: Button
@@ -121,8 +126,9 @@ class MovieDetaisActivity : AppCompatActivity() {
         originalLanguage.text = movie.original_language
 
         // average rate
-        FirebaseInteraction.getAverageRateForMovie(
+        FirebaseInteraction.getAverageRateForMedia(
             movie.id,
+            "movie",
             onSuccess = {averageRate ->
                 if(averageRate != 0.0F){
                     val formattedRate = String.format("%.1f", averageRate)
@@ -134,26 +140,8 @@ class MovieDetaisActivity : AppCompatActivity() {
             onError = ::onError
         )
 
-        // plus button
-        //val btnFollowUnfollow: Button = findViewById(R.id.btn_follow_unfollow)
-        //val followingMoviesRef = mDbRef.child("users").child(currentUser!!.uid).child("following_movies")
-        val movieIdToCheck: String = (movie.id).toString()
-
         btnFollowUnfollow.setOnClickListener{
-            FirebaseInteraction.checkMovieExistanceInFollowing(movieIdToCheck.toInt()){ exists ->
-                if(exists) {
-                    FirebaseInteraction.removeMovieFromFollowing(movieIdToCheck.toInt()) {
-                        btnFollowUnfollow.setBackgroundResource(R.drawable.add)
-                        FirebaseInteraction.removeFollowerFromMovie(movie.id)
-                    }
-                } else {
-                    FirebaseInteraction.addMovieToFollowing(movieIdToCheck.toInt()) {
-                        btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
-                        FirebaseInteraction.addFollowerToMovie(movie.id)
-                    }
-                }
-
-            }
+            followUnfollowMovie(movie)
         }
 
         llComments.setOnClickListener{
@@ -164,108 +152,188 @@ class MovieDetaisActivity : AppCompatActivity() {
         }
 
         btnRate.setOnClickListener {
-            val builder = AlertDialog.Builder(this@MovieDetaisActivity)
-            val inflater = layoutInflater
-            val dialogView = inflater.inflate(R.layout.rate_layout, null)
-            builder.setView(dialogView)
-
-            val ratingBar = dialogView.findViewById<RatingBar>(R.id.ratingBar)
-
-            // Controlla se l'utente ha già votato il film
-            FirebaseInteraction.checkUserRatingExistance(
-                movie.id.toInt(),
-                onSuccess = { exists ->
-                    if (exists) {
-                        // Se l'utente ha già votato, recupera il voto precedente
-                        FirebaseInteraction.getUserRateOnMedia(
-                            movie.id.toString(),
-                            onSuccess = { oldRating ->
-                                // Imposta il RatingBar al voto precedente dell'utente
-                                ratingBar.rating = oldRating
-
-                                builder.setTitle("Rate this movie")
-                                    .setPositiveButton("Ok") { dialog, which ->
-                                        val rating = ratingBar.rating
-                                        if (rating == 0.0f) {
-                                            dialog.dismiss()
-                                        } else {
-                                            // Aggiorna la media delle valutazioni del film
-                                            FirebaseInteraction.updateMediaRatingAverage(
-                                                movie.id.toString(),
-                                                "movie",
-                                                rating,
-                                                onSuccess = {
-                                                    // Aggiungi il voto dell'utente con successo
-                                                    FirebaseInteraction.addRatingToUser(
-                                                        movie.id.toString(),
-                                                        rating,
-                                                        onSuccess = {
-                                                            Toast.makeText(
-                                                                this@MovieDetaisActivity,
-                                                                "Rating selected: $rating",
-                                                                Toast.LENGTH_SHORT
-                                                            ).show()
-                                                        },
-                                                        onError = ::onError
-                                                    )
-                                                },
-                                                onError = ::onError
-                                            )
-                                        }
-                                    }
-                                    .setNegativeButton("Cancel") { dialog, which ->
-                                        dialog.dismiss()
-                                    }
-
-                                val alertDialog = builder.create()
-                                alertDialog.show()
-                            },
-                            onError = ::onError
-                        )
-                    } else {
-                        // L'utente non ha ancora votato, usa il rating di default (0.0)
-                        builder.setTitle("Rate this movie")
-                            .setPositiveButton("Ok") { dialog, which ->
-                                val rating = ratingBar.rating
-                                if (rating == 0.0f) {
-                                    dialog.dismiss()
-                                } else {
-                                    btnRate.setBackgroundResource(R.drawable.outlined_filled_star)
-                                    // Aggiorna la media delle valutazioni del film
-                                    FirebaseInteraction.updateMediaRatingAverage(
-                                        movie.id.toString(),
-                                        "movie",
-                                        rating,
-                                        onSuccess = {
-                                            // Aggiungi il voto dell'utente con successo
-                                            FirebaseInteraction.addRatingToUser(
-                                                movie.id.toString(),
-                                                rating,
-                                                onSuccess = {
-                                                    Toast.makeText(
-                                                        this@MovieDetaisActivity,
-                                                        "Rating selected: $rating",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                },
-                                                onError = ::onError
-                                            )
-                                        },
-                                        onError = ::onError
-                                    )
-                                }
-                            }
-                            .setNegativeButton("Cancel") { dialog, which ->
-                                dialog.dismiss()
-                            }
-
-                        val alertDialog = builder.create()
-                        alertDialog.show()
-                    }
-                },
-                onError = ::onError
-            )
+            showRatingPopover(movie)
         }
+
+        btnAddToWatchlist.setOnClickListener{
+            showWatchlistPopover(movie)
+        }
+    }
+
+    private fun showWatchlistPopover(movie: MovieDetails){
+        val builder = AlertDialog.Builder(this@MovieDetaisActivity)
+        val inflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.popover_watchlist, null)
+        builder.setView(dialogView)
+
+        val customTitleView = inflater.inflate(R.layout.custom_dialog_title, null)
+        builder.setCustomTitle(customTitleView)
+
+        val recyclerView = dialogView.findViewById<RecyclerView>(R.id.rv_add_to_watchlist)
+        val fabAddWatchlist = dialogView.findViewById<FloatingActionButton>(R.id.fab_add_new_watchlist)
+
+        var adapter: AddToWatchlistAdapter? = null
+
+        fabAddWatchlist.setOnClickListener{
+            showAddWatchlistDialog()
+        }
+
+        val alertDialog = builder.create()
+        alertDialog.show()
+
+        FirebaseInteraction.fetchWatchlistsWithDetails(
+            onSuccess = { watchlists ->
+                adapter = AddToWatchlistAdapter(this@MovieDetaisActivity, watchlists) {watchlist ->
+                    FirebaseInteraction.addMediaToWatchlist(
+                        movie.id,
+                        watchlist.name,
+                        "movie",
+                        onSuccess = {
+                            Toast.makeText(this, "Movie added to ${watchlist.name}", Toast.LENGTH_LONG).show()
+                            alertDialog.dismiss()
+                        },
+                        onError = {
+                            Log.e("FirebaseAddToWatchlist", it)
+                        }
+                    )
+                }
+                recyclerView.layoutManager = LinearLayoutManager(this)
+                recyclerView.adapter = adapter
+            },
+            onError = { errorMessage ->
+                Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        )
+
+        customTitleView.findViewById<ImageView>(R.id.iv_close_dialog)?.setOnClickListener {
+            alertDialog.dismiss()
+        }
+    }
+
+    private fun showAddWatchlistDialog(){
+
+    }
+
+    private fun followUnfollowMovie(movie: MovieDetails){
+        FirebaseInteraction.checkMovieExistanceInFollowing(movie.id){ exists ->
+            if(exists) {
+                FirebaseInteraction.removeMovieFromFollowing(movie.id) {
+                    btnFollowUnfollow.setBackgroundResource(R.drawable.add)
+                    FirebaseInteraction.removeFollowerFromMovie(movie.id)
+                }
+            } else {
+                FirebaseInteraction.addMovieToFollowing(movie.id) {
+                    btnFollowUnfollow.setBackgroundResource(R.drawable.remove)
+                    FirebaseInteraction.addFollowerToMovie(movie.id)
+                }
+            }
+
+        }
+    }
+    private fun showRatingPopover(movie: MovieDetails){
+        val builder = AlertDialog.Builder(this@MovieDetaisActivity)
+        val inflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.rate_layout, null)
+        builder.setView(dialogView)
+
+        val ratingBar = dialogView.findViewById<RatingBar>(R.id.ratingBar)
+
+        // Controlla se l'utente ha già votato il film
+        FirebaseInteraction.checkUserRatingExistance(
+            movie.id.toInt(),
+            onSuccess = { exists ->
+                if (exists) {
+                    // Se l'utente ha già votato, recupera il voto precedente
+                    FirebaseInteraction.getUserRateOnMedia(
+                        movie.id.toString(),
+                        onSuccess = { oldRating ->
+                            // Imposta il RatingBar al voto precedente dell'utente
+                            ratingBar.rating = oldRating
+
+                            builder.setTitle("Rate this movie")
+                                .setPositiveButton("Ok") { dialog, which ->
+                                    val rating = ratingBar.rating
+                                    if (rating == 0.0f) {
+                                        dialog.dismiss()
+                                    } else {
+                                        // Aggiorna la media delle valutazioni del film
+                                        FirebaseInteraction.updateMediaRatingAverage(
+                                            movie.id.toString(),
+                                            "movie",
+                                            rating,
+                                            onSuccess = {
+                                                // Aggiungi il voto dell'utente con successo
+                                                FirebaseInteraction.addRatingToUser(
+                                                    movie.id.toString(),
+                                                    rating,
+                                                    onSuccess = {
+                                                        updateUI(movie)
+                                                        Toast.makeText(
+                                                            this@MovieDetaisActivity,
+                                                            "Rating selected: $rating",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    },
+                                                    onError = ::onError
+                                                )
+                                            },
+                                            onError = ::onError
+                                        )
+                                    }
+                                }
+                                .setNegativeButton("Cancel") { dialog, which ->
+                                    dialog.dismiss()
+                                }
+
+                            val alertDialog = builder.create()
+                            alertDialog.show()
+                        },
+                        onError = ::onError
+                    )
+                } else {
+                    // L'utente non ha ancora votato, usa il rating di default (0.0)
+                    builder.setTitle("Rate this movie")
+                        .setPositiveButton("Ok") { dialog, which ->
+                            val rating = ratingBar.rating
+                            if (rating == 0.0f) {
+                                dialog.dismiss()
+                            } else {
+                                btnRate.setBackgroundResource(R.drawable.outlined_filled_star)
+                                // Aggiorna la media delle valutazioni del film
+                                FirebaseInteraction.updateMediaRatingAverage(
+                                    movie.id.toString(),
+                                    "movie",
+                                    rating,
+                                    onSuccess = {
+                                        // Aggiungi il voto dell'utente con successo
+                                        FirebaseInteraction.addRatingToUser(
+                                            movie.id.toString(),
+                                            rating,
+                                            onSuccess = {
+                                                updateUI(movie)
+                                                Toast.makeText(
+                                                    this@MovieDetaisActivity,
+                                                    "Rating selected: $rating",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            },
+                                            onError = ::onError
+                                        )
+                                    },
+                                    onError = ::onError
+                                )
+                            }
+                        }
+                        .setNegativeButton("Cancel") { dialog, which ->
+                            dialog.dismiss()
+                        }
+
+                    val alertDialog = builder.create()
+                    alertDialog.show()
+                }
+            },
+            onError = ::onError
+        )
     }
 
     private fun setInitialButtonState(movieId: Int) {

@@ -18,7 +18,7 @@ object MediaRepository {
     fun getPopularMovies(
         onSuccess: (movies: List<Media>) -> Unit,
         onError: () -> Unit
-    ){
+    ) {
         val call = tmdbApiClient.getClient().getPopularMovies(tmdbApiClient.getApiKey(), 1)
         call.enqueue(object : Callback<MediaResponse> {
             override fun onResponse(call: Call<MediaResponse>, response: Response<MediaResponse>) {
@@ -28,17 +28,22 @@ object MediaRepository {
                     if (mediaItems != null) {
                         onSuccess.invoke(mediaItems)
                     } else {
+                        Log.e("TMDB_API", "mediaItems è nullo")
                         onError.invoke()
                     }
                 } else {
+                    Log.e("TMDB_API", "Risposta non riuscita: ${response.errorBody()?.string()}")
                     onError.invoke()
                 }
             }
+
             override fun onFailure(call: Call<MediaResponse>, t: Throwable) {
+                Log.e("TMDB_API", "Chiamata fallita: ${t.message}")
                 onError.invoke()
             }
         })
     }
+
 
     fun getPopularSeries(
         onSuccess: (movies: List<Media>) -> Unit,

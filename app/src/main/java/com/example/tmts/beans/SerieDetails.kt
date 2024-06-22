@@ -9,7 +9,7 @@ data class SerieDetails (
     @SerializedName("original_name") override val title: String,
     @SerializedName("original_language") val original_language: String,
     @SerializedName("origin_country") val origin_country: List<String>,
-    @SerializedName("poster_path") val posterPath: String,
+    @SerializedName("poster_path") override val posterPath: String?,
     @SerializedName("backdrop_path") val backdropPath: String,
     @SerializedName("genres") val genres: List<Genre>,
     @SerializedName("overview") val overview: String,

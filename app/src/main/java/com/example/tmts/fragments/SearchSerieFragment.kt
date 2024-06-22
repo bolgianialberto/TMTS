@@ -57,7 +57,7 @@ class SearchSerieFragment : Fragment() {
 
         for (serie in series.results) {
 
-            if (serie.original_name.startsWith(query, ignoreCase = true)) {
+            if (serie.title.startsWith(query, ignoreCase = true)) {
                 serieIds.add(serie.id)
             }
         }
