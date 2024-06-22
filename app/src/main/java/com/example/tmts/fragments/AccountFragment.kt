@@ -11,6 +11,7 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.ExpandableListView
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.PopupMenu
@@ -23,6 +24,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
 import com.example.tmts.activities.MainEmptyActivity
+import com.example.tmts.adapters.ExpandableListAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -43,6 +45,7 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
     private lateinit var ibDropDown: ImageButton
     private lateinit var tvFollowerCount: TextView
     private lateinit var tvFollowingCount: TextView
+    private lateinit var elvList: ExpandableListView
 
     val currentUser = mAuth.currentUser!!
 
@@ -69,6 +72,7 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         ivAccountIcon = view.findViewById(R.id.account_icon)
         tvFollowerCount = view.findViewById(R.id.tv_follower_count)
         tvFollowingCount = view.findViewById(R.id.tv_following_count)
+        elvList = view.findViewById(R.id.expandable_list)
 
         // Fetch user's display name and change the view accordingly
         userIdRef.child("name").addValueEventListener(object: ValueEventListener {
@@ -90,6 +94,17 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
 
         // Load user's follower data from Firebase
         loadUserFollowerData(userIdRef, tvFollowerCount, tvFollowingCount)
+
+        // Setup expandable list view
+        val listTitle = listOf("Watchlist", "Serie TV", "Film Visti")
+        val listDetail = hashMapOf<String, List<String>>(
+            "Watchlist" to listOf("Item 1", "Item 2"),
+            "Serie TV" to listOf("Serie 1", "Serie 2"),  // Sarà popolato dall'adapter
+            "Film Visti" to listOf()
+        )
+
+        val expandableListAdapter = ExpandableListAdapter(requireContext(), listTitle, listDetail)
+        elvList.setAdapter(expandableListAdapter)
 
         // Set view or buttons listeners
         ivAccountIcon.setOnClickListener{
