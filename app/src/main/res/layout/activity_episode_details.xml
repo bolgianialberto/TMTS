@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activities.EpisodeDetailsActivity"
+        android:paddingBottom="10dp">
+
+        <ImageView
+            android:id="@+id/iv_episode_details_backdrop"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/tv_episode_details_episode_title"
+            app:layout_constraintDimensionRatio="16:9"/>
+
+        <Button
+            android:id="@+id/iv_arrow_back_episode_details"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/arrow_back_white"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- LinearLayout wrapping title, date info, and genres info -->
+        <LinearLayout
+            android:id="@+id/ll_title_date_genres"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="@id/iv_episode_details_backdrop"
+            app:layout_constraintStart_toStartOf="@id/iv_episode_details_backdrop">
+
+            <TextView
+                android:id="@+id/tv_episode_details_serie_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="serie title"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"/>
+
+            <TextView
+                android:id="@+id/tv_episode_details_n_episode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="episode number"
+                android:textSize="16sp"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_episode_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weightSum="100"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/iv_episode_details_backdrop"
+            app:layout_constraintBottom_toTopOf="@id/tv_episode_details_overview"
+            android:orientation="horizontal"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="5dp"
+            android:gravity="bottom">
+
+            <TextView
+                android:id="@+id/tv_episode_details_episode_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Episode title"
+                android:textStyle="bold"
+                android:textSize="24dp"
+                android:layout_weight="100"/>
+
+            <Button
+                android:id="@+id/btn_watch_watched"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/check"
+                android:layout_gravity="center" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_episode_details_overview"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:text="overview placeholder"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintTop_toBottomOf="@id/ll_episode_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/ll_info_box"/>
+
+        <LinearLayout
+            android:id="@+id/ll_info_box"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@id/tv_episode_details_overview"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:background="@drawable/rounded_border"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp">
+
+            <LinearLayout
+                android:id="@+id/ll_release_date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="release date:"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_serie_details_release_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="placeholder date"
+                    android:textSize="16sp"
+                    android:layout_marginStart="5dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_origin_country"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="runtime:"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tv_serie_details_origin_country"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:textSize="16sp"
+                    android:text="placeholder runtime"/>
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- LinearLayout for Cast -->
+        <LinearLayout
+            android:id="@+id/ll_cast"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            app:layout_constraintTop_toBottomOf="@id/ll_info_box"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Guest Stars"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="5dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_cast"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                tools:listitem="@layout/cast_item"/>
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

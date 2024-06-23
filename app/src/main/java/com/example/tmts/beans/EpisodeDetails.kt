@@ -11,7 +11,8 @@ data class EpisodeDetails(
     @SerializedName("season_number") val season_number: Int,
     @SerializedName("episode_number") val episode_number: Int,
     @SerializedName("still_path") val posterPath: String,
-    var seriePosterPath: String = "",
+    @SerializedName("guest_stars") val stars: List<CastMember>,
+    var seriePosterPath: String? = "",
     var serieId: Int = 0,
     var serieName: String? = null
 )

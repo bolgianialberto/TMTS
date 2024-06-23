@@ -1,12 +1,14 @@
 package com.example.tmts.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -14,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
+import com.example.tmts.activities.EpisodeDetailsActivity
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.Network
 import com.example.tmts.beans.SeasonDetails
@@ -28,6 +31,7 @@ import com.google.firebase.database.ValueEventListener
 class EpisodeAdapter(
     private val context: Context,
     private val serieId: Int,
+    private val serieName: String?,
     private var mediaItems: List<EpisodeDetails>
 ) : RecyclerView.Adapter<EpisodeAdapter.ViewHolder>() {
 
@@ -55,9 +59,11 @@ class EpisodeAdapter(
         private val tvEpisodeNumber: TextView = itemView.findViewById(R.id.tv_episode_number)
         private val tvEpisodeTitle: TextView = itemView.findViewById(R.id.tv_episode_title)
         private val btnCheck: Button = itemView.findViewById(R.id.btn_episode_check)
+        private val llEpisodeInfo: LinearLayout = itemView.findViewById(R.id.ll_episode_info)
 
         fun bind(mediaItem: EpisodeDetails) {
             mediaItem.serieId = serieId
+            mediaItem.serieName = serieName
 
             Glide.with(context)
                 .load("https://image.tmdb.org/t/p/w500${mediaItem.posterPath}")
@@ -70,15 +76,7 @@ class EpisodeAdapter(
             Log.d("FirebaseCheck", "Binding episode: ${mediaItem.episode_number}")
 
             // se già seguo la serie allora aggiorno il colore del check per gli episodi già visti
-            FirebaseInteraction.checkSerieExistanceInFollowing(
-                serieId,) { exists ->
-                if (exists) {
-                    Log.d("FirebaseCheck", "Serie exists: ${mediaItem.serieId}")
-                    setButtonDrawable(mediaItem, btnCheck, context)
-                } else {
-                    Log.d("FirebaseCheck", "Serie does not exist: ${mediaItem.serieId}")
-                }
-            }
+            setButtonDrawable(mediaItem, btnCheck, context)
 
             // se clicco sul check devo iniziare a seguire la serie se prima non la seguivo
             btnCheck.setOnClickListener {
@@ -108,10 +106,22 @@ class EpisodeAdapter(
                                     // Dopo aver aggiornato, aggiorna il drawable del pulsante
                                     setButtonDrawable(mediaItem, btnCheck, context)
                                 }
+                                FirebaseInteraction.addFollowerToSeries(serieId)
                             }
                         }
                 }
             }
+
+            llEpisodeInfo.setOnClickListener {
+                val intent = Intent(context, EpisodeDetailsActivity::class.java).apply {
+                    putExtra("serieId", serieId)
+                    putExtra("seasonNumber", mediaItem.season_number)
+                    putExtra("episodeNumber", mediaItem.episode_number)
+                    putExtra("serieName", serieName)
+                }
+                context.startActivity(intent)
+            }
+
         }
     }
     private fun setButtonDrawable(mediaItem: EpisodeDetails, btnCheck: Button, context: Context) {

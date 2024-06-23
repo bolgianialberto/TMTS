@@ -50,7 +50,7 @@ class SearchMovieFragment : Fragment() {
         val movieDetailsList = mutableListOf<MovieDetails>()
 
         for (movie in movies.results) {
-            if (movie.title.startsWith(query, ignoreCase = true)) { // Controlla se il titolo del film inizia con la query
+            if (movie.title != null && movie.title.startsWith(query, ignoreCase = true)) { // Controlla se il titolo del film inizia con la query
                 movieIds.add(movie.id)
             }
         }

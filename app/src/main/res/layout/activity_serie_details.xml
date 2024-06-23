@@ -10,7 +10,7 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".activities.SerieDetaisActivity"
+        tools:context=".activities.SerieDetailsActivity"
         android:paddingBottom="10dp">
 
         <ImageView
@@ -21,8 +21,36 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/ll_overview"
             app:layout_constraintDimensionRatio="16:9"/>
+
+        <LinearLayout
+            android:id="@+id/ll_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:layout_marginEnd="10dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tv_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="averageRate"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:visibility="invisible"/>
+
+            <ImageView
+                android:id="@+id/iv_filled_star"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/filledstar"
+                android:layout_marginStart="4dp"
+                android:visibility="invisible"/>
+        </LinearLayout>
 
         <Button
             android:id="@+id/iv_arrow_back_serie_details"
@@ -50,6 +78,7 @@
                 android:layout_height="wrap_content"
                 android:text="placeholder"
                 android:textSize="24sp"
+                android:textStyle="bold"
                 android:textColor="@color/white"/>
 
             <HorizontalScrollView
@@ -93,13 +122,67 @@
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/ll_action_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/ll_title_date_genres"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/ll_overview"
+            android:gravity="center_horizontal"
+            android:layout_margin="10dp">
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btn_follow_unfollow"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/add"
+                android:layout_marginEnd="8dp"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btn_watchlist"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/add_watchlist"
+                android:layout_marginEnd="8dp"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <Button
+                android:id="@+id/btn_rate"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/star"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/ll_overview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/iv_serie_details_backdrop"
+            app:layout_constraintTop_toBottomOf="@id/ll_action_bar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/rv_seasons"
+            app:layout_constraintBottom_toTopOf="@id/ll_seasons"
             android:orientation="horizontal"
             android:padding="10dp">
 
@@ -111,29 +194,6 @@
                 android:textSize="16sp"
                 android:text="overview placeholder"
                 android:paddingEnd="10dp"/>
-
-            <LinearLayout
-                android:id="@+id/ll_follow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="top">
-
-                <Button
-                    android:id="@+id/btn_follow_unfollow"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/add"
-                    android:layout_marginBottom="10dp"
-                    android:layout_gravity="center"/>
-
-                <Button
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:background="@drawable/bookmark"
-                    android:layout_gravity="center"/>
-
-            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout

@@ -10,7 +10,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.R
-import com.example.tmts.activities.MovieDetaisActivity
+import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.beans.MovieDetails
 
 class SearchMovieAdapter(private val context: Context, private var movies: List<MovieDetails>) :
@@ -58,7 +58,7 @@ class SearchMovieAdapter(private val context: Context, private var movies: List<
             textViewGenres.text = genresString
 
             itemView.setOnClickListener {
-                val intent = Intent(context, MovieDetaisActivity::class.java)
+                val intent = Intent(context, MovieDetailsActivity::class.java)
                 intent.putExtra("movieId", movie.id)
                 context.startActivity(intent)
             }

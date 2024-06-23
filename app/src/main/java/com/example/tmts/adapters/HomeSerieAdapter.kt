@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.OnCheckButtonClickListener
 import com.example.tmts.R
+import com.example.tmts.activities.EpisodeDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.MovieDetails
@@ -64,8 +65,11 @@ class HomeSerieAdapter(
             textViewEpisodeName.text = episode.title
 
             llSerieInfo.setOnClickListener {
-                val intent = Intent(context, SerieDetailsActivity::class.java)
+                val intent = Intent(context, EpisodeDetailsActivity::class.java)
                 intent.putExtra("serieId", episode.serieId)
+                intent.putExtra("seasonNumber", episode.season_number)
+                intent.putExtra("episodeNumber", episode.episode_number)
+                intent.putExtra("serieName", episode.serieName)
                 context.startActivity(intent)
             }
 

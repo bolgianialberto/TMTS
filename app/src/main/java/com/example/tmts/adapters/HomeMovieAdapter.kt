@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.OnCheckButtonClickListener
 import com.example.tmts.R
-import com.example.tmts.activities.MovieDetaisActivity
+import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.beans.MovieDetails
 
 class HomeMovieAdapter(
@@ -67,7 +67,7 @@ class HomeMovieAdapter(
             textViewGenres.text = genresString
 
             llMovieInfo.setOnClickListener {
-                val intent = Intent(context, MovieDetaisActivity::class.java)
+                val intent = Intent(context, MovieDetailsActivity::class.java)
                 intent.putExtra("movieId", movie.id)
                 context.startActivity(intent)
             }

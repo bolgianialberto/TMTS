@@ -3,6 +3,7 @@ package com.example.tmts
 import android.util.Log
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.Media
+import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.MediaResponse
 import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SeasonDetails
@@ -17,7 +18,7 @@ object MediaRepository {
     fun getPopularMovies(
         onSuccess: (movies: List<Media>) -> Unit,
         onError: () -> Unit
-    ){
+    ) {
         val call = tmdbApiClient.getClient().getPopularMovies(tmdbApiClient.getApiKey(), 1)
         call.enqueue(object : Callback<MediaResponse> {
             override fun onResponse(call: Call<MediaResponse>, response: Response<MediaResponse>) {
@@ -27,17 +28,22 @@ object MediaRepository {
                     if (mediaItems != null) {
                         onSuccess.invoke(mediaItems)
                     } else {
+                        Log.e("TMDB_API", "mediaItems è nullo")
                         onError.invoke()
                     }
                 } else {
+                    Log.e("TMDB_API", "Risposta non riuscita: ${response.errorBody()?.string()}")
                     onError.invoke()
                 }
             }
+
             override fun onFailure(call: Call<MediaResponse>, t: Throwable) {
+                Log.e("TMDB_API", "Chiamata fallita: ${t.message}")
                 onError.invoke()
             }
         })
     }
+
 
     fun getPopularSeries(
         onSuccess: (movies: List<Media>) -> Unit,
@@ -62,6 +68,18 @@ object MediaRepository {
                 onError.invoke()
             }
         })
+    }
+
+    fun getMediaDetails(
+        mediaId: Int,
+        mediaType: String,
+        onSuccess: (MediaDetails) -> Unit,
+        onError: () -> Unit
+    ) {
+        when (mediaType) {
+            "movie" -> getMovieDetails(mediaId, onSuccess, onError)
+            "serie" -> getSerieDetails(mediaId, onSuccess, onError)
+        }
     }
 
     fun getMovieDetails(

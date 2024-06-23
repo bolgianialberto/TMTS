@@ -9,11 +9,15 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.R
+import com.example.tmts.Utils
 import com.example.tmts.beans.Media
+import com.example.tmts.beans.MediaDetails
 
 class MediaAdapter(
     private val context: Context,
     private var mediaItems: List<Media>,
+    private val imageWidth: Int? = null,
+    private val imageHeight: Int? = null,
     private val onItemClick: (Media) -> Unit
 ) : RecyclerView.Adapter<MediaAdapter.ViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -39,6 +43,13 @@ class MediaAdapter(
         private val imageViewPopular: ImageView = itemView.findViewById(R.id.iv_popular)
 
         fun bind(mediaItem: Media) {
+            if (imageWidth != null && imageHeight != null) {
+                val layoutParams = imageViewPopular.layoutParams
+                layoutParams.width = Utils.dpToPx(context, imageWidth)
+                layoutParams.height = Utils.dpToPx(context, imageHeight)
+                imageViewPopular.layoutParams = layoutParams
+            }
+
             Glide.with(context)
                 .load("https://image.tmdb.org/t/p/w500${mediaItem.posterPath}")
                 .placeholder(R.drawable.movie)
