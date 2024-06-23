@@ -30,7 +30,7 @@
             android:name=".activities.SerieDetailsActivity"
             android:exported="false" />
         <activity
-            android:name=".activities.MovieDetaisActivity"
+            android:name=".activities.MovieDetailsActivity"
             android:exported="false" />
         <activity
             android:name=".activities.MainEmptyActivity"

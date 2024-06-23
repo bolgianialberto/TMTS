@@ -14,10 +14,9 @@ import com.example.tmts.MediaRepository
 import com.example.tmts.beans.Media
 import com.example.tmts.R
 import com.example.tmts.activities.SearchActivity
-import com.example.tmts.activities.MovieDetaisActivity
+import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.adapters.MediaAdapter
-import com.example.tmts.beans.MediaDetails
 
 class SearchFragment : Fragment() {
     private lateinit var popularMovieAdapter: MediaAdapter
@@ -39,7 +38,7 @@ class SearchFragment : Fragment() {
         btnSearchPopular = view.findViewById(R.id.btn_search_popular)
 
         popularMovieAdapter = MediaAdapter(requireContext(), emptyList()) { movie ->
-            val intent = Intent(requireContext(), MovieDetaisActivity::class.java)
+            val intent = Intent(requireContext(), MovieDetailsActivity::class.java)
             intent.putExtra("movieId", movie.id)
             startActivity(intent)
         }

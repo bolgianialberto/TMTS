@@ -10,7 +10,7 @@
         android:id="@+id/main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".activities.MovieDetaisActivity"
+        tools:context=".activities.MovieDetailsActivity"
         android:paddingBottom="10dp">
 
         <!-- Background Image -->
@@ -84,50 +84,52 @@
                 android:textSize="24sp"
                 android:textColor="@color/white"/>
 
-            <HorizontalScrollView
+            <LinearLayout
+                android:id="@+id/ll_date_information"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="none">
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                <LinearLayout
-                    android:id="@+id/ll_date_information"
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/clock" />
+
+                <TextView
+                    android:id="@+id/tv_movie_details_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:text="time"
+                    android:textSize="16sp"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/white"/>
+            </LinearLayout>
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/clock" />
+            <LinearLayout
+                android:id="@+id/ll_genres_information"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
-                    <TextView
-                        android:id="@+id/tv_movie_details_time"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="time"
-                        android:textSize="16sp"
-                        android:layout_marginStart="5dp"
-                        android:textColor="@color/white"/>
+                <ImageView
+                    android:id="@+id/iv_genres"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@drawable/genres" />
 
-                    <ImageView
-                        android:id="@+id/iv_genres"
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@drawable/genres"
-                        android:layout_marginStart="5dp"/>
-
-                    <TextView
-                        android:id="@+id/tv_movie_details_genres"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="genres"
-                        android:textSize="16sp"
-                        android:layout_marginStart="5dp"
-                        android:textColor="@color/white"/>
-                </LinearLayout>
-            </HorizontalScrollView>
+                <TextView
+                    android:id="@+id/tv_movie_details_genres"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="genres"
+                    android:textSize="16sp"
+                    android:layout_marginStart="5dp"
+                    android:textColor="@color/white"/>
+            </LinearLayout>
         </LinearLayout>
+
 
         <!-- Action Buttons -->
         <LinearLayout
@@ -229,7 +231,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="release date:"
+                    android:text="Release date:"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -251,7 +253,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="origin country:"
+                    android:text="Origin country:"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -273,7 +275,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="origin language:"
+                    android:text="Origin language:"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -316,7 +318,7 @@
                 android:id="@+id/tv_comments"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="comments"
+                android:text="Comments"
                 android:textStyle="bold"
                 android:layout_weight="70"/>
 
@@ -349,13 +351,13 @@
                 android:layout_width="0dp"
                 android:layout_height="30dp"
                 android:layout_weight="15"
-                android:src="@drawable/two_people" />
+                android:src="@drawable/two_people"/>
 
             <TextView
                 android:id="@+id/tv_users_who_follow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="people who follow"
+                android:text="People who follow"
                 android:textStyle="bold"
                 android:layout_weight="70"/>
 

@@ -56,8 +56,8 @@ class SearchSerieFragment : Fragment() {
         val serieDetailsList = mutableListOf<SerieDetails>()
 
         for (serie in series.results) {
-
-            if (serie.title.startsWith(query, ignoreCase = true)) {
+            Log.d("serieee", "${serie}")
+            if (serie.original_name != null && serie.original_name.startsWith(query, ignoreCase = true)) {
                 serieIds.add(serie.id)
             }
         }

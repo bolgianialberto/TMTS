@@ -1,10 +1,14 @@
 package com.example.tmts.activities
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RatingBar
@@ -19,11 +23,10 @@ import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.adapters.AddToWatchlistAdapter
-import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.MovieDetails
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MovieDetaisActivity : AppCompatActivity() {
+class MovieDetailsActivity : AppCompatActivity() {
     private lateinit var ivBackSearch: Button
     private lateinit var btnFollowUnfollow: Button
     private lateinit var titleTextView: TextView
@@ -64,6 +67,9 @@ class MovieDetaisActivity : AppCompatActivity() {
         btnAddToWatchlist = findViewById(R.id.btn_watchlist)
         tvAverageRate = findViewById(R.id.tv_rating)
         ivFilledStar = findViewById(R.id.iv_filled_star)
+
+        val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
+        backdropImageView.colorFilter = colorFilter
 
         MediaRepository.getMovieDetails(
             movieId,
@@ -161,7 +167,7 @@ class MovieDetaisActivity : AppCompatActivity() {
     }
 
     private fun showWatchlistPopover(movie: MovieDetails){
-        val builder = AlertDialog.Builder(this@MovieDetaisActivity)
+        val builder = AlertDialog.Builder(this@MovieDetailsActivity)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.popover_watchlist, null)
         builder.setView(dialogView)
@@ -174,23 +180,40 @@ class MovieDetaisActivity : AppCompatActivity() {
 
         var adapter: AddToWatchlistAdapter? = null
 
-        fabAddWatchlist.setOnClickListener{
-            showAddWatchlistDialog()
-        }
-
         val alertDialog = builder.create()
         alertDialog.show()
 
+        fabAddWatchlist.setOnClickListener{
+            showAddWatchlistDialog(movie)
+            alertDialog.dismiss()
+        }
+
         FirebaseInteraction.fetchWatchlistsWithDetails(
             onSuccess = { watchlists ->
-                adapter = AddToWatchlistAdapter(this@MovieDetaisActivity, watchlists) {watchlist ->
-                    FirebaseInteraction.addMediaToWatchlist(
+                adapter = AddToWatchlistAdapter(this@MovieDetailsActivity, watchlists) { watchlist ->
+                    FirebaseInteraction.checkMediaExistanceInWatchlist(
                         movie.id,
                         watchlist.name,
                         "movie",
-                        onSuccess = {
-                            Toast.makeText(this, "Movie added to ${watchlist.name}", Toast.LENGTH_LONG).show()
-                            alertDialog.dismiss()
+                        onSuccess = { exists ->
+                            Log.d("Exists?", "${exists}")
+                            if(exists){
+                                Toast.makeText(this, "Movie already in ${watchlist.name}", Toast.LENGTH_SHORT).show()
+                            }else{
+                                FirebaseInteraction.addMediaToWatchlist(
+                                    movie.id,
+                                    watchlist.name,
+                                    "movie",
+                                    onSuccess = {
+                                        Toast.makeText(this, "Movie added to ${watchlist.name}", Toast.LENGTH_LONG).show()
+                                        alertDialog.dismiss()
+                                    },
+                                    onError = {
+                                        Log.e("FirebaseAddToWatchlist", it)
+                                    }
+                                )
+                            }
+
                         },
                         onError = {
                             Log.e("FirebaseAddToWatchlist", it)
@@ -210,8 +233,43 @@ class MovieDetaisActivity : AppCompatActivity() {
         }
     }
 
-    private fun showAddWatchlistDialog(){
+    private fun showAddWatchlistDialog(movie: MovieDetails){
+        val builder = AlertDialog.Builder(this@MovieDetailsActivity)
+        val inflater = layoutInflater
+        val dialogView = inflater.inflate(R.layout.popover_add_watchlist, null)
+        builder.setView(dialogView)
 
+        val etWatchlistName = dialogView.findViewById<EditText>(R.id.et_watchlist_name)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btn_cancel)
+        val btnOk = dialogView.findViewById<Button>(R.id.btn_ok)
+
+        val alertDialog = builder.create()
+
+        btnCancel.setOnClickListener {
+            alertDialog.dismiss()
+        }
+
+        btnOk.setOnClickListener {
+            val watchlistName = etWatchlistName.text.toString().trim()
+            if (watchlistName.isNotEmpty()) {
+                FirebaseInteraction.addMediaToWatchlist(
+                    movie.id,
+                    watchlistName,
+                    "movie",
+                    onSuccess = {
+                        Toast.makeText(this, "Movie added to ${watchlistName}", Toast.LENGTH_SHORT).show()
+                        alertDialog.dismiss()
+                    },
+                    onError = {
+                        Log.e("FirebaseAddToWatchlist", it)
+                    }
+                )
+            } else {
+                Toast.makeText(this, "Watchlist name cannot be empty", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        alertDialog.show()
     }
 
     private fun followUnfollowMovie(movie: MovieDetails){
@@ -231,7 +289,7 @@ class MovieDetaisActivity : AppCompatActivity() {
         }
     }
     private fun showRatingPopover(movie: MovieDetails){
-        val builder = AlertDialog.Builder(this@MovieDetaisActivity)
+        val builder = AlertDialog.Builder(this@MovieDetailsActivity)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.rate_layout, null)
         builder.setView(dialogView)
@@ -269,7 +327,7 @@ class MovieDetaisActivity : AppCompatActivity() {
                                                     onSuccess = {
                                                         updateUI(movie)
                                                         Toast.makeText(
-                                                            this@MovieDetaisActivity,
+                                                            this@MovieDetailsActivity,
                                                             "Rating selected: $rating",
                                                             Toast.LENGTH_SHORT
                                                         ).show()
@@ -312,7 +370,7 @@ class MovieDetaisActivity : AppCompatActivity() {
                                             onSuccess = {
                                                 updateUI(movie)
                                                 Toast.makeText(
-                                                    this@MovieDetaisActivity,
+                                                    this@MovieDetailsActivity,
                                                     "Rating selected: $rating",
                                                     Toast.LENGTH_SHORT
                                                 ).show()

@@ -1,6 +1,9 @@
 package com.example.tmts.activities
 
 import android.content.Intent
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -78,6 +81,9 @@ class SerieDetailsActivity : AppCompatActivity() {
         btnRate = findViewById(R.id.btn_rate)
         tvAverageRate = findViewById(R.id.tv_rating)
         ivFilledStar = findViewById(R.id.iv_filled_star)
+
+        val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
+        backdropImageView.colorFilter = colorFilter
 
         rvNetwork.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvNetwork.adapter = networkAdapter

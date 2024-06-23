@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal">
-    
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_add_to_watchlist"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:listitem="@layout/add_to_watchlist_item"
-        />
-    
+        android:layout_marginBottom="80dp" /> <!-- Add margin to avoid overlap with FAB -->
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_new_watchlist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/plus"
         app:maxImageSize="35dp"
-        android:backgroundTint="@color/selectedColor"
-        android:layout_marginBottom="10dp"
-        />
+        app:layout_anchor="@id/rv_add_to_watchlist"
+        app:layout_anchorGravity="bottom|center"
+        android:layout_gravity="bottom|center"
+        android:layout_margin="16dp"
+        android:backgroundTint="@color/selectedColor" />
 
-</LinearLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

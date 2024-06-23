@@ -46,9 +46,8 @@ class AddToWatchlistAdapter (
             tv_watchlist_name.text = mediaItem.name
 
             // mettere l'adapter per i film
-            val mediaAdapter = MediaAdapter(context, mediaItem.medias){ media ->
-                // Gestisci il click sugli elementi Media
-
+            val mediaAdapter = MediaAdapter(context, mediaItem.medias, 80, 120){
+                onItemClick(mediaItem)
             }
             rv_watchlist.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
             rv_watchlist.adapter = mediaAdapter

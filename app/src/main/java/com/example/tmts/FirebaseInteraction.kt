@@ -371,6 +371,31 @@ object FirebaseInteraction {
         })
     }
 
+    fun checkMediaExistanceInWatchlist(
+        mediaId: Int,
+        watchlistName: String,
+        mediaType: String,
+        onSuccess: (Boolean) -> Unit,
+        onError: (String) -> Unit
+    ){
+        val mediaField = if (mediaType == "movie") "movies" else "series"
+
+        val watchlistMediaRef = watchlistRef
+            .child(watchlistName)
+            .child(mediaField)
+            .child(mediaId.toString())
+
+        watchlistMediaRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                onSuccess(dataSnapshot.exists())
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                onError(databaseError.message)
+            }
+        })
+    }
+
     fun checkEpisodeValue(
         serieId: Int,
         seasonNumber: Int,
