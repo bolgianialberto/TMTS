@@ -27,6 +27,7 @@ import java.util.Date
 import java.util.Locale
 
 object FirebaseInteraction {
+
     var mDbRef = FirebaseDatabase.getInstance().getReference()
     var mAuth = FirebaseAuth.getInstance()
     val user = mAuth.currentUser!!
@@ -34,12 +35,15 @@ object FirebaseInteraction {
     val followingSeriesRef = userRef.child("following_series")
     val followingMoviesRef = userRef.child("following_movies")
     val watchedMoviesRef = userRef.child("watched_movies")
+    val watchedSeriesRef = userRef.child("watched_series")
     val moviesRef = mDbRef.child("shows").child("movies")
     val seriesRef = mDbRef.child("shows").child("series")
     val reviewsRef = mDbRef.child("reviews")
     val reviewImagesRef = FirebaseStorage.getInstance().reference
     val userRatingsRef = userRef.child("ratings")
     val watchlistRef = userRef.child("watchlists")
+    var followedUsersRef = mDbRef.child("users").child(user.uid).child("followed")
+    var followersUsersRef = mDbRef.child("users").child(user.uid).child("followers")
 
     fun fetchWatchlistsWithDetails(onSuccess: (List<Watchlist>) -> Unit, onError: (String) -> Unit) {
         watchlistRef.get().addOnSuccessListener { snapshot ->
@@ -246,6 +250,50 @@ object FirebaseInteraction {
             override fun onCancelled(error: DatabaseError) {
                 Log.e("Firebase", "Errore nel recupero dei dati: ${error.message}")
                 // Chiamata della callback con lista vuota in caso di errore
+                callback(emptyList())
+            }
+        })
+    }
+
+    fun getFollowedUsers(callback: (List<String>) -> Unit, ){
+        followedUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val followed = mutableListOf<String>()
+
+                snapshot.children.forEach { child ->
+                    val followedID = child.key
+                    if (followedID != null) {//TODO: forse devo fare anche check se l'id effettivamente è id di un utente
+                        followed.add(followedID)
+                    }
+                }
+
+                callback(followed)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Errore nel recupero dei dati: ${error.message}")
+                callback(emptyList())
+            }
+        })
+    }
+
+    fun getFollowersUsers(callback: (List<String>) -> Unit, ){
+        followersUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val followers = mutableListOf<String>()
+
+                snapshot.children.forEach { child ->
+                    val followerID = child.key
+                    if (followerID != null) {//TODO: forse devo fare anche check se l'id effettivamente è id di un utente
+                        followers.add(followerID)
+                    }
+                }
+
+                callback(followers)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Errore nel recupero dei dati: ${error.message}")
                 callback(emptyList())
             }
         })
@@ -1064,5 +1112,51 @@ object FirebaseInteraction {
 
     fun onError(){
         Log.e("Firebase", "Something went wrong")
+    }
+
+    fun getWatchedMovies(callback: (List<String>) -> Unit) {
+        watchedMoviesRef.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val movieIds = mutableListOf<String>()
+                snapshot.children.forEach { child ->
+                    val movieId = child.key
+                    if (movieId != null) {
+                        movieIds.add(movieId)
+                        Log.d("Firebase", "Watched movie with id: ${movieId} added")
+                    }
+                }
+
+                callback(movieIds)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Errore nel recupero dei dati: ${error.message}")
+                // Chiamata della callback con lista vuota in caso di errore
+                callback(emptyList())
+            }
+        })
+    }
+
+    fun getWatchedSeries(callback: (List<String>) -> Unit) {
+        watchedSeriesRef.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val serieIds = mutableListOf<String>()
+                snapshot.children.forEach { child ->
+                    val serieId = child.key
+                    if (serieId != null) {
+                        serieIds.add(serieId)
+                        Log.d("Firebase", "Watched serie with id: ${serieId} added")
+                    }
+                }
+
+                callback(serieIds)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Firebase", "Errore nel recupero dei dati: ${error.message}")
+                // Chiamata della callback con lista vuota in caso di errore
+                callback(emptyList())
+            }
+        })
     }
 }

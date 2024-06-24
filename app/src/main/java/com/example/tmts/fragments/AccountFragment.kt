@@ -6,25 +6,32 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ExpandableListView
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.tmts.FirebaseInteraction
+import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.activities.MainEmptyActivity
-import com.example.tmts.adapters.ExpandableListAdapter
+import com.example.tmts.activities.MovieDetailsActivity
+import com.example.tmts.activities.SerieDetailsActivity
+import com.example.tmts.adapters.MediaAdapter
+import com.example.tmts.beans.Media
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -45,7 +52,11 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
     private lateinit var ibDropDown: ImageButton
     private lateinit var tvFollowerCount: TextView
     private lateinit var tvFollowingCount: TextView
-    private lateinit var elvList: ExpandableListView
+    private lateinit var watchedMoviesAdapter: MediaAdapter
+    private lateinit var watchedSeriesAdapter: MediaAdapter
+    private lateinit var llWatchedMovies: LinearLayout
+    private lateinit var llWatchedSeries: LinearLayout
+    private lateinit var llWatchlists: LinearLayout
 
     val currentUser = mAuth.currentUser!!
 
@@ -55,6 +66,11 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_account, container, false)
+        return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         // Fetch user id Firebase reference
         val userIdRef = mDbRef.child("users").child(currentUser.uid)
@@ -72,7 +88,39 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         ivAccountIcon = view.findViewById(R.id.account_icon)
         tvFollowerCount = view.findViewById(R.id.tv_follower_count)
         tvFollowingCount = view.findViewById(R.id.tv_following_count)
-        elvList = view.findViewById(R.id.expandable_list)
+        llWatchedMovies = view.findViewById(R.id.ll_watched_movies)
+        llWatchedSeries = view.findViewById(R.id.ll_watched_series)
+        llWatchlists = view.findViewById(R.id.ll_watchlists)
+
+        // Setup adapters for Recycle Views
+        watchedMoviesAdapter = MediaAdapter(requireContext(), emptyList()) { movie ->
+            val intent = Intent(requireContext(), MovieDetailsActivity::class.java)
+            intent.putExtra("movieId", movie.id)
+            startActivity(intent)
+        }
+        watchedSeriesAdapter = MediaAdapter(requireContext(), emptyList()) {serie ->
+            val intent = Intent(requireContext(), SerieDetailsActivity::class.java)
+            intent.putExtra("serieId", serie.id)
+            startActivity(intent)
+        }
+
+        val rvWatchedMovie: RecyclerView = view.findViewById(R.id.rv_watched_movies)
+        rvWatchedMovie.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        rvWatchedMovie.adapter = watchedMoviesAdapter
+
+        val rvWatchedSerie: RecyclerView = view.findViewById(R.id.rv_watched_series)
+        rvWatchedSerie.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        rvWatchedSerie.adapter = watchedSeriesAdapter
+
+        val rvWatchlist: RecyclerView = view.findViewById(R.id.rv_watchlist_account)
+
+        FirebaseInteraction.getWatchedMovies { movieIds ->
+            onWatchedMoviesFetched(movieIds)
+        }
+
+        FirebaseInteraction.getWatchedSeries { serieIds ->
+            onWatchedSeriesFetched(serieIds)
+        }
 
         // Fetch user's display name and change the view accordingly
         userIdRef.child("name").addValueEventListener(object: ValueEventListener {
@@ -95,16 +143,6 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         // Load user's follower data from Firebase
         loadUserFollowerData(userIdRef, tvFollowerCount, tvFollowingCount)
 
-        // Setup expandable list view
-        val listTitle = listOf("Watchlist", "Serie TV", "Film Visti")
-        val listDetail = hashMapOf<String, List<String>>(
-            "Watchlist" to listOf("Item 1", "Item 2"),
-            "Serie TV" to listOf("Serie 1", "Serie 2"),  // Sarà popolato dall'adapter
-            "Film Visti" to listOf()
-        )
-
-        val expandableListAdapter = ExpandableListAdapter(requireContext(), listTitle, listDetail)
-        elvList.setAdapter(expandableListAdapter)
 
         // Set view or buttons listeners
         ivAccountIcon.setOnClickListener{
@@ -134,7 +172,73 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
             }
         }
 
-        return view
+        llWatchedMovies.setOnClickListener{
+            if (rvWatchedMovie.visibility == View.GONE) {
+                rvWatchedMovie.visibility = View.VISIBLE
+            } else {
+                rvWatchedMovie.visibility = View.GONE
+            }
+        }
+
+        llWatchedSeries.setOnClickListener{
+            if (rvWatchedSerie.visibility == View.GONE) {
+                rvWatchedSerie.visibility = View.VISIBLE
+            } else {
+                rvWatchedSerie.visibility = View.GONE
+            }
+        }
+
+        llWatchlists.setOnClickListener{
+            if (rvWatchlist.visibility == View.GONE) {
+                rvWatchlist.visibility = View.VISIBLE
+            } else {
+                rvWatchlist.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun onWatchedMoviesFetched(movieIds: List<String>){
+        val movies = mutableListOf<Media>()
+        var completedRequests = 0
+        val totalRequests = movieIds.size
+
+        movieIds.forEach {movieId ->
+            MediaRepository.getMovieDetails(movieId.toInt(),
+                onSuccess = {movie ->
+                    val movieMedia = Media(movie.id, movie.title, "", movie.posterPath)
+                    Log.d("AccountFragment", "movieMedia = ${movieMedia}")
+                    movies.add(movieMedia)
+                    completedRequests++
+
+                    if (completedRequests == totalRequests) {
+                        Log.d("AccountFragment", "movies = ${movies}")
+                        watchedMoviesAdapter.updateMedia(movies)
+                    }
+                },
+                onError = {})
+        }
+    }
+
+    private fun onWatchedSeriesFetched(serieIds: List<String>){
+        val series = mutableListOf<Media>()
+        var completedRequests = 0
+        val totalRequests = serieIds.size
+
+        serieIds.forEach {serieId ->
+            MediaRepository.getSerieDetails(serieId.toInt(),
+                onSuccess = {serie ->
+                    val serieMedia = Media(serie.id, serie.title, "", serie.posterPath)
+                    Log.d("AccountFragment", "serieMedia = ${serieMedia}")
+                    series.add(serieMedia)
+                    completedRequests++
+
+                    if (completedRequests == totalRequests) {
+                        Log.d("AccountFragment", "series = ${series}")
+                        watchedSeriesAdapter.updateMedia(series)
+                    }
+                },
+                onError = {})
+        }
     }
 
     private fun loadUserFollowerData(
