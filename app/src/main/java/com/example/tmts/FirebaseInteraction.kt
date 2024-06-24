@@ -829,12 +829,39 @@ object FirebaseInteraction {
         onSuccess: (StorageReference) -> Unit,
         onFailure: (String) -> Unit
     ){
-        val imageRef = mStRef.child("users/$userId/ProfileImage.png")
+        val imageRef = mStRef.child("users/$userId/profileImage")
         if (imageRef != null) {
             onSuccess(imageRef)
         } else {
             onFailure("Image not found")
         }
+    }
+
+    fun getUserChats(
+        onSuccess: (List<User>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        mDbRef.child("users").addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val users = mutableListOf<User>()
+
+                snapshot.children.forEach { userRes ->
+                    val uid = userRes.key
+                    val name = userRes.child("name").value
+                    val email = userRes.child("email").value
+                    Log.d("F USER", "$uid, $name, $email $userRes.key")
+                    if (uid != null && uid != user.uid && name != null && email != null) {
+                        users.add(User(uid, name.toString(), email.toString()))
+                    }
+                }
+                onSuccess(users)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure("Users not Found")
+            }
+        })
+
     }
 
     fun onError(){

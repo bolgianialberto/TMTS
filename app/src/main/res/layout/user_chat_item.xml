@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="horizontal">
 
     <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/iv_show_more_followers_image"
+        android:id="@+id/iv_chat_account_image"
         android:layout_width="75dp"
         android:layout_height="75dp"
         android:layout_marginStart="2dp"
@@ -24,34 +24,26 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/tv_show_more_followers_item_username"
+            android:id="@+id/tv_chat_account_username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
             android:text="Name plaeholder"
             android:textSize="17sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tv_show_more_followers_item_info"
+            android:id="@+id/tv_chat_account_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
             android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
             android:text="Other accounts"
             android:textSize="14sp" />
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/btt_chat_with_user"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="4dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="15dp"
-        android:background="@drawable/chat" />
 
 </LinearLayout>

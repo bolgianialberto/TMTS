@@ -19,9 +19,10 @@ import com.example.tmts.R
 import com.example.tmts.adapters.MoreShowAccountsAdapter
 import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SerieDetails
+import com.example.tmts.interfaces.OnChatClickListener
 import kotlin.math.min
 
-class MoreShowAccountsActivity : AppCompatActivity() {
+class MoreShowAccountsActivity : AppCompatActivity(), OnChatClickListener {
 
     private val MAX_USERS: Int = 30
     private var movieDetails: MovieDetails? = null
@@ -33,6 +34,7 @@ class MoreShowAccountsActivity : AppCompatActivity() {
     private lateinit var tvShowTitle: TextView
     private lateinit var tvShowOverview: TextView
     private lateinit var bttBack: Button
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -46,7 +48,7 @@ class MoreShowAccountsActivity : AppCompatActivity() {
         val showId = intent.getStringExtra("showId")!!
         followers = intent.getStringArrayListExtra("retrievedFollowers")!!
         val loadedFollowers = intent.getStringArrayListExtra("loadedUsers")
-        moreShowAccountsAdapter = MoreShowAccountsAdapter(this)
+        moreShowAccountsAdapter = MoreShowAccountsAdapter(this, ArrayList(), this)
         rvAccounts = findViewById(R.id.rv_more_show_accounts)
         rvAccounts.layoutManager = LinearLayoutManager(this)
         rvAccounts.adapter = moreShowAccountsAdapter
@@ -118,4 +120,10 @@ class MoreShowAccountsActivity : AppCompatActivity() {
             )
         }
     }
+
+    override fun onChatClickListener(userId: String) {
+        Log.d("CHAT LOG", "chat w/ $userId")
+    }
+
+
 }

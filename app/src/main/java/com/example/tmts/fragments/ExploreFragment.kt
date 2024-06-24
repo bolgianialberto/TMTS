@@ -29,7 +29,7 @@ class ExploreFragment : Fragment() {
             replaceFragment(ExploreShowsFragment())}
         bttChat.setOnClickListener {
             toggleButtonColor(bttChat)
-            replaceFragment(ChatFragment())
+            replaceFragment(ChatListFragment())
         }
 
         return view
