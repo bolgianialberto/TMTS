@@ -2,6 +2,8 @@ package com.example.tmts
 
 import android.util.Log
 import com.example.tmts.beans.EpisodeDetails
+import com.example.tmts.beans.Genre
+import com.example.tmts.beans.GenreResponse
 import com.example.tmts.beans.Media
 import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.MediaResponse
@@ -14,6 +16,124 @@ import retrofit2.Response
 
 object MediaRepository {
     private var tmdbApiClient = TMDbApiClient()
+
+    fun getMovieGenres(
+        onSuccess: (genres: List<Genre>) -> Unit,
+        onError: () -> Unit
+    ) {
+        val call = tmdbApiClient.getClient().getMovieGenres(tmdbApiClient.getApiKey())
+        call.enqueue(object : Callback<GenreResponse> {
+            override fun onResponse(call: Call<GenreResponse>, response: Response<GenreResponse>) {
+                if (response.isSuccessful) {
+                    val genreResponse = response.body()
+                    val genres = genreResponse!!.results
+                    if (genres != null) {
+                        onSuccess.invoke(genres)
+                    } else {
+                        Log.e("TMDB_API", "Genres list is null")
+                        onError.invoke()
+                    }
+                } else {
+                    Log.e("TMDB_API", "Unsuccessful response: ${response.errorBody()?.string()}")
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<GenreResponse>, t: Throwable) {
+                Log.e("TMDB_API", "Call failed: ${t.message}")
+                onError.invoke()
+            }
+        })
+    }
+
+    fun getSerieGenres(
+        onSuccess: (genres: List<Genre>) -> Unit,
+        onError: () -> Unit
+    ) {
+        val call = tmdbApiClient.getClient().getSerieGenres(tmdbApiClient.getApiKey())
+        call.enqueue(object : Callback<GenreResponse> {
+            override fun onResponse(call: Call<GenreResponse>, response: Response<GenreResponse>) {
+                if (response.isSuccessful) {
+                    val genreResponse = response.body()
+                    val genres = genreResponse!!.results
+                    if (genres != null) {
+                        onSuccess.invoke(genres)
+                    } else {
+                        Log.e("TMDB_API", "Genres list is null")
+                        onError.invoke()
+                    }
+                } else {
+                    Log.e("TMDB_API", "Unsuccessful response: ${response.errorBody()?.string()}")
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<GenreResponse>, t: Throwable) {
+                Log.e("TMDB_API", "Call failed: ${t.message}")
+                onError.invoke()
+            }
+        })
+    }
+
+    fun discoverMoviesByGenre(
+        genreId: Int,
+        onSuccess: (movies: List<Media>) -> Unit,
+        onError: () -> Unit
+    ) {
+        val call = tmdbApiClient.getClient().discoverMoviesByGenre(tmdbApiClient.getApiKey(), genreId, 1)
+        call.enqueue(object : Callback<MediaResponse> {
+            override fun onResponse(call: Call<MediaResponse>, response: Response<MediaResponse>) {
+                if (response.isSuccessful) {
+                    val mediaResponse = response.body()
+                    val mediaItems: List<Media>? = mediaResponse?.results
+                    if (mediaItems != null) {
+                        onSuccess.invoke(mediaItems)
+                    } else {
+                        Log.e("TMDB_API", "mediaItems is null")
+                        onError.invoke()
+                    }
+                } else {
+                    Log.e("TMDB_API", "Unsuccessful response: ${response.errorBody()?.string()}")
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<MediaResponse>, t: Throwable) {
+                Log.e("TMDB_API", "Call failed: ${t.message}")
+                onError.invoke()
+            }
+        })
+    }
+
+    fun discoverSeriesByGenre(
+        genreId: Int,
+        onSuccess: (series: List<Media>) -> Unit,
+        onError: () -> Unit
+    ) {
+        val call = tmdbApiClient.getClient().discoverSeriesByGenre(tmdbApiClient.getApiKey(), genreId, 1)
+        call.enqueue(object : Callback<MediaResponse> {
+            override fun onResponse(call: Call<MediaResponse>, response: Response<MediaResponse>) {
+                if (response.isSuccessful) {
+                    val mediaResponse = response.body()
+                    val mediaItems: List<Media>? = mediaResponse?.results
+                    if (mediaItems != null) {
+                        onSuccess.invoke(mediaItems)
+                    } else {
+                        Log.e("TMDB_API", "mediaItems is null")
+                        onError.invoke()
+                    }
+                } else {
+                    Log.e("TMDB_API", "Unsuccessful response: ${response.errorBody()?.string()}")
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<MediaResponse>, t: Throwable) {
+                Log.e("TMDB_API", "Call failed: ${t.message}")
+                onError.invoke()
+            }
+        })
+    }
 
     fun getPopularMovies(
         onSuccess: (movies: List<Media>) -> Unit,

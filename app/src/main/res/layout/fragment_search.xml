@@ -1,91 +1,167 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.MainActivity"
     android:background="@color/lightergray">
 
-    <LinearLayout
-        android:id="@+id/ll_search_popular"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginTop="10dp"
-        android:gravity="center_vertical">
+        android:layout_height="match_parent"
+        tools:context=".activities.MainActivity"
+        >
 
-        <TextView
+        <LinearLayout
+            android:id="@+id/ll_search_popular"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:textSize="30sp"
-            android:text="TMTS"
-            android:textStyle="bold"/>
-        <!--
-        <EditText
-            android:id="@+id/et_search_popular"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_weight="85"
-            android:hint="@string/et_search_page_hint" />
-         -->
-
-        <ImageView
-            android:id="@+id/btn_search_popular"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/search"
-            android:layout_marginStart="-40dp" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/ll_popular_movies"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_below="@id/ll_search_popular"
-        android:padding="10dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Popular Movies"
-            android:textStyle="bold"
-            android:textSize="24sp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_popular_movies"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginTop="10dp"
-            tools:listitem="@layout/popular_media_item"/>
+            android:gravity="center_vertical">
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textSize="30sp"
+                android:text="TMTS"
+                android:textStyle="bold"/>
+            <!--
+            <EditText
+                android:id="@+id/et_search_popular"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_weight="85"
+                android:hint="@string/et_search_page_hint" />
+             -->
 
-    <LinearLayout
-        android:id="@+id/ll_popular_series"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_below="@id/ll_popular_movies"
-        android:padding="10dp">
+            <ImageView
+                android:id="@+id/btn_search_popular"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/search"
+                android:layout_marginStart="-40dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Popular TV Series"
-            android:textStyle="bold"
-            android:textSize="24sp" />
+        </LinearLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_popular_series"
+        <LinearLayout
+            android:id="@+id/ll_popular_movies"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            tools:listitem="@layout/popular_media_item"/>
+            android:orientation="vertical"
+            android:layout_below="@id/ll_search_popular"
+            android:padding="10dp">
 
-    </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Popular Movies"
+                android:textStyle="bold"
+                android:textSize="24sp" />
 
-</RelativeLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_popular_movies"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                tools:listitem="@layout/popular_media_item"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_popular_series"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/ll_popular_movies"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Popular TV Series"
+                android:textStyle="bold"
+                android:textSize="24sp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_popular_series"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                tools:listitem="@layout/popular_media_item"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_movies_by_genre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/ll_popular_series"
+            android:padding="10dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Movies genre:"
+                    android:textStyle="bold"
+                    android:textSize="24sp" />
+
+                <Spinner
+                    android:id="@+id/spinner_movie_genre"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:spinnerMode="dropdown" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_movie_by_genre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                tools:listitem="@layout/popular_media_item"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_series_by_genre"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_below="@id/ll_movies_by_genre"
+            android:padding="10dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Series genre:"
+                    android:textStyle="bold"
+                    android:textSize="24sp" />
+
+                <Spinner
+                    android:id="@+id/spinner_serie_genre"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:spinnerMode="dropdown" />
+            </LinearLayout>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_serie_by_genre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                tools:listitem="@layout/popular_media_item"/>
+        </LinearLayout>
+    </RelativeLayout>
+</ScrollView>

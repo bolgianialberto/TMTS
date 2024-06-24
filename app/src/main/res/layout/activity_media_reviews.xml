@@ -50,7 +50,8 @@
             android:id="@+id/rv_reviews"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            tools:listitem="@layout/review_item"/>
+            tools:listitem="@layout/review_item"
+            android:paddingBottom="10dp"/>
 
     </LinearLayout>
 

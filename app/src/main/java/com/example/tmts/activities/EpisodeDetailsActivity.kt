@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.GestureDetector
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -76,6 +77,7 @@ class EpisodeDetailsActivity : AppCompatActivity() {
         btnBackSearch.setOnClickListener {
             onBackPressed()
         }
+
     }
 
     private fun updateUI(episode: EpisodeDetails){
