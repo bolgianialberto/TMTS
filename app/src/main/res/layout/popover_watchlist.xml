@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:listitem="@layout/add_to_watchlist_item"
-        android:layout_marginBottom="80dp" /> <!-- Add margin to avoid overlap with FAB -->
+        android:layout_marginBottom="40dp" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_new_watchlist"
@@ -23,7 +23,8 @@
         app:layout_anchor="@id/rv_add_to_watchlist"
         app:layout_anchorGravity="bottom|center"
         android:layout_gravity="bottom|center"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/selectedColor" />
+        android:layout_margin="10dp"
+        android:backgroundTint="@color/selectedColor"
+        android:elevation="8dp"/>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

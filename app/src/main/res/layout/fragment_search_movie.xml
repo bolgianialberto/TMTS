@@ -4,7 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.SearchMovieFragment"
-    android:padding="5dp">
+    android:padding="5dp"
+    android:background="@color/lightergray">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_search_page_movie"

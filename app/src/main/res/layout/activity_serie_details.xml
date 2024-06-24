@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/lightergray">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/main"
@@ -81,33 +82,27 @@
                 android:textStyle="bold"
                 android:textColor="@color/white"/>
 
-            <HorizontalScrollView
+            <TextView
+                android:id="@+id/tv_serie_details_n_seasons"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:scrollbars="none">
+                android:text="time"
+                android:textSize="16sp"
+                android:textColor="@color/white"/>
 
-                <LinearLayout
-                    android:id="@+id/ll_seasons_information"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical">
-
-                    <TextView
-                        android:id="@+id/tv_serie_details_n_seasons"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="time"
-                        android:textSize="16sp"
-                        android:layout_marginStart="5dp"
-                        android:textColor="@color/white"/>
+            <LinearLayout
+                android:id="@+id/ll_genres_information"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
 
                     <ImageView
                         android:id="@+id/iv_genres"
                         android:layout_width="16dp"
                         android:layout_height="16dp"
                         android:src="@drawable/genres"
-                        android:layout_marginStart="5dp"/>
+                        />
 
                     <TextView
                         android:id="@+id/tv_serie_details_genres"
@@ -117,8 +112,8 @@
                         android:textSize="16sp"
                         android:layout_marginStart="5dp"
                         android:textColor="@color/white"/>
-                </LinearLayout>
-            </HorizontalScrollView>
+            </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
@@ -184,7 +179,9 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/ll_seasons"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            >
 
             <TextView
                 android:id="@+id/tv_serie_details_overview"
@@ -193,7 +190,7 @@
                 android:layout_weight="1"
                 android:textSize="16sp"
                 android:text="overview placeholder"
-                android:paddingEnd="10dp"/>
+                />
         </LinearLayout>
 
         <LinearLayout

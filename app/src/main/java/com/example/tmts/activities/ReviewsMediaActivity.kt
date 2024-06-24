@@ -23,12 +23,13 @@ class ReviewsMediaActivity : AppCompatActivity() {
     private lateinit var rvReview: RecyclerView
     private lateinit var reviewsAdapter: ReviewAdapter
     private lateinit var mediaType: String
+    private var mediaId: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_reviews)
 
         val intent = intent
-        val mediaId = intent.getIntExtra("mediaId", -1)
+        mediaId = intent.getIntExtra("mediaId", -1)
         mediaType = intent.getStringExtra("mediaType") ?: "movie"
 
         tvMediaName = findViewById(R.id.tv_comment_activity_media_title)
@@ -40,12 +41,21 @@ class ReviewsMediaActivity : AppCompatActivity() {
         rvReview.layoutManager = LinearLayoutManager(this)
         rvReview.adapter = reviewsAdapter
 
+        loadData()
+    }
+
+    private fun loadData(){
         MediaRepository.getMediaDetails(
             mediaId,
             mediaType,
             onSuccess = ::updateUI,
             onError = ::onError
         )
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadData()
     }
 
     private fun updateUI(media: MediaDetails){

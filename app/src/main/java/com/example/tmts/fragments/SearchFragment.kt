@@ -56,6 +56,18 @@ class SearchFragment : Fragment() {
         rvPopularSerie.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvPopularSerie.adapter = popularSerieAdapter
 
+        btnSearchPopular.setOnClickListener {
+            val intent = Intent(requireContext(), SearchActivity::class.java)
+            startActivity(intent)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadData()
+    }
+
+    private fun loadData(){
         MediaRepository.getPopularMovies(
             onSuccess = ::onPopularMoviesFetched,
             onError = ::onError
@@ -65,11 +77,6 @@ class SearchFragment : Fragment() {
             onSuccess = ::onPopularSeriesFetched,
             onError = ::onError
         )
-
-        btnSearchPopular.setOnClickListener {
-            val intent = Intent(requireContext(), SearchActivity::class.java)
-            startActivity(intent)
-        }
     }
 
     private fun onPopularMoviesFetched(movies: List<Media>){

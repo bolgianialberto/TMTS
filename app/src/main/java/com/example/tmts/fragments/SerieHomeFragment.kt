@@ -12,17 +12,9 @@ import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.OnCheckButtonClickListener
 import com.example.tmts.R
-import com.example.tmts.TMDbApiClient
 import com.example.tmts.adapters.HomeSerieAdapter
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.SerieDetails
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
     private lateinit var homeSerieAdapter: HomeSerieAdapter
@@ -41,9 +33,14 @@ class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = homeSerieAdapter
 
-        loadHomeSerie()
+        //loadHomeSerie()
 
         return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        loadHomeSerie()
     }
 
     private fun loadHomeSerie() {

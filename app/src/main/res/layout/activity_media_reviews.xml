@@ -5,15 +5,17 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.SeasonDetailsActivity">
+    tools:context=".activities.SeasonDetailsActivity"
+    android:background="@color/lightergray">
 
+    <!-- LinearLayout containing header and RecyclerView -->
     <LinearLayout
         android:id="@+id/contentLayout"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:orientation="vertical"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/fab_add_comment"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:ignore="MissingConstraints">
 
         <!-- Header -->
@@ -39,8 +41,8 @@
                 android:text="media_title_placeholder"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:gravity="left"/>
-
+                android:gravity="bottom"
+                android:layout_marginTop="5dp"/>
         </LinearLayout>
 
         <!-- RecyclerView for comments -->
@@ -52,6 +54,7 @@
 
     </LinearLayout>
 
+    <!-- FloatingActionButton in overlay -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add_comment"
         android:layout_width="wrap_content"
@@ -60,8 +63,8 @@
         android:src="@drawable/add_comment"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:backgroundTint="@color/unselectedColor"
+        android:backgroundTint="@color/selectedColor"
         app:borderWidth="0dp"
-        app:maxImageSize="35dp"/>
-
+        app:maxImageSize="35dp"
+        android:translationZ="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

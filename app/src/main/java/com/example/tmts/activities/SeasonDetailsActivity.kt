@@ -48,6 +48,8 @@ class SeasonDetailsActivity : AppCompatActivity() {
         btnBackArrow.setOnClickListener{
             onBackPressed()
         }
+
+
     }
 
     private fun onFetchedSerieDetails(serie: SerieDetails){

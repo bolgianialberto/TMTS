@@ -1,5 +1,6 @@
 package com.example.tmts.activities
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.PorterDuff
@@ -7,6 +8,7 @@ import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -166,7 +168,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         }
     }
 
-    private fun showWatchlistPopover(movie: MovieDetails){
+    private fun showWatchlistPopover(movie: MovieDetails) {
         val builder = AlertDialog.Builder(this@MovieDetailsActivity)
         val inflater = layoutInflater
         val dialogView = inflater.inflate(R.layout.popover_watchlist, null)
@@ -178,55 +180,56 @@ class MovieDetailsActivity : AppCompatActivity() {
         val recyclerView = dialogView.findViewById<RecyclerView>(R.id.rv_add_to_watchlist)
         val fabAddWatchlist = dialogView.findViewById<FloatingActionButton>(R.id.fab_add_new_watchlist)
 
-        var adapter: AddToWatchlistAdapter? = null
-
         val alertDialog = builder.create()
         alertDialog.show()
 
-        fabAddWatchlist.setOnClickListener{
+        fabAddWatchlist.setOnClickListener {
             showAddWatchlistDialog(movie)
-            alertDialog.dismiss()
+            alertDialog.dismiss() // Mantieni il dialogo aperto
         }
 
-        FirebaseInteraction.fetchWatchlistsWithDetails(
-            onSuccess = { watchlists ->
-                adapter = AddToWatchlistAdapter(this@MovieDetailsActivity, watchlists) { watchlist ->
-                    FirebaseInteraction.checkMediaExistanceInWatchlist(
-                        movie.id,
-                        watchlist.name,
-                        "movie",
-                        onSuccess = { exists ->
-                            Log.d("Exists?", "${exists}")
-                            if(exists){
-                                Toast.makeText(this, "Movie already in ${watchlist.name}", Toast.LENGTH_SHORT).show()
-                            }else{
-                                FirebaseInteraction.addMediaToWatchlist(
-                                    movie.id,
-                                    watchlist.name,
-                                    "movie",
-                                    onSuccess = {
-                                        Toast.makeText(this, "Movie added to ${watchlist.name}", Toast.LENGTH_LONG).show()
-                                        alertDialog.dismiss()
-                                    },
-                                    onError = {
-                                        Log.e("FirebaseAddToWatchlist", it)
-                                    }
-                                )
+        fun fetchWatchlists() {
+            FirebaseInteraction.fetchWatchlistsWithDetails(
+                onSuccess = { watchlists ->
+                    val adapter = AddToWatchlistAdapter(this@MovieDetailsActivity, watchlists) { watchlist ->
+                        FirebaseInteraction.checkMediaExistanceInWatchlist(
+                            movie.id,
+                            watchlist.name,
+                            "movie",
+                            onSuccess = { exists ->
+                                Log.d("Exists?", "$exists")
+                                if (exists) {
+                                    Toast.makeText(this@MovieDetailsActivity, "${movie.title} already in ${watchlist.name}", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    FirebaseInteraction.addMediaToWatchlist(
+                                        movie.id,
+                                        watchlist.name,
+                                        "movie",
+                                        onSuccess = {
+                                            Toast.makeText(this@MovieDetailsActivity, "Movie added to ${watchlist.name}", Toast.LENGTH_SHORT).show()
+                                            fetchWatchlists() // Ricarica le watchlist per aggiornarle
+                                        },
+                                        onError = {
+                                            Log.e("FirebaseAddToWatchlist", it)
+                                        }
+                                    )
+                                }
+                            },
+                            onError = {
+                                Log.e("FirebaseAddToWatchlist", it)
                             }
-
-                        },
-                        onError = {
-                            Log.e("FirebaseAddToWatchlist", it)
-                        }
-                    )
+                        )
+                    }
+                    recyclerView.layoutManager = LinearLayoutManager(this@MovieDetailsActivity)
+                    recyclerView.adapter = adapter
+                },
+                onError = { errorMessage ->
+                    Toast.makeText(this@MovieDetailsActivity, errorMessage, Toast.LENGTH_SHORT).show()
                 }
-                recyclerView.layoutManager = LinearLayoutManager(this)
-                recyclerView.adapter = adapter
-            },
-            onError = { errorMessage ->
-                Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
-            }
-        )
+            )
+        }
+
+        fetchWatchlists()
 
         customTitleView.findViewById<ImageView>(R.id.iv_close_dialog)?.setOnClickListener {
             alertDialog.dismiss()
@@ -244,6 +247,12 @@ class MovieDetailsActivity : AppCompatActivity() {
         val btnOk = dialogView.findViewById<Button>(R.id.btn_ok)
 
         val alertDialog = builder.create()
+
+        alertDialog.setOnShowListener {
+            etWatchlistName.requestFocus()
+            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(etWatchlistName, InputMethodManager.SHOW_IMPLICIT)
+        }
 
         btnCancel.setOnClickListener {
             alertDialog.dismiss()
