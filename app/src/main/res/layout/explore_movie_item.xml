@@ -30,14 +30,31 @@
         android:layout_marginStart="10dp"
         android:layout_marginEnd="5dp">
 
-        <TextView
-            android:id="@+id/tv_explore_show_title"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:text="placeholder title" />
+            android:orientation="horizontal"
+            android:layout_gravity="center_horizontal">
+
+            <TextView
+                android:id="@+id/tv_explore_show_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:text="placeholder title" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textAlignment="textEnd"
+                android:text="Followed by:" />
+
+        </LinearLayout>
 
         <View
             android:layout_width="match_parent"
@@ -70,14 +87,15 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal">
 
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_explore_show_user_1"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
                         android:layout_marginTop="2dp"
                         android:layout_marginBottom="2dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/account" />
+                        app:shapeAppearanceOverlay="@style/exploreMovieAccountRoundedImageView"
+                        app:srcCompat="@drawable/account" />
 
                     <TextView
                         android:id="@+id/tv_explore_show_user_1"
@@ -85,6 +103,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textAlignment="center"
+                        android:textSize="12sp"
                         android:text="User 1 long placeholder" />
 
                 </LinearLayout>
@@ -109,14 +128,16 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal">
 
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_explore_show_user_2"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
                         android:layout_marginTop="2dp"
                         android:layout_marginBottom="2dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/account" />
+                        app:shapeAppearanceOverlay="@style/exploreMovieAccountRoundedImageView"
+                        app:srcCompat="@drawable/account" />
+
 
                     <TextView
                         android:id="@+id/tv_explore_show_user_2"
@@ -124,6 +145,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textAlignment="center"
+                        android:textSize="12sp"
                         android:text="User 2 long placeholder" />
 
                 </LinearLayout>
@@ -148,14 +170,16 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal">
 
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_explore_show_user_3"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
                         android:layout_marginTop="2dp"
                         android:layout_marginBottom="2dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/account" />
+                        app:shapeAppearanceOverlay="@style/exploreMovieAccountRoundedImageView"
+                        app:srcCompat="@drawable/account" />
+
 
                     <TextView
                         android:id="@+id/tv_explore_show_user_3"
@@ -163,6 +187,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textAlignment="center"
+                        android:textSize="12sp"
                         android:text="User 3 long placeholder" />
 
                 </LinearLayout>
@@ -187,14 +212,16 @@
                     android:orientation="vertical"
                     android:gravity="center_horizontal">
 
-                    <ImageView
+                    <com.google.android.material.imageview.ShapeableImageView
                         android:id="@+id/iv_explore_show_user_4"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
                         android:layout_marginTop="2dp"
                         android:layout_marginBottom="2dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/account" />
+                        app:shapeAppearanceOverlay="@style/exploreMovieAccountRoundedImageView"
+                        app:srcCompat="@drawable/account" />
+
 
                     <TextView
                         android:id="@+id/tv_explore_show_user_4"
@@ -202,6 +229,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:textAlignment="center"
+                        android:textSize="12sp"
                         android:text="User 4 long placeholder" />
 
                 </LinearLayout>

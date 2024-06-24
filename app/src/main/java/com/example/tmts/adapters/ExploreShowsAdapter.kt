@@ -12,12 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
-import com.example.tmts.beans.ShowDetails
-import com.example.tmts.beans.User
+import com.example.tmts.beans.results.ShowDetailsResult
+import com.example.tmts.interfaces.OnMoreAccountClickListener
 
 class ExploreShowsAdapter (
     private val context: Context,
-    private val mediaItems: ArrayList<Pair<ShowDetails, ArrayList<User>>> = ArrayList()
+    private val mediaItems: ArrayList<ShowDetailsResult> = ArrayList(),
+    private val moreAccountsClickListener: OnMoreAccountClickListener
 ) : RecyclerView.Adapter<ExploreShowsAdapter.ExploreMovieViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExploreMovieViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.explore_movie_item, parent, false)
@@ -33,14 +34,19 @@ class ExploreShowsAdapter (
         holder.bind(mediaItem)
     }
 
-    fun updateShows(showDetails: ShowDetails, user: User) {
-        val show = mediaItems.find { it.first == showDetails }
-        if (show == null) {
-            mediaItems.add(Pair(showDetails, arrayListOf(user)))
+    fun updateShows(showDetailsResult: ShowDetailsResult) {
+        val showPair = mediaItems
+            .find {
+                showDetailsResult.showTypeId == it.showTypeId &&
+                showDetailsResult.movieDetails?.id == it.movieDetails?.id &&
+                showDetailsResult.serieDetails?.id == it.serieDetails?.id
+            }
+        if (showPair == null) {
+            mediaItems.add(showDetailsResult)
             notifyItemInserted(mediaItems.size - 1)
         } else {
-            show.second.add(user)
-            notifyItemChanged(mediaItems.indexOf(show))
+            showPair.loadedUsers.shuffle()
+            notifyItemChanged(mediaItems.indexOf(showPair))
         }
     }
 
@@ -79,52 +85,58 @@ class ExploreShowsAdapter (
             }
         }
 
-        fun bind(showInfo: Pair<ShowDetails, List<User>>) {
+        fun bind(showInfo: ShowDetailsResult) {
             initObjects()
-            when (showInfo.first.showId) {
+            when (showInfo.showTypeId) {
                 "MOV" -> {
-                    val movieInfo = showInfo.first.movieDetails!!
+                    val movieInfo = showInfo.movieDetails!!
                     tvTitle.text = movieInfo.title
                     Glide.with(context)
                         .load("https://image.tmdb.org/t/p/w500${movieInfo.posterPath}")
                         .placeholder(R.drawable.movie)
                         .into(ivMovie)
-
-                    for (index: Int in showInfo.second.indices) {
-                        val user = showInfo.second[index]
-                        FirebaseInteraction.getUserProfileImageRef(
-                            user.id,
-                            onSuccess = {
-                                it.downloadUrl.addOnSuccessListener { uri ->
-                                    Glide.with(context)
-                                        .load(uri)
-                                        .into(ivsUser[index]!!)
-                                }.addOnFailureListener{ exc ->
-                                    Log.e("STORAGE DOWNLOAD", "Error: $exc")
-                                }
-                            }, onFailure = {
-                                Log.e("IMAGE ERROR", it)
-                            })
-
-                        tvsUser[index]!!.text = user.name
-                        cvsUser[index]!!.visibility = View.VISIBLE
-                    }
                 }
                 "SER" -> {
-                    val serieInfo = showInfo.first.serieDetails!!
+                    val serieInfo = showInfo.serieDetails!!
                     tvTitle.text = serieInfo.title
                     Glide.with(context)
                         .load("https://image.tmdb.org/t/p/w500${serieInfo.posterPath}")
                         .placeholder(R.drawable.movie)
                         .into(ivMovie)
-
-                    for (index: Int in showInfo.second.indices) {
-                        tvsUser[index]!!.text = showInfo.second[index].name
-                        cvsUser[index]!!.visibility = View.VISIBLE
-                    }
                 }
             }
+            for (index: Int in showInfo.loadedUsers.indices) {
+                val user = showInfo.loadedUsers[index]
+                FirebaseInteraction.getUserProfileImageRef(
+                    user.id,
+                    onSuccess = {
+                        it.downloadUrl.addOnSuccessListener { uri ->
+                            Glide.with(context)
+                                .load(uri)
+                                .into(ivsUser[index]!!)
+                        }.addOnFailureListener{ exc ->
+                            Log.e("STORAGE DOWNLOAD", "Error: $exc")
+                        }
+                    }, onFailure = {
+                        Log.e("IMAGE ERROR", it)
+                    })
 
+                tvsUser[index]!!.text = user.name
+                cvsUser[index]!!.visibility = View.VISIBLE
+            }
+            if (showInfo.retrievedUsers.size > 4) {
+                Glide.with(context)
+                    .load(R.drawable.add)
+                    .into(ivsUser[N_USERS-1]!!)
+                ivsUser[N_USERS-1]!!.setOnClickListener {
+                    moreAccountsClickListener.onMoreAccountClickListener(showInfo)
+                }
+                tvsUser[N_USERS-1]!!.text = "Explore more"
+                tvsUser[N_USERS-1]!!.setOnClickListener {
+                    moreAccountsClickListener.onMoreAccountClickListener(showInfo)
+                }
+                cvsUser[N_USERS-1]!!.visibility = View.VISIBLE
+            }
         }
     }
 

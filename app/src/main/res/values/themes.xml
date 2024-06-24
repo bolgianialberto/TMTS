@@ -12,4 +12,12 @@
         <item name="itemIconTint">@color/nav_item_color</item>
         <item name="itemTextColor">@color/nav_item_color</item>
     </style>
+    <style name="exploreMovieAccountRoundedImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">27dp</item>
+    </style>
+    <style name="exploreAccountRoundedImageView" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">45dp</item>
+    </style>
 </resources>

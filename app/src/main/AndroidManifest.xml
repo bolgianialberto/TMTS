@@ -15,6 +15,9 @@
         android:theme="@style/Theme.TMDb_example"
         tools:targetApi="31">
         <activity
+            android:name=".activities.MoreShowAccountsActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.CreateReviewActivity"
             android:exported="false" />
         <activity

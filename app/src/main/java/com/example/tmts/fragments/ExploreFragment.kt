@@ -56,9 +56,11 @@ class ExploreFragment : Fragment() {
     }
 
     private fun replaceFragment(fragment: Fragment) {
+
         val fragmentManager = parentFragmentManager
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(R.id.fl_explore_fragment, fragment)
         fragmentTransaction.commit()
     }
+
 }
