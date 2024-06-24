@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/et_bio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:hint="Write something about you..."
+        android:inputType="textMultiLine"
+
+        android:maxLength="97"
+        android:textSize="15sp" />
+
+    <TextView
+        android:id="@+id/tv_bio_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:text="errore"
+        android:textColor="@android:color/holo_red_dark"
+        android:visibility="gone"
+        android:layout_marginTop="8dp" />
+
+</LinearLayout>

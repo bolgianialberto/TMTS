@@ -37,9 +37,11 @@ object FirebaseInteraction {
     val moviesRef = mDbRef.child("shows").child("movies")
     val seriesRef = mDbRef.child("shows").child("series")
     val reviewsRef = mDbRef.child("reviews")
-    val reviewImagesRef = FirebaseStorage.getInstance().reference
+    val storageRef = FirebaseStorage.getInstance().reference
     val userRatingsRef = userRef.child("ratings")
     val watchlistRef = userRef.child("watchlists")
+    val followedUsersRef = userRef.child("followed")
+    val followersUsersRef = userRef.child("followers")
 
     fun fetchWatchlistsWithDetails(onSuccess: (List<Watchlist>) -> Unit, onError: (String) -> Unit) {
         watchlistRef.get().addOnSuccessListener { snapshot ->
@@ -117,13 +119,27 @@ object FirebaseInteraction {
         })
     }
 
+    fun getUserRefInStorage(
+        userId: String?,
+        onSuccess: (StorageReference) -> Unit,
+        onError: (String) -> Unit
+    ){
+        val filePath = "users/${userId}/profileImage"
+        val userImageRef = storageRef.child(filePath)
+        if(userImageRef != null){
+            onSuccess(userImageRef)
+        } else {
+            onError("User image not found")
+        }
+    }
+
     fun getReviewRefInStorage(
         review: Review,
         onSuccess: (StorageReference) -> Unit,
         onError: (String) -> Unit
     ){
         val filePath = "reviews/${review.id}.jpg" // Assumi che review abbia un campo reviewId
-        val reviewImageRef = reviewImagesRef.child(filePath)
+        val reviewImageRef = storageRef.child(filePath)
         if(reviewImageRef != null){
             onSuccess(reviewImageRef)
         } else {
@@ -201,7 +217,6 @@ object FirebaseInteraction {
             }
         })
     }
-
 
     fun getFollowingSeries(callback: (List<Triple<String, String, Long>>) -> Unit){
         followingSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -283,6 +298,28 @@ object FirebaseInteraction {
         })
     }
 
+    fun getFollowedUsers(callback: (List<String>) -> Unit, ){
+        FirebaseInteraction.followedUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val followed = mutableListOf<String>()
+
+                snapshot.children.forEach { child ->
+                    val followedID = child.key
+                    if (followedID != null) {//TODO: forse devo fare anche check se l'id effettivamente è id di un utente
+                        followed.add(followedID)
+                    }
+                }
+
+                callback(followed)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Errore nel recupero dei dati: ${error.message}")
+                callback(emptyList())
+            }
+        })
+    }
+
     fun getUserRateOnMedia(
         mediaId: String,
         onSuccess: ((Float) -> Unit)?,
@@ -327,6 +364,28 @@ object FirebaseInteraction {
 
             override fun onCancelled(databaseError: DatabaseError) {
                 onError.invoke("Errore: ${databaseError.message}")
+            }
+        })
+    }
+
+    fun getFollowersUsers(callback: (List<String>) -> Unit, ){
+        FirebaseInteraction.followersUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val followers = mutableListOf<String>()
+
+                snapshot.children.forEach { child ->
+                    val followerID = child.key
+                    if (followerID != null) {//TODO: forse devo fare anche check se l'id effettivamente è id di un utente
+                        followers.add(followerID)
+                    }
+                }
+
+                callback(followers)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                println("Errore nel recupero dei dati: ${error.message}")
+                callback(emptyList())
             }
         })
     }
@@ -597,7 +656,7 @@ object FirebaseInteraction {
         if (reviewId != null) {
             if (uri != null) {
                 val filePath = "reviews/$reviewId.jpg"
-                val imageRef = reviewImagesRef.child(filePath)
+                val imageRef = storageRef.child(filePath)
 
                 imageRef.putFile(uri).addOnSuccessListener {
                     imageRef.downloadUrl.addOnSuccessListener { imageUrl ->

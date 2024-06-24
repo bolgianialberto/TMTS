@@ -1,6 +1,7 @@
 package com.example.tmts.adapters
 
 import android.content.Context
+import android.media.Image
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -42,6 +43,7 @@ class ReviewAdapter (
         private val tvDate: TextView = itemView.findViewById(R.id.tv_comment_activity_date)
         private val tvComment: TextView = itemView.findViewById(R.id.tv_comment_activity_user_comments)
         private val ivPhoto: ImageView = itemView.findViewById(R.id.iv_comment_activity_user_photo)
+        private val ivUserPhoto: ImageView = itemView.findViewById(R.id.iv_comment_activity_user_profile)
         fun bind(review: Review) {
             Log.d("review", "${review}")
             tvDate.text = review.date
@@ -73,6 +75,22 @@ class ReviewAdapter (
                     }.addOnFailureListener { exception ->
                         Log.e("FirebaseStorage", "Errore durante il download dell'immagine", exception)
                         ivPhoto.visibility = View.GONE
+                    }
+                },
+                onError = {message ->
+                    Log.d("ReviewAdapter", message)
+                }
+            )
+
+            FirebaseInteraction.getUserRefInStorage(
+                review.idUser,
+                onSuccess = {userImageRef ->
+                    userImageRef.downloadUrl.addOnSuccessListener { uri ->
+                        Glide.with(context)
+                            .load(uri)
+                            .into(ivUserPhoto)
+                    }.addOnFailureListener { exception ->
+                        Log.e("FirebaseStorage", "Errore durante il download dell'immagine", exception)
                     }
                 },
                 onError = {message ->
