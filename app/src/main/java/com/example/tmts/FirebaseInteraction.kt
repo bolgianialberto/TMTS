@@ -857,6 +857,7 @@ object FirebaseInteraction {
             }
     }
 
+    /*
     fun updateNextToSee (
         serieId: Int,
         watchedSeason: Int,
@@ -967,6 +968,108 @@ object FirebaseInteraction {
                 }
             }
         }
+    }
+
+     */
+    fun updateNextToSee(
+        serieId: Int,
+        watchedSeason: Int,
+        watchedEpisode: Int,
+        callback: (() -> Unit)? = null
+    ) {
+        val serieRef = followingSeriesRef.child(serieId.toString())
+        val episodeRef = serieRef.child("seasons").child(watchedSeason.toString()).child("episodes").child(watchedEpisode.toString())
+
+        episodeRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val currentValue = snapshot.getValue(Boolean::class.java) ?: false
+                val newValue = !currentValue
+
+                setEpisodeValue(serieId, watchedSeason, watchedEpisode, newValue) {
+                    getNextToSee(serieId) { nextToSeePair ->
+                        if (newValue) {
+                            if (watchedSeason < nextToSeePair!!.first || (watchedSeason == nextToSeePair.first && watchedEpisode < nextToSeePair.second)) {
+                                setNextToSee(serieId, watchedSeason, watchedEpisode) {
+                                    callback?.invoke()
+                                }
+                            } else if (nextToSeePair.first == watchedSeason && nextToSeePair.second == watchedEpisode) {
+                                findNextEpisode(serieRef, serieId, nextToSeePair.first, nextToSeePair.second + 1, callback)
+                            } else {
+                                callback?.invoke()
+                            }
+                        } else {
+                            if (watchedSeason < nextToSeePair!!.first || (watchedSeason == nextToSeePair.first && watchedEpisode < nextToSeePair.second)) {
+                                setNextToSee(serieId, watchedSeason, watchedEpisode) {
+                                    callback?.invoke()
+                                }
+                            } else if (nextToSeePair.first == watchedSeason && nextToSeePair.second == watchedEpisode) {
+                                findNextEpisode(serieRef, serieId, nextToSeePair.first, nextToSeePair.second + 1, callback)
+                            } else {
+                                callback?.invoke()
+                            }
+                        }
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("updateNextToSee", "Errore durante il controllo dello stato dell'episodio: ${error.message}")
+            }
+        })
+    }
+
+    private fun findNextEpisode(
+        serieRef: DatabaseReference,
+        serieId: Int,
+        seasonNumber: Int,
+        episodeNumber: Int,
+        callback: (() -> Unit)?
+    ) {
+        val nextEpisodeRef = serieRef.child("seasons").child(seasonNumber.toString()).child("episodes").child(episodeNumber.toString())
+
+        nextEpisodeRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists() && snapshot.getValue(Boolean::class.java) == true) {
+                    findNextEpisode(serieRef, serieId, seasonNumber, episodeNumber + 1, callback)
+                } else if (snapshot.exists()) {
+                    val newNext = "${seasonNumber}_$episodeNumber"
+                    serieRef.child("nextToSee").setValue(newNext)
+                    callback?.invoke()
+                } else {
+                    serieRef.child("seasons").child(seasonNumber.toString()).child("status").setValue(true)
+
+                    val nextSeasonRef = serieRef.child("seasons").child((seasonNumber + 1).toString())
+
+                    nextSeasonRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                findNextEpisode(serieRef, serieId,seasonNumber + 1, 1, callback)
+                            } else {
+                                serieRef.child("nextToSee").setValue(null)
+                                serieRef.removeValue().addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        Log.d("Firebase", "Serie rimossa con successo")
+                                    } else {
+                                        Log.e("Firebase", "Errore nella rimozione della serie", task.exception)
+                                    }
+                                }
+                                val watchedSeriesRef = mDbRef.child("users").child(user!!.uid).child("watched_series")
+                                watchedSeriesRef.child(serieId.toString()).setValue(true)
+                                callback?.invoke()
+                            }
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Log.e("SerieHomeFragment", "Errore durante il controllo della prossima stagione: ${error.message}")
+                        }
+                    })
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("SerieHomeFragment", "Errore durante il controllo del prossimo episodio: ${error.message}")
+            }
+        })
     }
 
     fun getNextToSee(serieId: Int, callback: (Pair<Int, Int>?) -> Unit){
