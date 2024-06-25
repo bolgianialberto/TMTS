@@ -30,8 +30,10 @@ import com.example.tmts.R
 import com.example.tmts.activities.MainEmptyActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
+import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.adapters.MediaAdapter
 import com.example.tmts.beans.Media
+import com.example.tmts.beans.Watchlist
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -54,6 +56,7 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
     private lateinit var tvFollowingCount: TextView
     private lateinit var watchedMoviesAdapter: MediaAdapter
     private lateinit var watchedSeriesAdapter: MediaAdapter
+    private var watchlistsAdapter: AddToWatchlistAdapter? = null
     private lateinit var llWatchedMovies: LinearLayout
     private lateinit var llWatchedSeries: LinearLayout
     private lateinit var llWatchlists: LinearLayout
@@ -104,6 +107,8 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
             startActivity(intent)
         }
 
+        watchlistsAdapter = AddToWatchlistAdapter(requireContext(), emptyList()) {}
+
         val rvWatchedMovie: RecyclerView = view.findViewById(R.id.rv_watched_movies)
         rvWatchedMovie.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rvWatchedMovie.adapter = watchedMoviesAdapter
@@ -113,6 +118,8 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         rvWatchedSerie.adapter = watchedSeriesAdapter
 
         val rvWatchlist: RecyclerView = view.findViewById(R.id.rv_watchlist_account)
+        rvWatchlist.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        rvWatchlist.adapter = watchlistsAdapter
 
         FirebaseInteraction.getWatchedMovies { movieIds ->
             onWatchedMoviesFetched(movieIds)
@@ -121,6 +128,15 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         FirebaseInteraction.getWatchedSeries { serieIds ->
             onWatchedSeriesFetched(serieIds)
         }
+
+        FirebaseInteraction.fetchWatchlistsWithDetails(
+            onSuccess = {watchlists ->
+                watchlistsAdapter!!.updateMedia(watchlists)
+        },
+            onError = { errorMessage ->
+                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+            }
+        )
 
         // Fetch user's display name and change the view accordingly
         userIdRef.child("name").addValueEventListener(object: ValueEventListener {
@@ -206,12 +222,10 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
             MediaRepository.getMovieDetails(movieId.toInt(),
                 onSuccess = {movie ->
                     val movieMedia = Media(movie.id, movie.title, "", movie.posterPath)
-                    Log.d("AccountFragment", "movieMedia = ${movieMedia}")
                     movies.add(movieMedia)
                     completedRequests++
 
                     if (completedRequests == totalRequests) {
-                        Log.d("AccountFragment", "movies = ${movies}")
                         watchedMoviesAdapter.updateMedia(movies)
                     }
                 },
@@ -228,12 +242,10 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
             MediaRepository.getSerieDetails(serieId.toInt(),
                 onSuccess = {serie ->
                     val serieMedia = Media(serie.id, serie.title, "", serie.posterPath)
-                    Log.d("AccountFragment", "serieMedia = ${serieMedia}")
                     series.add(serieMedia)
                     completedRequests++
 
                     if (completedRequests == totalRequests) {
-                        Log.d("AccountFragment", "series = ${series}")
                         watchedSeriesAdapter.updateMedia(series)
                     }
                 },
