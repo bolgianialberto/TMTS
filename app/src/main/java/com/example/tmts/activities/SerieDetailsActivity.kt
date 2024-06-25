@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RatingBar
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -25,6 +26,7 @@ import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.TMDbApiClient
+import com.example.tmts.Utils
 import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.adapters.NetworkAdapter
 import com.example.tmts.adapters.SeasonAdapter
@@ -61,6 +63,7 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var tvAverageRate: TextView
     private lateinit var ivFilledStar: ImageView
     private lateinit var btnWatchlist: Button
+    private lateinit var layout: ScrollView
     private var serieId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,6 +92,7 @@ class SerieDetailsActivity : AppCompatActivity() {
         tvAverageRate = findViewById(R.id.tv_rating)
         ivFilledStar = findViewById(R.id.iv_filled_star)
         btnWatchlist = findViewById(R.id.btn_watchlist)
+        layout = findViewById(R.id.sv_serie_details)
 
         val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
         backdropImageView.colorFilter = colorFilter
@@ -113,6 +117,14 @@ class SerieDetailsActivity : AppCompatActivity() {
 
         setInitialButtonState(serieId)
         setInitialRateState(serieId)
+
+        layout.setOnTouchListener(Utils.detectSwipe(this){ direction ->
+            when (direction) {
+                "MOVE_RIGHT" -> {
+                    onBackPressed()
+                }
+            }
+        })
     }
     private fun onError(){
         Log.e("SerieDetailsActivity", "Something went wrong")

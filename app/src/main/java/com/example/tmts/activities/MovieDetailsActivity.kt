@@ -14,6 +14,7 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RatingBar
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -24,6 +25,7 @@ import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
+import com.example.tmts.Utils
 import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.beans.MovieDetails
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -45,6 +47,7 @@ class MovieDetailsActivity : AppCompatActivity() {
     private lateinit var btnAddToWatchlist: Button
     private lateinit var tvAverageRate: TextView
     private lateinit var ivFilledStar: ImageView
+    private lateinit var layout: ScrollView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,6 +72,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         btnAddToWatchlist = findViewById(R.id.btn_watchlist)
         tvAverageRate = findViewById(R.id.tv_rating)
         ivFilledStar = findViewById(R.id.iv_filled_star)
+        layout = findViewById(R.id.sv_movie_details)
 
         val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
         backdropImageView.colorFilter = colorFilter
@@ -85,6 +89,14 @@ class MovieDetailsActivity : AppCompatActivity() {
 
         setInitialButtonState(movieId)
         setInitialRateState(movieId)
+
+        layout.setOnTouchListener(Utils.detectSwipe(this){ direction ->
+            when (direction) {
+                "MOVE_RIGHT" -> {
+                    onBackPressed()
+                }
+            }
+        })
     }
 
     private fun onError(){

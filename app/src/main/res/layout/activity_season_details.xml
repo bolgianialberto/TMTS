@@ -1,46 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
     tools:context=".activities.SeasonDetailsActivity"
-    android:orientation="vertical"
-    android:background="@color/lightergray"
-    >
+    android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:id="@+id/main_season_details"
+    android:background="@color/lightergray">
 
     <LinearLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="10dp"
-        android:gravity="center_vertical">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        >
 
-        <Button
-            android:id="@+id/iv_arrow_back_season_details"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/arrow_back"
-            android:layout_marginEnd="10dp"/>
-
-        <TextView
-            android:id="@+id/tv_season_details_serie_title"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="serie_title_placeholder"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:gravity="left"/>
+            android:orientation="horizontal"
+            android:padding="10dp"
+            android:gravity="center_vertical">
+
+            <Button
+                android:id="@+id/iv_arrow_back_season_details"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:background="@drawable/arrow_back"
+                android:layout_marginEnd="10dp"/>
+
+            <TextView
+                android:id="@+id/tv_season_details_serie_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="serie_title_placeholder"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:gravity="left"/>
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_seasons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            tools:listitem="@layout/season_item"/>
 
     </LinearLayout>
 
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_seasons"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="10dp"
-        tools:listitem="@layout/season_item"/>
-
-</LinearLayout>
+</ScrollView>

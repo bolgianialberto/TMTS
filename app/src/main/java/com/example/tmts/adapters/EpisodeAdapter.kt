@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
+import com.example.tmts.Utils
 import com.example.tmts.activities.EpisodeDetailsActivity
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.Network
@@ -32,7 +33,8 @@ class EpisodeAdapter(
     private val context: Context,
     private val serieId: Int,
     private val serieName: String?,
-    private var mediaItems: List<EpisodeDetails>
+    private var mediaItems: List<EpisodeDetails>,
+    private val onSwipeRight: (() -> Unit)?
 ) : RecyclerView.Adapter<EpisodeAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -61,6 +63,15 @@ class EpisodeAdapter(
         private val btnCheck: Button = itemView.findViewById(R.id.btn_episode_check)
         private val llEpisodeInfo: LinearLayout = itemView.findViewById(R.id.ll_episode_info)
 
+        init{
+            itemView.setOnTouchListener(Utils.detectSwipe(context){ direction ->
+                when (direction) {
+                    "MOVE_RIGHT" -> {
+                        onSwipeRight?.let { it() }
+                    }
+                }
+            })
+        }
         fun bind(mediaItem: EpisodeDetails) {
             mediaItem.serieId = serieId
             mediaItem.serieName = serieName

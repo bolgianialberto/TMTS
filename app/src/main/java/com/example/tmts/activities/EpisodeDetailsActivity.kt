@@ -8,9 +8,11 @@ import android.view.GestureDetector
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -20,6 +22,7 @@ import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
+import com.example.tmts.Utils
 import com.example.tmts.adapters.CastAdapter
 import com.example.tmts.adapters.SeasonAdapter
 import com.example.tmts.beans.EpisodeDetails
@@ -35,6 +38,7 @@ class EpisodeDetailsActivity : AppCompatActivity() {
     private lateinit var tvReleaseDate: TextView
     private lateinit var tvRuntime: TextView
     private lateinit var rvCast: RecyclerView
+    private lateinit var layout: ScrollView
     private var serieId: Int = 0
     private var seasonNumber: Int = 0
     private var episodeNumber: Int = 0
@@ -50,6 +54,7 @@ class EpisodeDetailsActivity : AppCompatActivity() {
         episodeNumber = intent.getIntExtra("episodeNumber", -1)
         serieName = intent.getStringExtra("serieName")
 
+        layout = findViewById(R.id.sv_episode_details)
         tvOverview = findViewById(R.id.tv_episode_details_overview)
         ivBackdrop = findViewById(R.id.iv_episode_details_backdrop)
         btnBackSearch = findViewById(R.id.iv_arrow_back_episode_details)
@@ -78,6 +83,13 @@ class EpisodeDetailsActivity : AppCompatActivity() {
             onBackPressed()
         }
 
+        layout.setOnTouchListener(Utils.detectSwipe(this){direction ->
+            when (direction) {
+                "MOVE_RIGHT" -> {
+                    onBackPressed()
+                }
+            }
+        })
     }
 
     private fun updateUI(episode: EpisodeDetails){

@@ -10,12 +10,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.R
+import com.example.tmts.Utils
 import com.example.tmts.beans.Network
 import com.example.tmts.beans.SeasonDetails
 
 class SeasonAdapter (
     private val context: Context,
-    private var mediaItems: List<SeasonDetails>
+    private var mediaItems: List<SeasonDetails>,
+    private val onSwipeRight: () -> Unit
 ) : RecyclerView.Adapter<SeasonAdapter.ViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.season_item, parent, false)
@@ -48,12 +50,22 @@ class SeasonAdapter (
                     rvEpisode.visibility = View.GONE
                 }
             }
+
+            itemView.setOnTouchListener(Utils.detectSwipe(context){ direction ->
+                when (direction) {
+                    "MOVE_RIGHT" -> {
+                        onSwipeRight()
+                    }
+                }
+            })
         }
         fun bind(mediaItem: SeasonDetails) {
             tvSeasonTitle.text = mediaItem.title
 
             rvEpisode.layoutManager = LinearLayoutManager(itemView.context)
-            rvEpisode.adapter = EpisodeAdapter(context, mediaItem.serieId, mediaItem.serieName, mediaItem.episodes)
+            rvEpisode.adapter = EpisodeAdapter(context, mediaItem.serieId, mediaItem.serieName, mediaItem.episodes){
+                onSwipeRight()
+            }
         }
     }
 }
