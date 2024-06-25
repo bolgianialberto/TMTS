@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.View
@@ -33,19 +32,12 @@ import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.adapters.MediaAdapter
 import com.example.tmts.beans.Media
-import com.example.tmts.beans.Watchlist
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
 
 class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteraction.kt
-    private var mDbRef = FirebaseDatabase.getInstance().getReference()
     private var mAuth = FirebaseAuth.getInstance()
     private var mStorage = FirebaseStorage.getInstance().getReference()
     private lateinit var ivAccountIcon: ImageView
@@ -74,12 +66,6 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        // Fetch user id Firebase reference
-        val userIdRef = mDbRef.child("users").child(currentUser.uid)
-
-        // Fetch user id Firebase reference
-        val userBioRef = mDbRef.child("users").child(currentUser.uid).child("bio")
 
         // Fetch user's Firebase image reference
         val userImageRef = mStorage.child("users").child(currentUser.uid).child("profileImage")
@@ -139,26 +125,29 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         )
 
         // Fetch user's display name and change the view accordingly
-        userIdRef.child("name").addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val name = snapshot.getValue(String::class.java)
-                tvUsername.text = "$name"
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-        })
+        FirebaseInteraction.getUsername(currentUser.uid,
+            onSuccess = {username ->
+                tvUsername.text = "$username"
+            },
+            onFailure = {errorMessage ->
+                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
+            })
 
         // Load previously uploaded image by user, if it exists, otherwise load default image
         loadUserImage(userImageRef, ivAccountIcon)
 
         // Load previously written user bio, if it exists, otherwise set default bio
-        loadUserBio(userBioRef, tvBio)
+        FirebaseInteraction.getUserBio(
+            onSuccess = { bio ->
+                tvBio.text = bio
+            },
+            onFailure = {
+                tvBio.text = "Write something about you..."
+            }
+        )
 
         // Load user's follower data from Firebase
-        loadUserFollowerData(userIdRef, tvFollowerCount, tvFollowingCount)
-
+        loadUserFollowerData(tvFollowerCount, tvFollowingCount)
 
         // Set view or buttons listeners
         ivAccountIcon.setOnClickListener{
@@ -168,7 +157,7 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
             popup.show()
             popup.setOnMenuItemClickListener {
                 when(it.itemId) {
-                    R.id.edit_profile_icon -> editProfileIcon()
+                    R.id.edit_profile_icon -> selectImageFromGallery()
                 }
                 true
             }
@@ -181,7 +170,7 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
             popup.show()
             popup.setOnMenuItemClickListener {
                 when(it.itemId) {
-                    R.id.edit_profile -> editProfile(userBioRef)
+                    R.id.edit_profile -> showEditBioDialog()
                     R.id.logout_button -> performLogout()
                 }
                 true
@@ -254,7 +243,6 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
     }
 
     private fun loadUserFollowerData(
-        userIdRef: DatabaseReference,
         tvFollowerCount: TextView,
         tvFollowingCount: TextView
     ) {
@@ -267,33 +255,9 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         FirebaseInteraction.getFollowedUsers { followed ->
             tvFollowingCount.text = followed.size.toString()
         }
-
     }
 
-    private fun loadUserBio(userBioRef: DatabaseReference, tvBio: TextView) {
-        userBioRef.addValueEventListener(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val bio = snapshot.getValue(String::class.java)
-                tvBio.text = (bio ?: "Write something about you...")
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                TODO("Not yet implemented")
-            }
-        })
-    }
-
-    private fun editProfileIcon(): Boolean {
-        selectImageFromGallery()
-        return true
-    }
-
-    private fun editProfile(userBioRef: DatabaseReference): Boolean {
-        showEditBioDialog(userBioRef)
-        return true
-    }
-
-    private fun showEditBioDialog(userBioRef: DatabaseReference) {
+    private fun showEditBioDialog() {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_edit_bio, null)
         val editTextBio = dialogView.findViewById<EditText>(R.id.et_bio)
         val textViewError = dialogView.findViewById<TextView>(R.id.tv_bio_error)
@@ -319,8 +283,16 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
             .setView(dialogView)
             .setPositiveButton("Save") {dialog, _ ->
                 val newBio = editTextBio.text.toString()
-                tvBio.setText(newBio)
-                saveBioToFirebase(userBioRef, newBio)
+
+                FirebaseInteraction.saveBioToFirebase(newBio,
+                    onSuccess = {
+                        Toast.makeText(requireContext(), "Bio updated successfully!", Toast.LENGTH_SHORT).show()
+                        tvBio.setText(newBio)
+                },
+                    onFailure = {
+                        Toast.makeText(requireContext(), "Failed to update bio!", Toast.LENGTH_SHORT).show()
+                    }
+                )
                 dialog.dismiss()
             }
             .setNegativeButton("Cancel") {dialog, _ ->
@@ -328,16 +300,6 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
             }
             .create()
             .show()
-    }
-
-    private fun saveBioToFirebase(userBioRef: DatabaseReference, newBio: String) {
-        userBioRef.setValue(newBio)
-            .addOnSuccessListener {
-                Toast.makeText(requireContext(), "Bio updated successfully!", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                Toast.makeText(requireContext(), "Failed to update bio!", Toast.LENGTH_SHORT).show()
-            }
     }
 
     private fun performLogout(): Boolean {
@@ -386,5 +348,4 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         super.onDestroyView()
         selectImageFromGalleryResult.unregister()
     }
-
 }

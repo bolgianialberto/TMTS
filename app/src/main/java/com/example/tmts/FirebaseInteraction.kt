@@ -3,8 +3,6 @@ package com.example.tmts
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
-import androidx.core.content.ContextCompat
 import com.example.tmts.beans.Media
 import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.Review
@@ -13,15 +11,12 @@ import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageException
 import com.google.firebase.storage.StorageReference
 import java.util.Date
 import java.util.Locale
@@ -44,6 +39,7 @@ object FirebaseInteraction {
     val watchlistRef = userRef.child("watchlists")
     var followedUsersRef = mDbRef.child("users").child(user.uid).child("followed")
     var followersUsersRef = mDbRef.child("users").child(user.uid).child("followers")
+    val userBioRef = userRef.child("bio")
 
     fun fetchWatchlistsWithDetails(onSuccess: (List<Watchlist>) -> Unit, onError: (String) -> Unit) {
         watchlistRef.get().addOnSuccessListener { snapshot ->
@@ -119,6 +115,36 @@ object FirebaseInteraction {
                 onFailure(error.message)
             }
         })
+    }
+
+    fun getUserBio(onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+        userBioRef.addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val bio = snapshot.getValue(String::class.java)
+                if (bio != null) {
+                    onSuccess(bio)
+                } else {
+                    onFailure("No biography found for user ID: ${user.uid}")
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure(error.message)
+            }
+        })
+    }
+
+    fun saveBioToFirebase(newBio: String, onSuccess: (() -> Unit)? = null, onFailure: (() -> Unit)? = null) {
+        userBioRef.setValue(newBio)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess?.invoke()
+                    Log.d("Firebase", "Bio aggiunta con successo a Firebase")
+                } else {
+                    onFailure?.invoke()
+                    Log.e("Firebase", "Errore durante l'aggiunta della bio a Firebase", task.exception)
+                }
+            }
     }
 
     fun getReviewRefInStorage(
