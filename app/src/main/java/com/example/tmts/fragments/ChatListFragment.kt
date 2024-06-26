@@ -1,5 +1,6 @@
 package com.example.tmts.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,11 +11,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
+import com.example.tmts.activities.AddChatActivity
 import com.example.tmts.adapters.ChatListAdapter
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class ChatListFragment : Fragment(){
 
     private lateinit var chatListAdapter: ChatListAdapter
+    private lateinit var addChatBtt: FloatingActionButton
     private lateinit var rvChatList: RecyclerView
 
     override fun onResume() {
@@ -32,6 +36,11 @@ class ChatListFragment : Fragment(){
         rvChatList = view.findViewById(R.id.rv_chat_list)
         rvChatList.layoutManager = LinearLayoutManager(requireContext())
         rvChatList.adapter = chatListAdapter
+        addChatBtt = view.findViewById(R.id.flt_btt_add_chat)
+        addChatBtt.setOnClickListener {
+            val intent = Intent(context, AddChatActivity::class.java)
+            requireContext().startActivity(intent)
+        }
         loadChats()
         return view
     }

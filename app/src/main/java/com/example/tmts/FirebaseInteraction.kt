@@ -881,6 +881,39 @@ object FirebaseInteraction {
 
     }
 
+    fun getUsersStartingWith(
+        startingChars: String,
+        onSuccess: (List<User>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val lowerStartingChars = startingChars.lowercase()
+        mDbRef.child("users").addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val users = mutableListOf<User>()
+                snapshot.children.forEach {usr ->
+                    val userId = usr.key
+                    val username = usr.child("name").value
+                    val email = usr.child("email").value
+                    if (
+                        userId != null &&
+                        userId != user.uid &&
+                        username != null &&
+                        username.toString().lowercase().startsWith(lowerStartingChars) &&
+                        email != null) {
+                        val res = User(userId, username.toString(), email.toString())
+                        users.add(res)
+                    }
+                }
+                onSuccess(users)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure(error.toString())
+            }
+
+        })
+    }
+
     fun getSenderRoomNewMessages(
         previousMessages: List<Pair<String, Message>>,
         senderRoom: String,

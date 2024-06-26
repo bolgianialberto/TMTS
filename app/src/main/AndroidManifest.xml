@@ -15,6 +15,9 @@
         android:theme="@style/Theme.TMDb_example"
         tools:targetApi="31">
         <activity
+            android:name=".activities.AddChatActivity"
+            android:exported="false" />
+        <activity
             android:name=".activities.ChatActivity"
             android:exported="false" />
         <activity
