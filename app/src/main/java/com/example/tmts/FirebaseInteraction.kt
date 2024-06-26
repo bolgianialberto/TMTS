@@ -2,6 +2,7 @@ package com.example.tmts
 
 import android.icu.text.SimpleDateFormat
 import android.util.Log
+import com.example.tmts.beans.Message
 import com.example.tmts.beans.Review
 import com.example.tmts.beans.User
 import com.google.firebase.auth.FirebaseAuth
@@ -838,23 +839,39 @@ object FirebaseInteraction {
     }
 
     fun getUserChats(
-        onSuccess: (List<User>) -> Unit,
+        onSuccess: (List<Pair<String, Message>>) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        mDbRef.child("users").addListenerForSingleValueEvent(object: ValueEventListener {
+        mDbRef.child("chat").addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val users = mutableListOf<User>()
+                val chats = mutableListOf<Pair<String, Message>>()
 
-                snapshot.children.forEach { userRes ->
-                    val uid = userRes.key
-                    val name = userRes.child("name").value
-                    val email = userRes.child("email").value
-                    Log.d("F USER", "$uid, $name, $email $userRes.key")
-                    if (uid != null && uid != user.uid && name != null && email != null) {
-                        users.add(User(uid, name.toString(), email.toString()))
+                snapshot.children.forEach { chat ->
+                    val chatId = chat.key
+                    val lastMessage = chat.child("messages").children.maxByOrNull { it.child("timestamp").value as Long }!!
+                    val senderId = lastMessage.child("senderId").value
+                    val receiverId = lastMessage.child("receiverId").value
+                    val text = lastMessage.child("text").value
+                    val timestamp = lastMessage.child("timestamp").value
+                    if (
+                        chatId != null &&
+                        chatId.toString().startsWith(user.uid) &&
+                        senderId != null &&
+                        receiverId != null &&
+                        text != null &&
+                        timestamp != null
+                        ) {
+                        val userId = chatId.drop(user.uid.length)
+                        val lastMsg = Message(
+                            text.toString(),
+                            senderId.toString(),
+                            receiverId.toString(),
+                            timestamp as Long
+                        )
+                        chats.add(Pair(userId, lastMsg))
                     }
                 }
-                onSuccess(users)
+                onSuccess(chats)
             }
 
             override fun onCancelled(error: DatabaseError) {
@@ -862,6 +879,61 @@ object FirebaseInteraction {
             }
         })
 
+    }
+
+    fun getSenderRoomNewMessages(
+        previousMessages: List<Pair<String, Message>>,
+        senderRoom: String,
+        onSuccess: (List<Pair<String, Message>>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        mDbRef.child("chat").child(senderRoom).child("messages").addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val messages = mutableListOf<Pair<String, Message>>()
+                for (dataSnapshot in snapshot.children) {
+                    val messageId = dataSnapshot.key
+                    val senderId = dataSnapshot.child("senderId").value
+                    val receiverId = dataSnapshot.child("receiverId").value
+                    val text = dataSnapshot.child("text").value
+                    val timestamp = dataSnapshot.child("timestamp").value
+                    if (
+                        messageId != null &&
+                        !previousMessages.map { it.first }.contains(messageId) &&
+                        senderId != null &&
+                        receiverId != null &&
+                        text != null &&
+                        timestamp != null
+                        ) {
+                        messages.add(Pair(messageId, Message(
+                            text.toString(),
+                            senderId.toString(),
+                            receiverId.toString(),
+                            timestamp as Long
+                        )))
+                    }
+                }
+                onSuccess(messages)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure(error.toString())
+            }
+
+        })
+    }
+
+    fun sendMessage(
+        message: Message,
+        onSuccess: (Message) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val senderRoom = message.receiverId + message.senderId
+        val receiverRoom = message.senderId + message.receiverId
+        mDbRef.child("chat").child(senderRoom).child("messages").push().setValue(message).addOnSuccessListener {
+            mDbRef.child("chat").child(receiverRoom).child("messages").push().setValue(message).addOnSuccessListener {
+                onSuccess(message)
+            }.addOnFailureListener { fail -> onFailure(fail.toString()) }
+        }.addOnFailureListener { fail -> onFailure(fail.toString()) }
     }
 
     fun onError(){
