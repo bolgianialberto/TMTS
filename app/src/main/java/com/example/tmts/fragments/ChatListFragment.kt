@@ -1,6 +1,5 @@
 package com.example.tmts.fragments
 
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -9,13 +8,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.tmts.ChatResultContract
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
-import com.example.tmts.activities.AddChatActivity
 import com.example.tmts.adapters.ChatListAdapter
 import com.example.tmts.beans.Message
 import com.example.tmts.beans.User
+import com.example.tmts.beans.contracts.AddChatResultContract
+import com.example.tmts.beans.contracts.ChatResultContract
 import com.example.tmts.interfaces.OnChatClickListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -25,6 +24,9 @@ class ChatListFragment : Fragment(), OnChatClickListener {
     private lateinit var chatListAdapter: ChatListAdapter
     private lateinit var addChatBtt: FloatingActionButton
     private lateinit var rvChatList: RecyclerView
+    private val addChatActivityLauncher = registerForActivityResult(AddChatResultContract()) { _ ->
+        updateChats()
+    }
     private val chatActivityLauncher = registerForActivityResult(ChatResultContract()) { _ ->
         updateChats()
     }
@@ -42,8 +44,7 @@ class ChatListFragment : Fragment(), OnChatClickListener {
         rvChatList.adapter = chatListAdapter
         addChatBtt = view.findViewById(R.id.flt_btt_add_chat)
         addChatBtt.setOnClickListener {
-            val intent = Intent(context, AddChatActivity::class.java)
-            requireContext().startActivity(intent)
+            addChatActivityLauncher.launch(null)
         }
         loadChats()
         return view

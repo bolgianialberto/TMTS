@@ -1,9 +1,12 @@
 package com.example.tmts.activities
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
+import android.widget.Button
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -18,6 +21,7 @@ import com.example.tmts.beans.User
 
 class AddChatActivity : AppCompatActivity() {
 
+    private lateinit var bttBack: Button
     private lateinit var addChatAdapter: AddChatAdapter
     private lateinit var rvUsers: RecyclerView
     private lateinit var edtUsername: EditText
@@ -33,6 +37,13 @@ class AddChatActivity : AppCompatActivity() {
             insets
         }
 
+        bttBack = findViewById(R.id.btt_arrow_back_chats)
+        bttBack.setOnClickListener {
+            val resultIntent = Intent()
+            resultIntent.putExtra("closed", true)
+            setResult(Activity.RESULT_OK, resultIntent)
+            finish()
+        }
         addChatAdapter = AddChatAdapter(this)
         edtUsername = findViewById(R.id.edt_add_user_chat)
         edtUsername.addTextChangedListener(object : TextWatcher {
@@ -61,12 +72,12 @@ class AddChatActivity : AppCompatActivity() {
         rvUsers = findViewById(R.id.rv_add_chat)
         rvUsers.layoutManager = LinearLayoutManager(this)
         rvUsers.adapter = addChatAdapter
-        loadUsers("")
+        loadUsers()
     }
 
-    private fun loadUsers(startingChars: String) {
+    private fun loadUsers() {
         FirebaseInteraction.getUsersStartingWith(
-            startingChars,
+            "",
             onSuccess = {users ->
                 allUsers.addAll(users)
                 actuallyShownUsers.addAll(users)

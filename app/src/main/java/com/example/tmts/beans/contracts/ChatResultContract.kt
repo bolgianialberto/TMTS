@@ -1,4 +1,4 @@
-package com.example.tmts
+package com.example.tmts.beans.contracts
 
 import android.app.Activity
 import android.content.Context
