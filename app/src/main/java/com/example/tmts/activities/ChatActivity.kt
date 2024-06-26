@@ -1,5 +1,6 @@
 package com.example.tmts.activities
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -52,12 +53,14 @@ class ChatActivity : AppCompatActivity() {
         bttBack = findViewById(R.id.btt_arrow_back_chat
         )
         bttBack.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
+            /*val intent = Intent(this, MainActivity::class.java)
             intent.putExtra("reload", true)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            // intent.addFlags(Intent.)
-            startActivity(intent)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)*/
+            val resultIntent = Intent()
+            resultIntent.putExtra("closed", true)
+            setResult(Activity.RESULT_OK, resultIntent)
+            finish()
         }
         ivUserImage = findViewById(R.id.iv_account_chat_image)
         tvUser = findViewById(R.id.tv_chat_user)

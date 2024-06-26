@@ -74,7 +74,6 @@ object FirebaseInteraction {
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                Log.d("GET USER INFO", "Info for user $userId")
                 val username = snapshot.child("name").getValue(String::class.java)
                 val email = snapshot.child("email").getValue(String::class.java)
                 if (username != null && email != null) {

@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,15 +12,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
-import com.example.tmts.activities.ChatActivity
 import com.example.tmts.beans.Message
 import com.example.tmts.beans.User
+import com.example.tmts.interfaces.OnChatClickListener
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 class ChatListAdapter(
     private val context: Context,
+    private val chatClickListener: OnChatClickListener,
     private val usersWithLastMessageList: ArrayList<Pair<User, Message>> = ArrayList()
 ) : RecyclerView.Adapter<ChatListAdapter.ChatListViewHolder>() {
     inner class ChatListViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -59,10 +59,11 @@ class ChatListAdapter(
             tvLastMessage.text = lastMessage.text
             tvLastMessageTime.text = convertTimestampToDateString(lastMessage.timestamp)
             llUser.setOnClickListener {
-                val intent = Intent(context, ChatActivity::class.java)
+                chatClickListener.onChatClickListener(user.id)
+                /*val intent = Intent(context, ChatActivity::class.java)
                 intent.putExtra("userId", user.id)
                 intent.putExtra("username", user.name)
-                context.startActivity(intent)
+                context.startActivity(intent)*/
             }
         }
     }
@@ -85,14 +86,28 @@ class ChatListAdapter(
         notifyItemInserted(position)
     }
 
-    fun clearUsers() {
-        usersWithLastMessageList.clear()
-        notifyItemRangeRemoved(0, usersWithLastMessageList.size)
+    fun deleteUser(user: User) {
+        val position = usersWithLastMessageList.indexOf(usersWithLastMessageList.find { it.first == user })
+        usersWithLastMessageList.removeAt(position)
+        notifyItemRemoved(position)
     }
+
+    fun updateUser(userWithLastMessage: Pair<User, Message>) {
+        val previousPair = usersWithLastMessageList.find { it.first == userWithLastMessage.first }
+        var previousIndex = -1
+        if (previousPair != null) {
+            previousIndex = usersWithLastMessageList.indexOf(previousPair)
+        }
+        usersWithLastMessageList.removeAt(previousIndex)
+        val newIndex = addMessageWithTimestampOrder(userWithLastMessage)
+        notifyItemMoved(previousIndex, newIndex)
+        notifyItemChanged(newIndex)
+    }
+
 
     private fun addMessageWithTimestampOrder(userWithLastMessage: Pair<User, Message>): Int {
         val position = usersWithLastMessageList.binarySearch {
-            it.second.timestamp.compareTo(userWithLastMessage.second.timestamp)
+            userWithLastMessage.second.timestamp.compareTo(it.second.timestamp)
         }
         val insertionPoint = if (position < 0) -(position + 1) else position
         usersWithLastMessageList.add(insertionPoint, userWithLastMessage)
