@@ -65,7 +65,7 @@ class MoreShowAccountsAdapter(
                     Log.e("IMAGE ERROR", it)
                 })
             tvUsername.text = user.name
-            bttChat.setOnClickListener { chatToUserClickListener.onChatClickListener(user.id) }
+            bttChat.setOnClickListener { chatToUserClickListener.onChatClickListener(user.id, user.name) }
         }
     }
 }

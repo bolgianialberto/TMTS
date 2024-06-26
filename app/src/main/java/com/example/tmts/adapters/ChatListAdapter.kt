@@ -59,7 +59,7 @@ class ChatListAdapter(
             tvLastMessage.text = lastMessage.text
             tvLastMessageTime.text = convertTimestampToDateString(lastMessage.timestamp)
             llUser.setOnClickListener {
-                chatClickListener.onChatClickListener(user.id)
+                chatClickListener.onChatClickListener(user.id, user.name)
                 /*val intent = Intent(context, ChatActivity::class.java)
                 intent.putExtra("userId", user.id)
                 intent.putExtra("username", user.name)

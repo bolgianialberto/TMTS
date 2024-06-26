@@ -107,8 +107,7 @@ class ChatListFragment : Fragment(), OnChatClickListener {
         )
     }
 
-    override fun onChatClickListener(userId: String) {
-        val username = chatList.find { it.first.id == userId }!!.first.name
+    override fun onChatClickListener(userId: String, username: String) {
         chatActivityLauncher.launch(Pair(userId, username))
     }
 }

@@ -56,11 +56,27 @@ class MoreShowAccountsActivity : AppCompatActivity(), OnChatClickListener {
         tvShowTitle = findViewById(R.id.tv_more_account_show_title)
         tvShowOverview = findViewById(R.id.tv_more_account_show_description)
         bttBack = findViewById(R.id.btt_arrow_back_explore)
+
+        ivShowImage.setOnClickListener {
+            var showIntent: Intent? = null
+            // val intShowId = showId.toInt()
+            Log.d("INTENT LOG", "$showType $showId")
+            when (showType) {
+                "MOV" -> {
+                    Log.d("INTENT LOG 1", "$showType $showId")
+                    showIntent = Intent(this, MovieDetaisActivity::class.java)
+                    showIntent.putExtra("movieId", showId.toInt())
+                }
+                "SER" -> {
+                    Log.d("INTENT LOG 2", "$showType $showId")
+                    showIntent = Intent(this, SerieDetailsActivity::class.java)
+                    showIntent.putExtra("serieId", showId.toInt())
+                }
+            }
+            startActivity(showIntent!!)
+        }
         bttBack.setOnClickListener {
-            val intent = Intent(this, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            intent.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-            startActivity(intent)
+            finish()
         }
         loadData(showType, showId)
     }
@@ -121,8 +137,11 @@ class MoreShowAccountsActivity : AppCompatActivity(), OnChatClickListener {
         }
     }
 
-    override fun onChatClickListener(userId: String) {
-        Log.d("CHAT LOG", "chat w/ $userId")
+    override fun onChatClickListener(userId: String, username: String) {
+        val intent = Intent(this, ChatActivity::class.java)
+        intent.putExtra("userId", userId)
+        intent.putExtra("username", username)
+        startActivity(intent)
     }
 
 

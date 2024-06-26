@@ -1,5 +1,5 @@
 package com.example.tmts.interfaces
 
 interface OnChatClickListener {
-    fun onChatClickListener(userId: String)
+    fun onChatClickListener(userId: String, username: String)
 }
