@@ -59,16 +59,12 @@ class MoreShowAccountsActivity : AppCompatActivity(), OnChatClickListener {
 
         ivShowImage.setOnClickListener {
             var showIntent: Intent? = null
-            // val intShowId = showId.toInt()
-            Log.d("INTENT LOG", "$showType $showId")
             when (showType) {
                 "MOV" -> {
-                    Log.d("INTENT LOG 1", "$showType $showId")
                     showIntent = Intent(this, MovieDetaisActivity::class.java)
                     showIntent.putExtra("movieId", showId.toInt())
                 }
                 "SER" -> {
-                    Log.d("INTENT LOG 2", "$showType $showId")
                     showIntent = Intent(this, SerieDetailsActivity::class.java)
                     showIntent.putExtra("serieId", showId.toInt())
                 }

@@ -1,6 +1,7 @@
 package com.example.tmts.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -12,6 +13,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
+import com.example.tmts.activities.MovieDetaisActivity
+import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.beans.results.ShowDetailsResult
 import com.example.tmts.interfaces.OnMoreAccountClickListener
 
@@ -104,6 +107,20 @@ class ExploreShowsAdapter (
                         .placeholder(R.drawable.movie)
                         .into(ivMovie)
                 }
+            }
+            ivMovie.setOnClickListener {
+                var showIntent: Intent? = null
+                when (showInfo.showTypeId) {
+                    "MOV" -> {
+                        showIntent = Intent(context, MovieDetaisActivity::class.java)
+                        showIntent.putExtra("movieId", showInfo.movieDetails!!.id.toInt())
+                    }
+                    "SER" -> {
+                        showIntent = Intent(context, SerieDetailsActivity::class.java)
+                        showIntent.putExtra("serieId", showInfo.serieDetails!!.id.toInt())
+                    }
+                }
+                context.startActivity(showIntent!!)
             }
             for (index: Int in showInfo.loadedUsers.indices) {
                 val user = showInfo.loadedUsers[index]
