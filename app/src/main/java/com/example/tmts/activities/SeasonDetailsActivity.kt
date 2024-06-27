@@ -25,7 +25,7 @@ class SeasonDetailsActivity : AppCompatActivity() {
     private lateinit var seasonAdapter: SeasonAdapter
     private lateinit var btnBackArrow: Button
     private lateinit var tvSerieTitle: TextView
-    private lateinit var layout: ScrollView
+    private lateinit var layout: LinearLayout
     private var serieId = 0
     val seasonsList = mutableListOf<SeasonDetails>()
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,7 +38,7 @@ class SeasonDetailsActivity : AppCompatActivity() {
 
         btnBackArrow = findViewById(R.id.iv_arrow_back_season_details)
         tvSerieTitle = findViewById(R.id.tv_season_details_serie_title)
-        layout = findViewById(R.id.main_season_details)
+        layout = findViewById(R.id.main)
 
         seasonAdapter = SeasonAdapter(this, emptyList()){
             onBackPressed()
@@ -52,15 +52,22 @@ class SeasonDetailsActivity : AppCompatActivity() {
             onBackPressed()
         }
 
-        layout.setOnTouchListener(Utils.detectSwipe(this){ direction ->
+        applySwipeGesture()
+
+        loadData()
+    }
+
+    private fun applySwipeGesture() {
+        val swipeHandler = { direction: String ->
             when (direction) {
                 "MOVE_RIGHT" -> {
                     onBackPressed()
                 }
             }
-        })
+        }
 
-        loadData()
+        layout.setOnTouchListener(Utils.detectSwipe(this@SeasonDetailsActivity, swipeHandler))
+        rvSeasons.setOnTouchListener(Utils.detectSwipe(this@SeasonDetailsActivity, swipeHandler))
     }
 
     override fun onResume() {

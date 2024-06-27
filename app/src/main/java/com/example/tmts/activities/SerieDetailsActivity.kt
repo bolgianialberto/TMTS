@@ -64,6 +64,7 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var ivFilledStar: ImageView
     private lateinit var btnWatchlist: Button
     private lateinit var layout: ScrollView
+    private lateinit var ivSeen: ImageView
     private var serieId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -93,6 +94,7 @@ class SerieDetailsActivity : AppCompatActivity() {
         ivFilledStar = findViewById(R.id.iv_filled_star)
         btnWatchlist = findViewById(R.id.btn_watchlist)
         layout = findViewById(R.id.sv_serie_details)
+        ivSeen = findViewById(R.id.iv_seen)
 
         val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
         backdropImageView.colorFilter = colorFilter
@@ -100,23 +102,9 @@ class SerieDetailsActivity : AppCompatActivity() {
         rvNetwork.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvNetwork.adapter = networkAdapter
 
-        if (serieId != -1) {
-            MediaRepository.getSerieDetails(
-                serieId,
-                onSuccess = ::updateUI,
-                onError = ::onError,
-            )
-        } else {
-            Log.e("MovieDetailsActivity", "Serie ID not found")
-            finish()
-        }
-
         ivBackSearch.setOnClickListener {
             onBackPressed()
         }
-
-        setInitialButtonState(serieId)
-        setInitialRateState(serieId)
 
         layout.setOnTouchListener(Utils.detectSwipe(this){ direction ->
             when (direction) {
@@ -125,7 +113,26 @@ class SerieDetailsActivity : AppCompatActivity() {
                 }
             }
         })
+
+        loadData()
     }
+
+    override fun onResume() {
+        super.onResume()
+        loadData()
+    }
+
+    private fun loadData(){
+        setInitialButtonState(serieId)
+        setInitialRateState(serieId)
+
+        MediaRepository.getSerieDetails(
+            serieId,
+            onSuccess = ::updateUI,
+            onError = ::onError,
+        )
+    }
+
     private fun onError(){
         Log.e("SerieDetailsActivity", "Something went wrong")
     }
@@ -182,6 +189,19 @@ class SerieDetailsActivity : AppCompatActivity() {
                 }
             },
             onError = ::onError
+        )
+
+        // seen or not?
+        FirebaseInteraction.checkSerieExistanceInWatched(
+            serie.id,
+            onSuccess = {exists ->
+                if (exists) {
+                    ivSeen.visibility = View.VISIBLE
+                }
+            },
+            onError = {
+                Log.e("SerieDetailsActivity", it)
+            }
         )
 
         // plus button

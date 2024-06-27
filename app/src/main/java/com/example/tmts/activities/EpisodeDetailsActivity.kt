@@ -131,6 +131,7 @@ class EpisodeDetailsActivity : AppCompatActivity() {
                     Log.d("FirebaseCheck", "Serie exists: ${episode.serieId}")
                     // se esiste già devo mettere a true e in caso fare l'update di nextToSee
                     FirebaseInteraction.updateNextToSee(
+                        this@EpisodeDetailsActivity,
                         serieId,
                         episode.season_number,
                         episode.episode_number
@@ -144,6 +145,7 @@ class EpisodeDetailsActivity : AppCompatActivity() {
                     // e controllare nextToSee
                     FirebaseInteraction.addSerieToFollowing(serieId) {
                         FirebaseInteraction.updateNextToSee(
+                            this@EpisodeDetailsActivity,
                             serieId,
                             episode.season_number,
                             episode.episode_number

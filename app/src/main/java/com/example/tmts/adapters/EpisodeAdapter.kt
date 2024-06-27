@@ -97,6 +97,7 @@ class EpisodeAdapter(
                             Log.d("FirebaseCheck", "Serie exists: ${mediaItem.serieId}")
                             // se esiste già devo mettere a true e in caso fare l'update di nextToSee
                             FirebaseInteraction.updateNextToSee(
+                                context,
                                 serieId,
                                 mediaItem.season_number,
                                 mediaItem.episode_number
@@ -110,6 +111,7 @@ class EpisodeAdapter(
                             // e controllare nextToSee
                             FirebaseInteraction.addSerieToFollowing(serieId) {
                                 FirebaseInteraction.updateNextToSee(
+                                    context,
                                     serieId,
                                     mediaItem.season_number,
                                     mediaItem.episode_number

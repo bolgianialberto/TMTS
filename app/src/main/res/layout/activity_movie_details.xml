@@ -26,6 +26,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintDimensionRatio="16:9"/>
 
+        <!-- Invisible Image Overlay -->
+        <ImageView
+            android:id="@+id/iv_seen"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/seen"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="@id/iv_movie_details_backdrop"
+            app:layout_constraintEnd_toEndOf="@id/iv_movie_details_backdrop"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"/>
+
         <!-- LinearLayout for rating and star icon -->
         <LinearLayout
             android:id="@+id/ll_rating"
@@ -142,7 +154,6 @@
             app:layout_constraintTop_toBottomOf="@id/ll_title_date_genres"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/ll_overview"
             android:gravity="center_horizontal"
             android:layout_margin="10dp">
 
@@ -211,6 +222,84 @@
 
         </LinearLayout>
 
+        <!-- Comments Section -->
+        <LinearLayout
+            android:id="@+id/ll_comments"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/ll_overview"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/ll_users_who_follow"
+            android:background="@drawable/rounded_border"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginTop="10dp"
+            android:padding="10dp"
+            android:weightSum="100"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="15"
+                android:src="@drawable/comments" />
+
+            <TextView
+                android:id="@+id/tv_comments"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Comments"
+                android:textStyle="bold"
+                android:layout_weight="70"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="15"
+                android:src="@drawable/arrow_front" />
+        </LinearLayout>
+
+        <!-- Users Who Follow Section -->
+        <LinearLayout
+            android:id="@+id/ll_users_who_follow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/ll_comments"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/ll_info_box"
+            android:background="@drawable/rounded_border"
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:weightSum="100"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="15"
+                android:src="@drawable/two_people"/>
+
+            <TextView
+                android:id="@+id/tv_users_who_follow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Followers"
+                android:textStyle="bold"
+                android:layout_weight="70"/>
+
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_weight="15"
+                android:src="@drawable/arrow_front" />
+        </LinearLayout>
+
         <!-- Info Box -->
         <LinearLayout
             android:id="@+id/ll_info_box"
@@ -218,13 +307,14 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:orientation="vertical"
-            app:layout_constraintTop_toBottomOf="@id/ll_overview"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_users_who_follow"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:background="@drawable/rounded_border"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp">
+            android:layout_marginBottom="10dp">
 
             <LinearLayout
                 android:id="@+id/ll_release_date"
@@ -292,84 +382,6 @@
                     android:text="placeholder origin_language"/>
             </LinearLayout>
 
-        </LinearLayout>
-
-        <!-- Comments Section -->
-        <LinearLayout
-            android:id="@+id/ll_comments"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/ll_info_box"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/rounded_border"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            android:padding="10dp"
-            android:weightSum="100"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="30dp"
-                android:layout_weight="15"
-                android:src="@drawable/comments" />
-
-            <TextView
-                android:id="@+id/tv_comments"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Comments"
-                android:textStyle="bold"
-                android:layout_weight="70"/>
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="30dp"
-                android:layout_weight="15"
-                android:src="@drawable/arrow_front" />
-        </LinearLayout>
-
-        <!-- Users Who Follow Section -->
-        <LinearLayout
-            android:id="@+id/ll_users_who_follow"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintTop_toBottomOf="@id/ll_comments"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/rounded_border"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginTop="10dp"
-            android:padding="10dp"
-            android:weightSum="100"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="30dp"
-                android:layout_weight="15"
-                android:src="@drawable/two_people"/>
-
-            <TextView
-                android:id="@+id/tv_users_who_follow"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="People who follow"
-                android:textStyle="bold"
-                android:layout_weight="70"/>
-
-            <ImageView
-                android:layout_width="0dp"
-                android:layout_height="30dp"
-                android:layout_weight="15"
-                android:src="@drawable/arrow_front" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

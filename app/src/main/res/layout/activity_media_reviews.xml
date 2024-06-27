@@ -1,71 +1,81 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/main_review_activity_wrapper"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activities.SeasonDetailsActivity"
-    android:background="@color/lightergray">
+    android:orientation="vertical"
+    android:background="@color/lightergray"
+    android:clickable="true"
+    android:focusable="true">
 
-    <!-- LinearLayout containing header and RecyclerView -->
-    <LinearLayout
-        android:id="@+id/contentLayout"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_media_review"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        tools:ignore="MissingConstraints">
+        android:clickable="true"
+        android:focusable="true">
 
         <!-- Header -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:id="@+id/contentLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:padding="10dp"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
-            <Button
-                android:id="@+id/iv_arrow_back_comment_activity"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/arrow_back"
-                android:layout_marginEnd="10dp"/>
-
-            <TextView
-                android:id="@+id/tv_comment_activity_media_title"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="media_title_placeholder"
-                android:textSize="24sp"
-                android:textStyle="bold"
-                android:gravity="bottom"
-                android:layout_marginTop="5dp"/>
+                android:orientation="horizontal"
+                android:padding="10dp"
+                android:gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/iv_arrow_back_comment_activity"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:background="@drawable/arrow_back"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:id="@+id/tv_comment_activity_media_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="media_title_placeholder"
+                    android:textSize="24sp"
+                    android:textStyle="bold"
+                    android:gravity="bottom"
+                    android:layout_marginTop="5dp"/>
+            </LinearLayout>
+
+            <!-- RecyclerView for comments -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_reviews"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:listitem="@layout/review_item"
+                android:paddingBottom="10dp"/>
+
         </LinearLayout>
 
-        <!-- RecyclerView for comments -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rv_reviews"
-            android:layout_width="match_parent"
+        <!-- FloatingActionButton in overlay -->
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_add_comment"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:listitem="@layout/review_item"
-            android:paddingBottom="10dp"/>
+            android:layout_margin="16dp"
+            android:src="@drawable/add_comment"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:backgroundTint="@color/selectedColor"
+            app:borderWidth="0dp"
+            app:maxImageSize="35dp"
+            android:translationZ="8dp"/>
 
-    </LinearLayout>
-
-    <!-- FloatingActionButton in overlay -->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fab_add_comment"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:src="@drawable/add_comment"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:backgroundTint="@color/selectedColor"
-        app:borderWidth="0dp"
-        app:maxImageSize="35dp"
-        android:translationZ="8dp"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

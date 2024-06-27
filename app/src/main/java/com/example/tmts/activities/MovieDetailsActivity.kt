@@ -48,6 +48,7 @@ class MovieDetailsActivity : AppCompatActivity() {
     private lateinit var tvAverageRate: TextView
     private lateinit var ivFilledStar: ImageView
     private lateinit var layout: ScrollView
+    private lateinit var ivSeen: ImageView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,6 +74,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         tvAverageRate = findViewById(R.id.tv_rating)
         ivFilledStar = findViewById(R.id.iv_filled_star)
         layout = findViewById(R.id.sv_movie_details)
+        ivSeen = findViewById(R.id.iv_seen)
 
         val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
         backdropImageView.colorFilter = colorFilter
@@ -158,6 +160,19 @@ class MovieDetailsActivity : AppCompatActivity() {
                 }
             },
             onError = ::onError
+        )
+
+        // seen or not?
+        FirebaseInteraction.checkMovieExistanceInWatched(
+            movie.id,
+            onSuccess = {exists ->
+                if (exists) {
+                    ivSeen.visibility = View.VISIBLE
+                }
+            },
+            onError = {
+                Log.e("MovieDetailsActivity", it)
+            }
         )
 
         btnFollowUnfollow.setOnClickListener{

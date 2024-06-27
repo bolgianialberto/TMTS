@@ -1,5 +1,6 @@
 package com.example.tmts
 
+import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.util.Log
@@ -34,6 +35,7 @@ object FirebaseInteraction {
     val followingSeriesRef = userRef.child("following_series")
     val followingMoviesRef = userRef.child("following_movies")
     val watchedMoviesRef = userRef.child("watched_movies")
+    val watchedSeriesRef = userRef.child("watched_series")
     val moviesRef = mDbRef.child("shows").child("movies")
     val seriesRef = mDbRef.child("shows").child("series")
     val reviewsRef = mDbRef.child("reviews")
@@ -426,6 +428,42 @@ object FirebaseInteraction {
             override fun onCancelled(databaseError: DatabaseError) {
                 Log.w("FirebaseCheck", "checkSerieExists:onCancelled", databaseError.toException())
                 callback(false)
+            }
+        })
+    }
+
+    fun checkSerieExistanceInWatched(
+        serieId: Int,
+        onSuccess: (Boolean) -> Unit,
+        onError: (String) -> Unit
+    ){
+        val watchedSerieRef = watchedSeriesRef.child(serieId.toString())
+
+        watchedSerieRef.addListenerForSingleValueEvent(object: ValueEventListener{
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                onSuccess(dataSnapshot.exists())
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                onError(databaseError.message)
+            }
+        })
+    }
+
+    fun checkMovieExistanceInWatched(
+        movieId: Int,
+        onSuccess: (Boolean) -> Unit,
+        onError: (String) -> Unit
+    ){
+        val watchedMovieRef = watchedMoviesRef.child(movieId.toString())
+
+        watchedMovieRef.addListenerForSingleValueEvent(object: ValueEventListener{
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                onSuccess(dataSnapshot.exists())
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                onError(databaseError.message)
             }
         })
     }
@@ -847,15 +885,24 @@ object FirebaseInteraction {
     }
 
     fun addMovieToWatched(movieId: Int) {
-        watchedMoviesRef.child(movieId.toString()).setValue(true)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Log.d("Firebase", "Film aggiunto con successo")
-                } else {
-                    Log.e("Firebase", "Errore nell'aggiunta del film", task.exception)
+        val movieRef = watchedMoviesRef.child(movieId.toString())
+
+        movieRef.get().addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val currentCount = task.result?.getValue(Int::class.java) ?: 0
+                movieRef.setValue(currentCount + 1).addOnCompleteListener { updateTask ->
+                    if (updateTask.isSuccessful) {
+                        Log.d("Firebase", "Film aggiunto con successo, numero di volte visto: ${currentCount + 1}")
+                    } else {
+                        Log.e("Firebase", "Errore nell'aggiornamento del contatore del film", updateTask.exception)
+                    }
                 }
+            } else {
+                Log.e("Firebase", "Errore nel recupero del contatore del film", task.exception)
             }
+        }
     }
+
 
     /*
     fun updateNextToSee (
@@ -972,6 +1019,7 @@ object FirebaseInteraction {
 
      */
     fun updateNextToSee(
+        context: Context,
         serieId: Int,
         watchedSeason: Int,
         watchedEpisode: Int,
@@ -993,7 +1041,7 @@ object FirebaseInteraction {
                                     callback?.invoke()
                                 }
                             } else if (nextToSeePair.first == watchedSeason && nextToSeePair.second == watchedEpisode) {
-                                findNextEpisode(serieRef, serieId, nextToSeePair.first, nextToSeePair.second + 1, callback)
+                                findNextEpisode(context, serieRef, serieId, nextToSeePair.first, nextToSeePair.second + 1, callback)
                             } else {
                                 callback?.invoke()
                             }
@@ -1003,7 +1051,7 @@ object FirebaseInteraction {
                                     callback?.invoke()
                                 }
                             } else if (nextToSeePair.first == watchedSeason && nextToSeePair.second == watchedEpisode) {
-                                findNextEpisode(serieRef, serieId, nextToSeePair.first, nextToSeePair.second + 1, callback)
+                                findNextEpisode(context, serieRef, serieId, nextToSeePair.first, nextToSeePair.second + 1, callback)
                             } else {
                                 callback?.invoke()
                             }
@@ -1019,6 +1067,7 @@ object FirebaseInteraction {
     }
 
     private fun findNextEpisode(
+        context: Context,
         serieRef: DatabaseReference,
         serieId: Int,
         seasonNumber: Int,
@@ -1030,7 +1079,7 @@ object FirebaseInteraction {
         nextEpisodeRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists() && snapshot.getValue(Boolean::class.java) == true) {
-                    findNextEpisode(serieRef, serieId, seasonNumber, episodeNumber + 1, callback)
+                    findNextEpisode(context, serieRef, serieId, seasonNumber, episodeNumber + 1, callback)
                 } else if (snapshot.exists()) {
                     val newNext = "${seasonNumber}_$episodeNumber"
                     serieRef.child("nextToSee").setValue(newNext)
@@ -1043,19 +1092,43 @@ object FirebaseInteraction {
                     nextSeasonRef.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             if (snapshot.exists()) {
-                                findNextEpisode(serieRef, serieId,seasonNumber + 1, 1, callback)
+                                findNextEpisode(context, serieRef, serieId, seasonNumber + 1, 1, callback)
                             } else {
-                                serieRef.child("nextToSee").setValue(null)
-                                serieRef.removeValue().addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
-                                        Log.d("Firebase", "Serie rimossa con successo")
-                                    } else {
-                                        Log.e("Firebase", "Errore nella rimozione della serie", task.exception)
-                                    }
-                                }
-                                val watchedSeriesRef = mDbRef.child("users").child(user!!.uid).child("watched_series")
-                                watchedSeriesRef.child(serieId.toString()).setValue(true)
+                                // Chiama la callback prima di rimuovere la serie
                                 callback?.invoke()
+
+                                // Aggiorna il contatore delle serie viste
+                                val watchedSeriesRef = mDbRef.child("users").child(user!!.uid).child("watched_series").child(serieId.toString())
+                                watchedSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                    override fun onDataChange(dataSnapshot: DataSnapshot) {
+                                        val currentCount = dataSnapshot.getValue(Int::class.java) ?: 0
+                                        watchedSeriesRef.setValue(currentCount + 1).addOnCompleteListener { task ->
+                                            if (task.isSuccessful) {
+                                                Log.d("Firebase", "Counter aggiornato con successo")
+                                            } else {
+                                                Log.e("Firebase", "Errore nell'aggiornamento del counter", task.exception)
+                                            }
+
+                                            // Rimuovi la serie dai "following"
+                                            serieRef.child("nextToSee").setValue(null)
+                                            serieRef.removeValue().addOnCompleteListener { removeTask ->
+                                                if (removeTask.isSuccessful) {
+                                                    Log.d("Firebase", "Serie rimossa con successo")
+                                                    // Mostra il Toast di congratulazioni
+                                                    Toast.makeText(context, "Congratulations on finishing the series!", Toast.LENGTH_LONG).show()
+                                                } else {
+                                                    Log.e("Firebase", "Errore nella rimozione della serie", removeTask.exception)
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    override fun onCancelled(databaseError: DatabaseError) {
+                                        Log.e("Firebase", "Errore nell'aggiornamento del counter", databaseError.toException())
+                                        // Chiama la callback anche in caso di errore
+                                        callback?.invoke()
+                                    }
+                                })
                             }
                         }
 
@@ -1071,6 +1144,8 @@ object FirebaseInteraction {
             }
         })
     }
+
+
 
     fun getNextToSee(serieId: Int, callback: (Pair<Int, Int>?) -> Unit){
         val serieRef = followingSeriesRef

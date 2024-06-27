@@ -101,6 +101,7 @@ class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
 
         FirebaseInteraction.getNextToSee(serieId.toInt()) {nextToSeePair ->
             FirebaseInteraction.updateNextToSee(
+                requireContext(),
                 serieId.toInt(),
                 nextToSeePair!!.first,
                 nextToSeePair!!.second,
