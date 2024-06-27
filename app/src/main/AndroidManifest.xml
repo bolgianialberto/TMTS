@@ -19,6 +19,7 @@
             android:exported="false" />
         <activity
             android:name=".activities.ChatActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".activities.MoreShowAccountsActivity"

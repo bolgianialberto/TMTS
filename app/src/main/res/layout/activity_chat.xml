@@ -2,87 +2,99 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+    android:id="@+id/main_chat_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_alignParentTop="true"
     tools:context=".activities.ChatActivity">
-
-    <LinearLayout
-        android:id="@+id/ll_top_chat"
+        
+    <RelativeLayout
+        android:id="@+id/rl_chat_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:background="@drawable/account_user_chat_background">
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:fitsSystemWindows="true">
 
-        <Button
-            android:id="@+id/btt_arrow_back_chat"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-            android:background="@drawable/arrow_back" />
-
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/iv_account_chat_image"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
-            android:scaleType="centerCrop"
-            app:srcCompat="@drawable/account"
-            app:shapeAppearanceOverlay="@style/chatAccountRoundedImageView" />
-
-        <TextView
-            android:id="@+id/tv_chat_user"
+        <LinearLayout
+            android:id="@+id/ll_top_chat"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-            android:text="Placeholder Name"
-            android:textStyle="bold"
-            android:textColor="@color/white"
-            android:textSize="20sp" />
+            android:orientation="horizontal"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:background="@drawable/account_user_chat_background">
 
-    </LinearLayout>
+            <Button
+                android:id="@+id/btt_arrow_back_chat"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:background="@drawable/arrow_back" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_chat_messages"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/ll_top_chat"
-        android:layout_above="@+id/ll_chat_send_message" />
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/iv_account_chat_image"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="2dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/account"
+                app:shapeAppearanceOverlay="@style/chatAccountRoundedImageView" />
 
-    <LinearLayout
-        android:id="@+id/ll_chat_send_message"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+            <TextView
+                android:id="@+id/tv_chat_user"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:text="Placeholder Name"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
 
-        <EditText
-            android:id="@+id/edt_chat_message"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_weight="1"
-            android:hint="Type a message..."
-            android:layout_marginLeft="10dp" />
+        </LinearLayout>
 
-        <Button
-            android:id="@+id/btt_send_message"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="5dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
-            android:background="@drawable/arrow_front" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_chat_messages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ll_top_chat"
+            android:layout_above="@+id/rl_chat_send_message" />
 
-    </LinearLayout>
+        <RelativeLayout
+            android:id="@+id/rl_chat_send_message"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
 
+            <EditText
+                android:id="@+id/edt_chat_message"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_alignParentStart="true"
+                android:layout_toStartOf="@+id/btt_send_message"
+                android:hint="Type a message..."
+                android:layout_marginLeft="10dp" />
+
+            <Button
+                android:id="@+id/btt_send_message"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/arrow_front" />
+
+        </RelativeLayout>
+
+    </RelativeLayout>
 
 </RelativeLayout>
