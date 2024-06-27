@@ -62,8 +62,8 @@ class ChatListFragment : Fragment(), OnChatClickListener {
                             chatList.add(Pair(user, it.second))
                             chatListAdapter.updateUsers(Pair(user, it.second))
                         },
-                        onFailure = {
-                            Log.e("Explore Movie Fragment", "Something went wrong")
+                        onFailure = {exc ->
+                            Log.e("CHAT LIST ERROR", exc)
                         }
                     )
                 }
@@ -81,17 +81,18 @@ class ChatListFragment : Fragment(), OnChatClickListener {
                     FirebaseInteraction.getUserInfo(
                         pair.first,
                         onSuccess = { user ->
-                            if (chatList.filterNot { it.first == user }.isEmpty()) {
+                            if (chatList.find {it.first == user} == null){
                                 chatList.add(Pair(user, pair.second))
                                 chatListAdapter.updateUsers(Pair(user, pair.second))
                             } else {
                                 val previousUserPair = chatList.find { it.first == user }
+                                Log.d("UPDATED MSG 1", "${user.name} - ${pair.second}")
                                 if (previousUserPair != null && previousUserPair.second != pair.second) {
-                                    // Log.d("UPDATED MSG", "${user.name} - ${pair.second}")
+                                    Log.d("UPDATED MSG 2", "${user.name} - ${pair.second}")
                                     val pos = chatList.indexOf(previousUserPair)
                                     chatList[pos] = Pair(user, pair.second)
-                                    chatListAdapter.deleteUser(user)
-                                    chatListAdapter.updateUsers(Pair(user, pair.second))
+                                    // chatListAdapter.deleteUser(user)
+                                    chatListAdapter.updateUser(Pair(user, pair.second))
                                 }
                             }
                         },
