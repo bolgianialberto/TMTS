@@ -968,6 +968,17 @@ object FirebaseInteraction {
         }.addOnFailureListener { fail -> onFailure(fail.toString()) }
     }
 
+    fun addToken(
+        token: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        userRef.child("token").setValue(token).addOnSuccessListener {
+            onSuccess(token)
+        }.addOnFailureListener { exc ->
+            onFailure(exc)
+        }
+    }
     fun onError(){
         Log.e("Firebase", "Something went wrong")
     }

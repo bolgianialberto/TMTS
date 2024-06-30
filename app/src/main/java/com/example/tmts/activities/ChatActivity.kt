@@ -62,10 +62,6 @@ class ChatActivity : AppCompatActivity() {
 
         bttBack = findViewById(R.id.btt_arrow_back_chat)
         bttBack.setOnClickListener {
-            /*val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("reload", true)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)*/
             val resultIntent = Intent()
             resultIntent.putExtra("closed", true)
             setResult(Activity.RESULT_OK, resultIntent)
@@ -135,4 +131,6 @@ class ChatActivity : AppCompatActivity() {
                 Log.e("SEND MSG ERROR", it)
             })
     }
+
+
 }
