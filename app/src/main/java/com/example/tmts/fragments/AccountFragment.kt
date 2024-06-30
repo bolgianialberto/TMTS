@@ -37,7 +37,7 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
 
-class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteraction.kt
+class AccountFragment : Fragment() {
     private var mAuth = FirebaseAuth.getInstance()
     private var mStorage = FirebaseStorage.getInstance().getReference()
     private lateinit var ivAccountIcon: ImageView
@@ -127,7 +127,7 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         // Fetch user's display name and change the view accordingly
         FirebaseInteraction.getUsername(currentUser.uid,
             onSuccess = {username ->
-                tvUsername.text = "$username"
+                tvUsername.text = username
             },
             onFailure = {errorMessage ->
                 Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
@@ -147,7 +147,7 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         )
 
         // Load user's follower data from Firebase
-        loadUserFollowerData(tvFollowerCount, tvFollowingCount)
+        loadUserFollowerData()
 
         // Set view or buttons listeners
         ivAccountIcon.setOnClickListener{
@@ -242,10 +242,7 @@ class AccountFragment : Fragment() {//TODO Implement usage of FireBaseInteractio
         }
     }
 
-    private fun loadUserFollowerData(
-        tvFollowerCount: TextView,
-        tvFollowingCount: TextView
-    ) {
+    private fun loadUserFollowerData() {
         // Set number of users following me from Firebase
         FirebaseInteraction.getFollowersUsers { followers ->
             tvFollowerCount.text = followers.size.toString()

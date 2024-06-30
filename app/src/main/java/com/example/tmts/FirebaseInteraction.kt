@@ -1185,4 +1185,77 @@ object FirebaseInteraction {
             }
         })
     }
+
+    fun removeSelfFromUserFollowers(targetUid: String, onSuccess: (() -> Unit)? = null) {
+        val selfRefToUserFollowers = mDbRef
+            .child("users")
+            .child(targetUid)
+            .child("followers")
+            .child(user.uid)
+
+        selfRefToUserFollowers.removeValue()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess?.invoke()
+                } else {
+                    //TODO
+                }
+            }
+    }
+
+    fun removeTargetUserFromFollowing(targetUid: String, onSuccess: (() -> Unit)? = null) {
+        val targetRef = followedUsersRef
+            .child(targetUid)
+
+        targetRef.removeValue()
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess?.invoke()
+                } else {
+                    //TODO
+                }
+            }
+    }
+
+    fun addTargetUserToFollowing(targetUid: String, onSuccess: (() -> Unit)? = null) {
+        val targetRef = followedUsersRef
+            .child(targetUid)
+
+        targetRef.setValue(true)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess?.invoke()
+                } else {
+                    //TODO
+                }
+            }
+    }
+
+    //fun addMovieToWatched(movieId: Int) {
+    //    watchedMoviesRef.child(movieId.toString()).setValue(true)
+    //        .addOnCompleteListener { task ->
+    //            if (task.isSuccessful) {
+    //                Log.d("Firebase", "Film aggiunto con successo")
+    //            } else {
+    //                Log.e("Firebase", "Errore nell'aggiunta del film", task.exception)
+    //            }
+    //        }
+    //}
+
+    fun addSelfToFollowed(targetUid: String, onSuccess: (() -> Unit)? = null) {
+        val selfRefToUserFollowers = mDbRef
+            .child("users")
+            .child(targetUid)
+            .child("followers")
+            .child(user.uid)
+
+        selfRefToUserFollowers.setValue(true)
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    onSuccess?.invoke()
+                } else {
+                    //TODO
+                }
+            }
+    }
 }
