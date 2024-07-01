@@ -979,6 +979,30 @@ object FirebaseInteraction {
             onFailure(exc)
         }
     }
+
+    fun getUserToken(
+        userId: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val tokenRef = mDbRef.child("users").child(userId).child("token")
+        tokenRef.addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val token = snapshot.value?.toString()
+                if (token != null) {
+                    onSuccess(token)
+                } else {
+                    onFailure(Exception("Token value is null"))
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure(error.toException())
+            }
+
+        })
+    }
+
     fun onError(){
         Log.e("Firebase", "Something went wrong")
     }

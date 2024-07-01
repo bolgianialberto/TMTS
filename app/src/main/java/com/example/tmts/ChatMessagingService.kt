@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import com.example.tmts.activities.MainActivity
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -18,6 +19,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import com.google.firebase.messaging.messaging
 
 class ChatMessagingService(): FirebaseMessagingService() {
 
@@ -41,17 +43,28 @@ class ChatMessagingService(): FirebaseMessagingService() {
             if (!task.isSuccessful) {
                 Log.w(TAG, "Fetching FCM registration token failed", task.exception)
                 onFailure(task.exception)
+            } else {
+                val token = task.result
+                Log.d(TAG, "Obtained token: $token")
+                // Add token to database
+                FirebaseInteraction.addToken(
+                    token,
+                    // Subscribe to notification for user
+                    onSuccess={
+                        subscribeToMessageNotification(
+                            onSuccess = {
+                                onSuccess(token)
+                            },
+                            onFailure = { exc ->
+                                onFailure(exc)
+                            }
+                        )
+                    },
+                    onFailure = {
+                        onFailure(it)
+                    }
+                )
             }
-            val token = task.result
-            Log.d(TAG, "Obtained token: $token")
-            FirebaseInteraction.addToken(
-                token,
-                onSuccess={
-                    onSuccess(it)
-                },
-                onFailure = {
-                    onFailure(it)
-                })
         }
     }
 
@@ -131,5 +144,27 @@ class ChatMessagingService(): FirebaseMessagingService() {
         remoteView.setTextViewText(R.id.tv_message_notification_text, message)
         remoteView.setImageViewResource(R.id.iv_message_notification_app_logo, R.drawable.chat)
         return remoteView
+    }
+
+    fun subscribeToMessageNotification(
+        onSuccess: () -> Unit,
+        onFailure: (Exception?) -> Unit
+    ) {
+        Firebase.messaging.subscribeToTopic(userId).addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                onFailure(task.exception)
+            } else {
+                Log.d(TAG, "Subscribed to $userId")
+                onSuccess()
+            }
+        }
+    }
+
+    fun sendNotificationToUser(
+        userId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception?) -> Unit
+    ) {
+        // val msg = Firebase.messaging.send(msg)
     }
 }

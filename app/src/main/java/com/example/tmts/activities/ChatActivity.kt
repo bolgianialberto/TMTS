@@ -23,6 +23,11 @@ import com.example.tmts.beans.Message
 
 class ChatActivity : AppCompatActivity() {
 
+    private var senderId: String? = null
+    private var receiverId: String? = null
+    private var receiverRoom: String? = null
+    private var senderRoom: String? = null
+
     private lateinit var chatLayoutView: View
     private lateinit var bttBack: Button
     private lateinit var ivUserImage: ImageView
@@ -33,8 +38,6 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var messageAdapter: MessageAdapter
     private var standardHeight = -1
     private lateinit var messageList: ArrayList<Pair<String, Message>>
-    var receiverRoom: String? = null
-    var senderRoom: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,8 +57,8 @@ class ChatActivity : AppCompatActivity() {
             }
         }
         val receiverUsername = intent.getStringExtra("username")!!
-        val receiverId = intent.getStringExtra("userId")!!
-        val senderId = FirebaseInteraction.user.uid
+        receiverId = intent.getStringExtra("userId")!!
+        senderId = FirebaseInteraction.user.uid
         senderRoom = receiverId + senderId
         receiverRoom = senderId + receiverId
         messageList = ArrayList()
@@ -73,7 +76,7 @@ class ChatActivity : AppCompatActivity() {
         edtMessage = findViewById(R.id.edt_chat_message)
         bttSend = findViewById(R.id.btt_send_message)
         FirebaseInteraction.getUserProfileImageRef(
-            receiverId,
+            receiverId!!,
             onSuccess = {
                 it.downloadUrl.addOnSuccessListener { uri ->
                     Glide.with(this)
@@ -94,8 +97,8 @@ class ChatActivity : AppCompatActivity() {
             if (edtMessage.text.toString().isNotEmpty()) {
                 val message = Message(
                     edtMessage.text.toString(),
-                    senderId,
-                    receiverId,
+                    senderId!!,
+                    receiverId!!,
                     System.currentTimeMillis()
                 )
                 sendMessage(message)
@@ -132,5 +135,7 @@ class ChatActivity : AppCompatActivity() {
             })
     }
 
+    private fun sendNotification() {
 
+    }
 }
