@@ -23,17 +23,23 @@
             app:layout_constraintTop_toTopOf="parent"
             >
 
-            <ImageView
-                android:id="@+id/account_icon"
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cv_image_profile"
                 android:layout_width="64dp"
                 android:layout_height="64dp"
-
-
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_marginTop="20sp"
+                app:cardCornerRadius="32dp">
 
-                android:src="@drawable/account" />
+                <ImageView
+                    android:id="@+id/account_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    app:srcCompat="@drawable/account" />
+            </androidx.cardview.widget.CardView>
+
 
             <TextView
                 android:id="@+id/tv_account_username"
@@ -41,7 +47,7 @@
                 android:layout_height="wrap_content"
 
 
-                app:layout_constraintStart_toEndOf="@+id/account_icon"
+                app:layout_constraintStart_toEndOf="@+id/cv_image_profile"
                 app:layout_constraintTop_toTopOf="parent"
                 android:layout_marginStart="10sp"
                 android:layout_marginTop="20sp"
@@ -57,15 +63,14 @@
                 android:layout_width="200sp"
                 android:layout_height="wrap_content"
 
-                app:layout_constraintStart_toEndOf="@id/account_icon"
+                app:layout_constraintStart_toEndOf="@id/cv_image_profile"
                 app:layout_constraintTop_toBottomOf="@id/tv_account_username"
                 android:layout_marginStart="10sp"
                 android:layout_marginTop="5sp"
 
                 android:maxLength="97"
                 android:textSize="15sp"
-
-                android:hint="Write something about you..." />
+                />
 
             <LinearLayout
                 android:id="@+id/ll_follower"
@@ -74,7 +79,7 @@
                 android:orientation="vertical"
                 android:gravity="center"
 
-                app:layout_constraintStart_toEndOf="@id/account_icon"
+                app:layout_constraintStart_toEndOf="@id/cv_image_profile"
                 app:layout_constraintTop_toBottomOf="@id/tv_bio"
                 android:layout_marginStart="10sp"
                 android:layout_marginTop="10sp">

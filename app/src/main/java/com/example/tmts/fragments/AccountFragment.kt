@@ -1,11 +1,13 @@
 package com.example.tmts.fragments
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.View
@@ -17,6 +19,7 @@ import android.widget.LinearLayout
 import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -26,6 +29,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
+import com.example.tmts.activities.CreateReviewActivity
 import com.example.tmts.activities.MainEmptyActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
@@ -54,6 +58,27 @@ class AccountFragment : Fragment() {
     private lateinit var llWatchlists: LinearLayout
 
     val currentUser = mAuth.currentUser!!
+
+    private lateinit var selectImageFromGalleryResult: ActivityResultLauncher<String>
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) {uri ->
+            uri?.let{
+                ivAccountIcon.setImageURI(uri)
+                FirebaseInteraction.updateUserProfileImage(
+                    uri,
+                    onSuccess = {
+                        Toast.makeText(requireContext(), "Profile image correctly updated!", Toast.LENGTH_SHORT).show()
+                    },
+                    onError = {
+                        Toast.makeText(requireContext(), "Something wrong happened", Toast.LENGTH_SHORT).show()
+                    }
+                )
+            }
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -310,6 +335,7 @@ class AccountFragment : Fragment() {
         selectImageFromGalleryResult.launch("image/*")
     }
 
+    /*
     private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) {
             uri: Uri? -> uri?.let {
             //TODO: Se faccio upload di 1 immagine, poi switch fragment, poi ritorno a fare upload immagine, mi porta a un crash
@@ -325,11 +351,13 @@ class AccountFragment : Fragment() {
         }
     }
 
+     */
+
     private fun loadUserImage(userImageRef: StorageReference, ivAccountIcon: ImageView) {
-        userImageRef.downloadUrl.addOnSuccessListener {
+        userImageRef.downloadUrl.addOnSuccessListener {uri ->
             // File exists, load with Glide
             Glide.with(requireContext())
-                .load(userImageRef)
+                .load(uri)
                 .placeholder(R.drawable.movie)
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .skipMemoryCache(true)
@@ -338,11 +366,5 @@ class AccountFragment : Fragment() {
             // File doesn't exist, load default image
             ivAccountIcon.setImageResource(R.drawable.movie) // TODO: change default image
         }
-
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        selectImageFromGalleryResult.unregister()
     }
 }

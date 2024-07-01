@@ -9,6 +9,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
@@ -23,10 +24,6 @@ class CreateReviewActivity : AppCompatActivity() {
     private lateinit var ivReviewPhoto: ImageView
     private var selectedImageUri: Uri? = null
     private lateinit var mediaType: String
-
-    companion object {
-        private const val REQUEST_PICK_IMAGE = 100
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,21 +75,15 @@ class CreateReviewActivity : AppCompatActivity() {
         }
 
         btnAddPhoto.setOnClickListener {
-            // Intent per aprire la galleria e selezionare un'immagine
-            val intent = Intent(Intent.ACTION_PICK)
-            intent.type = "image/*"
-            startActivityForResult(intent, REQUEST_PICK_IMAGE)
+            selectImageFromGalleryResult.launch("image/*")
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_PICK_IMAGE && resultCode == Activity.RESULT_OK) {
-            selectedImageUri = data?.data
-            if (selectedImageUri != null) {
-                ivReviewPhoto.setImageURI(selectedImageUri)
-                ivReviewPhoto.visibility = ImageView.VISIBLE
-            }
+    private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        uri?.let{uri ->
+            selectedImageUri = uri
+            ivReviewPhoto.setImageURI(selectedImageUri)
+            ivReviewPhoto.visibility = ImageView.VISIBLE
         }
     }
 }

@@ -44,6 +44,21 @@ object FirebaseInteraction {
     val followersUsersRef = userRef.child("followers")
     val userBioRef = userRef.child("bio")
 
+    fun updateUserProfileImage(
+        uri: Uri,
+        userId: String? = user.uid,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ){
+        val filename = "users/${userId}/profileImage"
+        val profileImageRef = storageRef.child(filename)
+        profileImageRef.putFile(uri).addOnSuccessListener {
+            onSuccess()
+        }.addOnFailureListener() {
+            onError.invoke("impossible to update user profile image")
+        }
+    }
+
     fun fetchWatchlistsWithDetails(onSuccess: (List<Watchlist>) -> Unit, onError: (String) -> Unit) {
         watchlistRef.get().addOnSuccessListener { snapshot ->
             val watchlistTasks = snapshot.children.mapNotNull { watchlistSnapshot ->
