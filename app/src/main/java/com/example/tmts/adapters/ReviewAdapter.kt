@@ -1,19 +1,20 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.media.Image
+import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
+import com.example.tmts.activities.UserPageActivity
 import com.example.tmts.beans.Review
-import com.google.firebase.storage.FirebaseStorage
 
 class ReviewAdapter (
     private val context: Context,
@@ -97,6 +98,12 @@ class ReviewAdapter (
                     Log.d("ReviewAdapter", message)
                 }
             )
+
+            tvUserName.setOnClickListener {
+                val intent = Intent(context, UserPageActivity::class.java)
+                intent.putExtra("uid", review.idUser)
+                startActivity(context, intent, null)
+            }
         }
     }
 }
