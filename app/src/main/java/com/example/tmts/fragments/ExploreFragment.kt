@@ -50,7 +50,7 @@ class ExploreFragment : Fragment() {
         button.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.selectedColor))
         button.setTextColor(ContextCompat.getColor(requireContext(), R.color.black))
 
-        val nonClickedButton = if (button.id == R.id.btn_film) bttExplore else bttChat
+        val nonClickedButton = if (button.id == R.id.btt_chat) bttExplore else bttChat
         nonClickedButton.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.unselectedColor))
         nonClickedButton.setTextColor(ContextCompat.getColor(requireContext(), R.color.gray))
     }

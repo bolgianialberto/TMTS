@@ -2,9 +2,12 @@ package com.example.tmts.fragments
 
 import android.app.Activity
 import android.app.AlertDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -12,6 +15,7 @@ import android.view.LayoutInflater
 import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -107,12 +111,12 @@ class AccountFragment : Fragment() {
         llWatchlists = view.findViewById(R.id.ll_watchlists)
 
         // Setup adapters for Recycle Views
-        watchedMoviesAdapter = MediaAdapter(requireContext(), emptyList()) { movie ->
+        watchedMoviesAdapter = MediaAdapter(requireContext(), emptyList(), 66, 100) { movie ->
             val intent = Intent(requireContext(), MovieDetailsActivity::class.java)
             intent.putExtra("movieId", movie.id)
             startActivity(intent)
         }
-        watchedSeriesAdapter = MediaAdapter(requireContext(), emptyList()) {serie ->
+        watchedSeriesAdapter = MediaAdapter(requireContext(), emptyList(), 66, 100) {serie ->
             val intent = Intent(requireContext(), SerieDetailsActivity::class.java)
             intent.putExtra("serieId", serie.id)
             startActivity(intent)
@@ -284,11 +288,11 @@ class AccountFragment : Fragment() {
         val editTextBio = dialogView.findViewById<EditText>(R.id.et_bio)
         val textViewError = dialogView.findViewById<TextView>(R.id.tv_bio_error)
 
-        editTextBio.addTextChangedListener(object: TextWatcher {
+        editTextBio.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (s != null && s.length >= 97) {// TODO: not hardcoded pls
+                if (s != null && s.length >= 97) { // TODO: not hardcoded pls
                     textViewError.text = "Character limit reached!"
                     textViewError.visibility = View.VISIBLE
                 } else {
@@ -300,29 +304,38 @@ class AccountFragment : Fragment() {
         })
         editTextBio.setText(tvBio.text.toString())
 
-        AlertDialog.Builder(requireContext())
+        val dialog = AlertDialog.Builder(requireContext())
             .setTitle("Edit your profile bio")
             .setView(dialogView)
-            .setPositiveButton("Save") {dialog, _ ->
+            .setPositiveButton("Save") { dialog, _ ->
                 val newBio = editTextBio.text.toString()
 
                 FirebaseInteraction.saveBioToFirebase(newBio,
                     onSuccess = {
                         Toast.makeText(requireContext(), "Bio updated successfully!", Toast.LENGTH_SHORT).show()
                         tvBio.setText(newBio)
-                },
+                    },
                     onFailure = {
                         Toast.makeText(requireContext(), "Failed to update bio!", Toast.LENGTH_SHORT).show()
                     }
                 )
                 dialog.dismiss()
             }
-            .setNegativeButton("Cancel") {dialog, _ ->
+            .setNegativeButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
             }
             .create()
-            .show()
+
+        dialog.show()
+
+        // Give focus to the EditText and show the keyboard after the dialog has been shown
+        editTextBio.requestFocus()
+        Handler(Looper.getMainLooper()).post {
+            val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.showSoftInput(editTextBio, InputMethodManager.SHOW_IMPLICIT)
+        }
     }
+
 
     private fun performLogout(): Boolean {
         mAuth.signOut()

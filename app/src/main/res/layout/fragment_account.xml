@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.AccountFragment"
-    android:background="#f6f9f0"
+    android:background="@color/lightergray"
     >
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -17,8 +17,7 @@
             android:id="@+id/cl_profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginTop="10dp"
+            android:padding="20dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             >
@@ -45,6 +44,7 @@
                 android:id="@+id/tv_account_username"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
 
 
                 app:layout_constraintStart_toEndOf="@+id/cv_image_profile"
@@ -54,7 +54,7 @@
 
                 android:text="Username"
                 android:textColor="#1A472A "
-                android:textSize="25sp"
+                android:textSize="30sp"
                 android:textStyle="bold"
                 android:gravity="center" />
 
@@ -62,6 +62,7 @@
                 android:id="@+id/tv_bio"
                 android:layout_width="200sp"
                 android:layout_height="wrap_content"
+                android:paddingHorizontal="4dp"
 
                 app:layout_constraintStart_toEndOf="@id/cv_image_profile"
                 app:layout_constraintTop_toBottomOf="@id/tv_account_username"
@@ -89,6 +90,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Followers"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
                     android:textColor="#3a6e43"
                     android:textStyle="bold"
                     android:textSize="16sp" />
@@ -120,6 +123,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
                     android:text="Following"
                     android:textSize="16sp"
                     android:textStyle="bold"
@@ -157,14 +161,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/cl_profile"
             android:paddingHorizontal="20dp"
-            android:layout_marginTop="30dp">
+            android:layout_marginTop="10dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Watched Movies"
                 android:textStyle="bold"
-                android:textColor="#A6A96F"
                 android:textSize="24sp" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -192,7 +195,6 @@
                 android:layout_height="wrap_content"
                 android:text="Watched TV Series"
                 android:textStyle="bold"
-                android:textColor="#A6A96F"
                 android:textSize="24sp" />
 
             <androidx.recyclerview.widget.RecyclerView
@@ -219,7 +221,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Your Watchlists"
-                android:textColor="#A6A96F"
                 android:textStyle="bold"
                 android:textSize="24sp" />
 

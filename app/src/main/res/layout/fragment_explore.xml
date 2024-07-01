@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".fragments.ExploreFragment">
+    tools:context=".fragments.ExploreFragment"
+    android:background="@color/lightergray">
 
     <LinearLayout
         android:id="@+id/topNavigationView"
