@@ -53,6 +53,9 @@
         <activity
             android:name=".activities.SignUpActivity"
             android:exported="false" />
+        <activity
+            android:name=".activities.UserPageActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

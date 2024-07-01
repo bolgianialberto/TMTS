@@ -117,8 +117,22 @@ object FirebaseInteraction {
         })
     }
 
-    fun getUserBio(onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
-        userBioRef.addListenerForSingleValueEvent(object: ValueEventListener {
+    fun getUserBio(
+        userId: String? = user.uid,
+        onSuccess: (String) -> Unit, onFailure: (String) -> Unit
+    ) {
+        var ref = mDbRef
+
+        if (userId.isNullOrBlank() || userId == user.uid) {
+            ref = userBioRef
+        } else {
+            ref = mDbRef
+                .child("users")
+                .child(userId!!)
+                .child("bio")
+        }
+
+        ref.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val bio = snapshot.getValue(String::class.java)
                 if (bio != null) {
@@ -233,8 +247,22 @@ object FirebaseInteraction {
     }
 
 
-    fun getFollowingSeries(callback: (List<Triple<String, String, Long>>) -> Unit){
-        followingSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+    fun getFollowingSeries(
+        userId: String? = user.uid,
+        callback: (List<Triple<String, String, Long>>) -> Unit
+    ){
+        var ref = mDbRef
+
+        if (userId.isNullOrBlank() || userId == user.uid) {
+            ref = followingSeriesRef
+        } else {
+            ref = mDbRef
+                .child("users")
+                .child(userId!!)
+                .child("following_series")
+        }
+
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val series = mutableListOf<Triple<String, String, Long>>()
 
@@ -257,8 +285,22 @@ object FirebaseInteraction {
         })
     }
 
-    fun getFollowingMovies(callback: (List<Pair<String, Long>>) -> Unit) {
-        followingMoviesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+    fun getFollowingMovies(
+        userId: String? = user.uid,
+        callback: (List<Pair<String, Long>>) -> Unit
+    ) {
+        var ref = mDbRef
+
+        if (userId.isNullOrBlank() || userId == user.uid) {
+            ref = followingMoviesRef
+        } else {
+            ref = mDbRef
+                .child("users")
+                .child(userId!!)
+                .child("following_movies")
+        }
+
+        ref.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val movies = mutableListOf<Pair<String, Long>>()
 
