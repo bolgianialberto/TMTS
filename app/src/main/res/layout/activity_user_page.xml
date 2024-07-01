@@ -10,8 +10,16 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
+
+        <Button
+            android:id="@+id/b_arrow_back_user_page"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/arrow_back"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="10dp"/>
 
         <ImageView
             android:id="@+id/account_icon"
@@ -20,7 +28,8 @@
             android:layout_gravity="center"
             android:layout_marginTop="50sp"
 
-            android:src="@drawable/account" />
+            android:src="@drawable/account"
+            android:contentDescription="User Profile Image" />
 
         <TextView
             android:id="@+id/tv_account_username"

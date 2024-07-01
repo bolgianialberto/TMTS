@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
-import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.adapters.MediaAdapter
 import com.example.tmts.beans.Media
 
@@ -25,6 +24,7 @@ class UserPageActivity: AppCompatActivity() {
     private lateinit var tvFollowerCount: TextView
     private lateinit var tvFollowingCount: TextView
     private lateinit var ivAccountIcon: ImageView
+    private lateinit var bBackSearch: Button
     private lateinit var bFollowUnfollow: Button
     private lateinit var followedMoviesAdapter: MediaAdapter
     private lateinit var followedSeriesAdapter: MediaAdapter
@@ -47,6 +47,7 @@ class UserPageActivity: AppCompatActivity() {
         bFollowUnfollow = findViewById(R.id.b_follow)
         llFollowedMovies = findViewById(R.id.ll_followed_movies)
         llFollowedSeries = findViewById(R.id.ll_followed_series)
+        bBackSearch = findViewById(R.id.b_arrow_back_user_page)
 
         // Setup adapters for Recycle Views
         followedMoviesAdapter = MediaAdapter(this, emptyList()) { movie ->
@@ -61,7 +62,15 @@ class UserPageActivity: AppCompatActivity() {
             startActivity(intent)
         }
 
+        val rvFollowedMovie: RecyclerView = findViewById(R.id.rv_followed_movies)
+        rvFollowedMovie.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvFollowedMovie.adapter = followedMoviesAdapter
 
+        val rvFollowedSerie: RecyclerView = findViewById(R.id.rv_followed_series)
+        rvFollowedSerie.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvFollowedSerie.adapter = followedSeriesAdapter
+
+        // Update TextViews and other data
         FirebaseInteraction.getUsername(
             userId = uid!!,
             onSuccess = { username ->
@@ -82,18 +91,6 @@ class UserPageActivity: AppCompatActivity() {
         )
 
         loadUserFollowerData()
-
-        bFollowUnfollow.setOnClickListener{
-            followUnfollowUser(uid)
-        }
-
-        val rvFollowedMovie: RecyclerView = findViewById(R.id.rv_followed_movies)
-        rvFollowedMovie.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvFollowedMovie.adapter = followedMoviesAdapter
-
-        val rvFollowedSerie: RecyclerView = findViewById(R.id.rv_followed_series)
-        rvFollowedSerie.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvFollowedSerie.adapter = followedSeriesAdapter
 
         FirebaseInteraction.getFollowingMovies(uid) { movies ->
             val followingMovies = mutableListOf<String>()
@@ -131,6 +128,16 @@ class UserPageActivity: AppCompatActivity() {
             }
         }
 
+        // Setup button listeners and initial state
+        bFollowUnfollow.setOnClickListener{
+            followUnfollowUser(uid!!)
+        }
+
+        bBackSearch.setOnClickListener {
+            onBackPressed()
+        }
+
+        setInitialButtonState(uid)
     }
 
     private fun onFollowedMoviesFetched(movieIds: MutableList<String>) {
@@ -188,12 +195,14 @@ class UserPageActivity: AppCompatActivity() {
                     bFollowUnfollow.setBackgroundResource(R.drawable.remove)
                 }
             }
+
+            loadUserFollowerData()
         }
     }
 
     private fun loadUserFollowerData() {
         // Set number of users following me from Firebase
-        FirebaseInteraction.getFollowersUsers { followers ->
+        FirebaseInteraction.getFollowersUsers { followers -> //TODO: add uid requirement
             tvFollowerCount.text = followers.size.toString()
         }
 
@@ -203,7 +212,15 @@ class UserPageActivity: AppCompatActivity() {
         }
     }
 
-
+    private fun setInitialButtonState(userId: String) {
+        FirebaseInteraction.checkFollowedExistance(userId) { exists ->
+            if(exists) {
+                bFollowUnfollow.setBackgroundResource(R.drawable.remove)
+            } else {
+                bFollowUnfollow.setBackgroundResource(R.drawable.add)
+            }
+        }
+    }
 
     private fun onError(){
         Log.e("CommentsMovieActivity", "Something went wrong")

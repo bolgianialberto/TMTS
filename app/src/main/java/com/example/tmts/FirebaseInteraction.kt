@@ -427,6 +427,24 @@ object FirebaseInteraction {
         })
     }
 
+    fun checkFollowedExistance(
+        userId: String,
+        callback: (Boolean) -> Unit
+    ){
+        followedUsersRef
+            .child(userId!!).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val exists = dataSnapshot.exists()
+                callback(exists)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                Log.w("FirebaseCheck", "checkFollowedExistance:onCancelled", databaseError.toException())
+                callback(false)
+            }
+        })
+    }
+
     fun checkUserRatingExistance(
         mediaId: Int,
         onSuccess: (Boolean) -> Unit,
