@@ -64,7 +64,7 @@ class ExploreShowsFragment : Fragment(), OnMoreAccountClickListener{
     }
 
     private fun fetchDetails() {
-        for (show in retrievedShows) {
+        for (show in retrievedShows.shuffled()) {
             val showId = show.second
             when (show.first) {
                 "MOV" -> {

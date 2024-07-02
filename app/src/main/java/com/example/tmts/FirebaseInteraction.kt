@@ -17,6 +17,8 @@ import java.util.Date
 import java.util.Locale
 
 object FirebaseInteraction {
+    private val MAX_SHOWS_PULLED_EXPLORE_SECTION = 10
+
     var mDbRef = FirebaseDatabase.getInstance().getReference()
     val mStRef = FirebaseStorage.getInstance().getReference()
     var mAuth = FirebaseAuth.getInstance()
@@ -785,6 +787,7 @@ object FirebaseInteraction {
     }
 
     fun getExploreShows(callback: (List<Pair<String, String>>) -> Unit) {
+        val result = mutableListOf<Pair<String, String>>()
         followingMoviesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val movies = mutableListOf<Pair<String, String>>()
@@ -795,6 +798,7 @@ object FirebaseInteraction {
                         movies.add(Pair("MOV", movieId))
                     }
                 }
+                result.addAll(movies)
 
                 followingSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -806,19 +810,63 @@ object FirebaseInteraction {
                                 series.add(Pair("SER", seriesId))
                             }
                         }
-                        callback((series + movies).shuffled())
+
+                        result.addAll(series)
+                         mDbRef.child("shows").child("movies")
+                             .addListenerForSingleValueEvent(object: ValueEventListener{
+                                 override fun onDataChange(snapshot: DataSnapshot) {
+                                     var addedShows = 0
+                                     for (child in snapshot.children) {
+                                         val movId = child.key
+                                         if (movId != null && !result.map { it.second }.contains(movId)) {
+                                             result.add(Pair("MOV", movId))
+                                             addedShows++
+                                             if (addedShows >= 10) break
+                                         }
+                                     }
+                                     if (addedShows >= 10) {
+                                         callback(result)
+                                     } else {
+                                         mDbRef.child("shows").child("series")
+                                             .addListenerForSingleValueEvent(object: ValueEventListener{
+                                                 override fun onDataChange(snapshot: DataSnapshot) {
+                                                     for (child in snapshot.children) {
+                                                         val serId = child.key
+                                                         if (serId != null && !result.map { it.second }.contains(serId)) {
+                                                             result.add(Pair("SER", serId))
+                                                             addedShows++
+                                                             if (addedShows >= 10) break
+                                                         }
+                                                     }
+                                                     callback(result)
+                                                 }
+
+                                                 override fun onCancelled(error: DatabaseError) {
+                                                     Log.e("Firebase Explore", error.message)
+                                                     callback(emptyList())
+                                                 }
+
+                                             })
+                                     }
+                                 }
+
+                                 override fun onCancelled(error: DatabaseError) {
+                                     Log.e("Firebase Explore", error.message)
+                                     callback(emptyList())
+                                 }
+
+                             })
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        println("Errore nel recupero dei dati: ${error.message}")
+                        Log.e("Firebase Explore", error.message)
                         callback(emptyList())
                     }
                 })
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Errore nel recupero dei dati: ${error.message}")
-                // Chiamata della callback con lista vuota in caso di errore
+                Log.e("Firebase Explore", error.message)
                 callback(emptyList())
             }
         })
