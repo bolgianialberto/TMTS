@@ -1,10 +1,8 @@
 package com.example.tmts.fragments
 
-import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -29,11 +27,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
-import com.example.tmts.activities.CreateReviewActivity
 import com.example.tmts.activities.MainEmptyActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
@@ -41,13 +37,9 @@ import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.adapters.MediaAdapter
 import com.example.tmts.beans.Media
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.storage.FirebaseStorage
-import com.google.firebase.storage.StorageReference
-
 
 class AccountFragment : Fragment() {
     private var mAuth = FirebaseAuth.getInstance()
-    private var mStorage = FirebaseStorage.getInstance().getReference()
     private lateinit var ivAccountIcon: ImageView
     private lateinit var tvBio: TextView
     private lateinit var tvUsername: TextView
@@ -60,6 +52,12 @@ class AccountFragment : Fragment() {
     private lateinit var llWatchedMovies: LinearLayout
     private lateinit var llWatchedSeries: LinearLayout
     private lateinit var llWatchlists: LinearLayout
+    private lateinit var arrowWatchedMovies: ImageView
+    private lateinit var arrowWatchedSeries: ImageView
+    private lateinit var arrowWatchlist: ImageView
+    private lateinit var tvWatchedMovies: TextView
+    private lateinit var tvWatchedSeries: TextView
+    private lateinit var tvWatchlists: TextView
 
     val currentUser = mAuth.currentUser!!
 
@@ -96,9 +94,6 @@ class AccountFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Fetch user's Firebase image reference
-        val userImageRef = mStorage.child("users").child(currentUser.uid).child("profileImage")
-
         // Initialize views
         tvUsername = view.findViewById(R.id.tv_account_username)
         tvBio = view.findViewById(R.id.tv_bio)
@@ -109,6 +104,12 @@ class AccountFragment : Fragment() {
         llWatchedMovies = view.findViewById(R.id.ll_watched_movies)
         llWatchedSeries = view.findViewById(R.id.ll_watched_series)
         llWatchlists = view.findViewById(R.id.ll_watchlists)
+        arrowWatchedMovies = view.findViewById(R.id.arrow_watched_movies)
+        arrowWatchedSeries = view.findViewById(R.id.arrow_watched_series)
+        arrowWatchlist = view.findViewById(R.id.arrow_watchlist)
+        tvWatchedMovies = view.findViewById(R.id.tv_watched_movies)
+        tvWatchedSeries = view.findViewById(R.id.tv_watched_series)
+        tvWatchlists = view.findViewById(R.id.tv_watchlists)
 
         // Setup adapters for Recycle Views
         watchedMoviesAdapter = MediaAdapter(requireContext(), emptyList(), 66, 100) { movie ->
@@ -137,16 +138,29 @@ class AccountFragment : Fragment() {
         rvWatchlist.adapter = watchlistsAdapter
 
         FirebaseInteraction.getWatchedMovies { movieIds ->
-            onWatchedMoviesFetched(movieIds)
+            if (movieIds.isNotEmpty()){
+                onWatchedMoviesFetched(movieIds)
+            } else {
+                llWatchedMovies.visibility = View.GONE
+            }
+
         }
 
         FirebaseInteraction.getWatchedSeries { serieIds ->
-            onWatchedSeriesFetched(serieIds)
+            if (serieIds.isNotEmpty()){
+                onWatchedSeriesFetched(serieIds)
+            } else {
+                llWatchedSeries.visibility = View.GONE
+            }
         }
 
         FirebaseInteraction.fetchWatchlistsWithDetails(
             onSuccess = {watchlists ->
-                watchlistsAdapter!!.updateMedia(watchlists)
+                if (watchlists.isNotEmpty()){
+                    watchlistsAdapter!!.updateMedia(watchlists)
+                } else {
+                    llWatchlists.visibility = View.GONE
+                }
         },
             onError = { errorMessage ->
                 Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
@@ -163,7 +177,7 @@ class AccountFragment : Fragment() {
             })
 
         // Load previously uploaded image by user, if it exists, otherwise load default image
-        loadUserImage(userImageRef, ivAccountIcon)
+        loadUserImage()
 
         // Load previously written user bio, if it exists, otherwise set default bio
         FirebaseInteraction.getUserBio(
@@ -206,29 +220,40 @@ class AccountFragment : Fragment() {
             }
         }
 
-        llWatchedMovies.setOnClickListener{
+        // Gestori di clic aggiornati
+        llWatchedMovies.setOnClickListener {
+            val rvWatchedMovie: RecyclerView = view.findViewById(R.id.rv_watched_movies)
             if (rvWatchedMovie.visibility == View.GONE) {
                 rvWatchedMovie.visibility = View.VISIBLE
+                arrowWatchedMovies.setImageResource(R.drawable.arrow_up)
             } else {
                 rvWatchedMovie.visibility = View.GONE
+                arrowWatchedMovies.setImageResource(R.drawable.arrow_down)
             }
         }
 
-        llWatchedSeries.setOnClickListener{
+        llWatchedSeries.setOnClickListener {
+            val rvWatchedSerie: RecyclerView = view.findViewById(R.id.rv_watched_series)
             if (rvWatchedSerie.visibility == View.GONE) {
                 rvWatchedSerie.visibility = View.VISIBLE
+                arrowWatchedSeries.setImageResource(R.drawable.arrow_up)
             } else {
                 rvWatchedSerie.visibility = View.GONE
+                arrowWatchedSeries.setImageResource(R.drawable.arrow_down)
             }
         }
 
-        llWatchlists.setOnClickListener{
+        llWatchlists.setOnClickListener {
+            val rvWatchlist: RecyclerView = view.findViewById(R.id.rv_watchlist_account)
             if (rvWatchlist.visibility == View.GONE) {
                 rvWatchlist.visibility = View.VISIBLE
+                arrowWatchlist.setImageResource(R.drawable.arrow_up)
             } else {
                 rvWatchlist.visibility = View.GONE
+                arrowWatchlist.setImageResource(R.drawable.arrow_down)
             }
         }
+
     }
 
     private fun onWatchedMoviesFetched(movieIds: List<String>){
@@ -348,36 +373,20 @@ class AccountFragment : Fragment() {
         selectImageFromGalleryResult.launch("image/*")
     }
 
-    /*
-    private val selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) {
-            uri: Uri? -> uri?.let {
-            //TODO: Se faccio upload di 1 immagine, poi switch fragment, poi ritorno a fare upload immagine, mi porta a un crash
-
-            val userImageRef = mStorage.child("users").child(currentUser.uid).child("profileImage")
-
-            userImageRef.putFile(uri).addOnSuccessListener {
-                Toast.makeText(requireContext(), "Uploaded successfully!", Toast.LENGTH_SHORT).show()
-                ivAccountIcon.setImageURI(uri)
-            }.addOnFailureListener {
-                Toast.makeText(requireContext(), "Something went wrong!", Toast.LENGTH_SHORT).show()
+    private fun loadUserImage() {
+        FirebaseInteraction.getUserRefInStorage(
+            onSuccess = {userImageRef ->
+                userImageRef.downloadUrl.addOnSuccessListener { uri ->
+                    Glide.with(requireContext())
+                        .load(uri)
+                        .into(ivAccountIcon)
+                }.addOnFailureListener { exception ->
+                    Log.e("FirebaseStorage", "Errore durante il download dell'immagine", exception)
+                }
+            },
+            onError = {message ->
+                Log.d("AccountFragment", message)
             }
-        }
-    }
-
-     */
-
-    private fun loadUserImage(userImageRef: StorageReference, ivAccountIcon: ImageView) {
-        userImageRef.downloadUrl.addOnSuccessListener {uri ->
-            // File exists, load with Glide
-            Glide.with(requireContext())
-                .load(uri)
-                .placeholder(R.drawable.movie)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .skipMemoryCache(true)
-                .into(ivAccountIcon)
-        }.addOnFailureListener{
-            // File doesn't exist, load default image
-            ivAccountIcon.setImageResource(R.drawable.movie) // TODO: change default image
-        }
+        )
     }
 }

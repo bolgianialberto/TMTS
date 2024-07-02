@@ -160,7 +160,7 @@ object FirebaseInteraction {
     }
 
     fun getUserRefInStorage(
-        userId: String?,
+        userId: (String)? = user.uid,
         onSuccess: (StorageReference) -> Unit,
         onError: (String) -> Unit
     ) {
