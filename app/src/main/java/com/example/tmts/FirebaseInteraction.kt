@@ -117,6 +117,10 @@ object FirebaseInteraction {
         })
     }
 
+    fun getLoggedUserId(): String {
+        return user.uid
+    }
+
     fun getUserBio(
         userId: String? = user.uid,
         onSuccess: (String) -> Unit, onFailure: (String) -> Unit

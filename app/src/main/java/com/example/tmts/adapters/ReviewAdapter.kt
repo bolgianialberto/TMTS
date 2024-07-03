@@ -83,9 +83,12 @@ class ReviewAdapter (
             )
 
             tvUserName.setOnClickListener {
-                val intent = Intent(context, UserPageActivity::class.java)
-                intent.putExtra("uid", review.idUser)
-                startActivity(context, intent, null)
+                val loggedUserUid = FirebaseInteraction.getLoggedUserId()
+                if (review.idUser != loggedUserUid) {
+                    val intent = Intent(context, UserPageActivity::class.java)
+                    intent.putExtra("uid", review.idUser)
+                    startActivity(context, intent, null)
+                }
             }
         }
     }
