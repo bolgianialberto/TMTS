@@ -144,7 +144,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/cv_profile"
+            app:layout_constraintTop_toBottomOf="@id/ll_watchlists"
             android:padding="10dp"
             android:layout_margin="10dp"
             android:background="@drawable/rounded_border"
@@ -169,14 +169,15 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_marginStart="4dp"
-                    android:src="@drawable/arrow_up"/>
+                    android:src="@drawable/arrow_down"/>
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_rv_tv_movies"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <!-- RecyclerView for Watched Movies -->
                 <androidx.recyclerview.widget.RecyclerView
@@ -235,14 +236,15 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_marginStart="4dp"
-                    android:src="@drawable/arrow_up" />
+                    android:src="@drawable/arrow_down" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_rv_tv_series"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_watched_series"
@@ -277,7 +279,7 @@
             android:layout_margin="10dp"
             android:visibility="visible"
             android:background="@drawable/rounded_border"
-            app:layout_constraintTop_toBottomOf="@id/ll_watched_series">
+            app:layout_constraintTop_toBottomOf="@id/cv_profile">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -298,14 +300,15 @@
                     android:layout_width="25dp"
                     android:layout_height="25dp"
                     android:layout_marginStart="4dp"
-                    android:src="@drawable/arrow_up" />
+                    android:src="@drawable/arrow_down" />
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/ll_rv_btn_watchlist"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="gone">
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_watchlist_account"
