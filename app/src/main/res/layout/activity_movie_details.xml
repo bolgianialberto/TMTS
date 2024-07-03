@@ -82,12 +82,13 @@
         <!-- Title, Date, Genres -->
         <LinearLayout
             android:id="@+id/ll_title_date_genres"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="10dp"
             app:layout_constraintBottom_toBottomOf="@id/iv_movie_details_backdrop"
-            app:layout_constraintStart_toStartOf="@id/iv_movie_details_backdrop">
+            app:layout_constraintStart_toStartOf="@id/iv_movie_details_backdrop"
+            app:layout_constraintEnd_toStartOf="@id/iv_seen">
 
             <TextView
                 android:id="@+id/tv_movie_details_title"
@@ -231,7 +232,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/ll_users_who_follow"
-            android:background="@drawable/rounded_border"
+            android:background="@drawable/thick_rounded_border"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_marginTop="10dp"
@@ -271,7 +272,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toTopOf="@id/ll_info_box"
-            android:background="@drawable/rounded_border"
+            android:background="@drawable/thick_rounded_border"
             android:layout_margin="10dp"
             android:padding="10dp"
             android:weightSum="100"
@@ -311,7 +312,7 @@
             app:layout_constraintTop_toBottomOf="@id/ll_users_who_follow"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/rounded_border"
+            android:background="@drawable/thick_rounded_border"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             >

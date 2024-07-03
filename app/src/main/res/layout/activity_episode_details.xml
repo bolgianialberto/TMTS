@@ -120,7 +120,7 @@
             app:layout_constraintTop_toBottomOf="@id/tv_episode_details_overview"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:background="@drawable/rounded_border"
+            android:background="@drawable/thick_rounded_border"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:layout_marginTop="10dp">

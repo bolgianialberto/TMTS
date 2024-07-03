@@ -14,6 +14,7 @@ import android.view.MenuInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -58,6 +59,13 @@ class AccountFragment : Fragment() {
     private lateinit var tvWatchedMovies: TextView
     private lateinit var tvWatchedSeries: TextView
     private lateinit var tvWatchlists: TextView
+    private lateinit var tvNoWatchedMovies: TextView
+    private lateinit var tvNoWatchedSeries: TextView
+    private lateinit var tvNoWatchlists: TextView
+    private lateinit var llRvTvMovies: LinearLayout
+    private lateinit var llRvTvSeries: LinearLayout
+    private lateinit var llRvBtnWatchlist: LinearLayout
+
 
     val currentUser = mAuth.currentUser!!
 
@@ -110,6 +118,12 @@ class AccountFragment : Fragment() {
         tvWatchedMovies = view.findViewById(R.id.tv_watched_movies)
         tvWatchedSeries = view.findViewById(R.id.tv_watched_series)
         tvWatchlists = view.findViewById(R.id.tv_watchlists)
+        tvNoWatchedMovies = view.findViewById(R.id.tv_no_watched_movies)
+        tvNoWatchedSeries = view.findViewById(R.id.tv_no_watched_series)
+        tvNoWatchlists = view.findViewById(R.id.tv_no_watchlists)
+        llRvTvMovies = view.findViewById(R.id.ll_rv_tv_movies)
+        llRvTvSeries = view.findViewById(R.id.ll_rv_tv_series)
+        llRvBtnWatchlist = view.findViewById(R.id.ll_rv_btn_watchlist)
 
         // Setup adapters for Recycle Views
         watchedMoviesAdapter = MediaAdapter(requireContext(), emptyList(), 66, 100) { movie ->
@@ -139,27 +153,26 @@ class AccountFragment : Fragment() {
 
         FirebaseInteraction.getWatchedMovies { movieIds ->
             if (movieIds.isNotEmpty()){
+                rvWatchedMovie.visibility = View.VISIBLE
+                tvNoWatchedMovies.visibility = View.GONE
                 onWatchedMoviesFetched(movieIds)
-            } else {
-                llWatchedMovies.visibility = View.GONE
             }
-
         }
 
         FirebaseInteraction.getWatchedSeries { serieIds ->
             if (serieIds.isNotEmpty()){
+                rvWatchedSerie.visibility = View.VISIBLE
+                tvNoWatchedSeries.visibility = View.GONE
                 onWatchedSeriesFetched(serieIds)
-            } else {
-                llWatchedSeries.visibility = View.GONE
             }
         }
 
         FirebaseInteraction.fetchWatchlistsWithDetails(
             onSuccess = {watchlists ->
                 if (watchlists.isNotEmpty()){
+                    rvWatchlist.visibility = View.VISIBLE
+                    tvNoWatchlists.visibility = View.GONE
                     watchlistsAdapter!!.updateMedia(watchlists)
-                } else {
-                    llWatchlists.visibility = View.GONE
                 }
         },
             onError = { errorMessage ->
@@ -222,34 +235,31 @@ class AccountFragment : Fragment() {
 
         // Gestori di clic aggiornati
         llWatchedMovies.setOnClickListener {
-            val rvWatchedMovie: RecyclerView = view.findViewById(R.id.rv_watched_movies)
-            if (rvWatchedMovie.visibility == View.GONE) {
-                rvWatchedMovie.visibility = View.VISIBLE
+            if (llRvTvMovies.visibility == View.GONE) {
+                llRvTvMovies.visibility = View.VISIBLE
                 arrowWatchedMovies.setImageResource(R.drawable.arrow_up)
             } else {
-                rvWatchedMovie.visibility = View.GONE
+                llRvTvMovies.visibility = View.GONE
                 arrowWatchedMovies.setImageResource(R.drawable.arrow_down)
             }
         }
 
         llWatchedSeries.setOnClickListener {
-            val rvWatchedSerie: RecyclerView = view.findViewById(R.id.rv_watched_series)
-            if (rvWatchedSerie.visibility == View.GONE) {
-                rvWatchedSerie.visibility = View.VISIBLE
+            if (llRvTvSeries.visibility == View.GONE) {
+                llRvTvSeries.visibility = View.VISIBLE
                 arrowWatchedSeries.setImageResource(R.drawable.arrow_up)
             } else {
-                rvWatchedSerie.visibility = View.GONE
+                llRvTvSeries.visibility = View.GONE
                 arrowWatchedSeries.setImageResource(R.drawable.arrow_down)
             }
         }
 
         llWatchlists.setOnClickListener {
-            val rvWatchlist: RecyclerView = view.findViewById(R.id.rv_watchlist_account)
-            if (rvWatchlist.visibility == View.GONE) {
-                rvWatchlist.visibility = View.VISIBLE
+            if (llRvBtnWatchlist.visibility == View.GONE) {
+                llRvBtnWatchlist.visibility = View.VISIBLE
                 arrowWatchlist.setImageResource(R.drawable.arrow_up)
             } else {
-                rvWatchlist.visibility = View.GONE
+                llRvBtnWatchlist.visibility = View.GONE
                 arrowWatchlist.setImageResource(R.drawable.arrow_down)
             }
         }

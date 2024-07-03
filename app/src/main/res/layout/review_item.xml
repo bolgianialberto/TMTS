@@ -13,7 +13,7 @@
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:background="@drawable/rounded_border"
+        android:background="@drawable/thick_rounded_border"
         android:padding="3dp">
 
         <!-- LinearLayout for User Info -->
