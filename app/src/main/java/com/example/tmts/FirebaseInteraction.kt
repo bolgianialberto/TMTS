@@ -743,7 +743,7 @@ object FirebaseInteraction {
     fun getMovieFollowers(movieId: Int, callback: ((List<String>) -> Unit)) {
 
         val movieFollowersRef = mDbRef.child("shows").child("movies").child(movieId.toString()).child("followers")
-        movieFollowersRef.addValueEventListener(object: ValueEventListener {
+        movieFollowersRef.addListenerForSingleValueEvent(object: ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -766,7 +766,7 @@ object FirebaseInteraction {
     fun getSerieFollowers(serieId: Int, callback: ((List<String>) -> Unit)) {
 
         val serieFollowersRef = mDbRef.child("shows").child("series").child(serieId.toString()).child("followers")
-        serieFollowersRef.addValueEventListener(object: ValueEventListener {
+        serieFollowersRef.addListenerForSingleValueEvent(object: ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
 

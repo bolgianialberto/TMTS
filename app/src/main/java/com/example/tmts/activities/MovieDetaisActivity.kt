@@ -56,7 +56,7 @@ class MovieDetaisActivity : AppCompatActivity() {
         )
 
         ivBackSearch.setOnClickListener {
-            onBackPressed()
+            finish()
         }
 
         setInitialButtonState(movieId)

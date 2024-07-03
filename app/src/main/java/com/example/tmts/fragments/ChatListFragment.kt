@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.tmts.ChatMessagingService
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
 import com.example.tmts.adapters.ChatListAdapter
@@ -45,14 +44,14 @@ class ChatListFragment : Fragment(), OnChatClickListener {
         addChatBtt.setOnClickListener {
             addChatActivityLauncher.launch(null)
         }
-        ChatMessagingService().getActualToken(
+        /*ChatMessagingService().getActualToken(
             onSuccess = {
                 Log.d("TOKEN", it)
                 println(it)
             },
             onFailure = {
                 Log.e("ERROR", it!!.toString())
-            })
+            })*/
         loadChats()
         return view
     }
