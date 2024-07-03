@@ -95,13 +95,7 @@ class ChatActivity : AppCompatActivity() {
         rvMessage.adapter = messageAdapter
         bttSend.setOnClickListener {
             if (edtMessage.text.toString().isNotEmpty()) {
-                val message = Message(
-                    edtMessage.text.toString(),
-                    senderId!!,
-                    receiverId!!,
-                    System.currentTimeMillis()
-                )
-                sendMessage(message)
+                sendMessage(edtMessage.text.toString(), senderId!!, receiverId!!)
             }
         }
         loadMessages()
@@ -113,6 +107,8 @@ class ChatActivity : AppCompatActivity() {
             messageList,
             senderRoom!!,
             onSuccess = { messages ->
+                Log.d("Loading messages", "${messages.size}")
+                messages.forEach {Log.d("MessageDetail", it.toString())}
                 messageList.addAll(messages)
                 messages.forEach { messageAdapter.updateMessages(it.second) }
                 rvMessage.scrollToPosition(messageList.size - 1)
@@ -122,9 +118,11 @@ class ChatActivity : AppCompatActivity() {
             })
     }
 
-    private fun sendMessage(message: Message) {
+    private fun sendMessage(messageText: String, senderId: String, receiverId: String) {
         FirebaseInteraction.sendMessage(
-            message,
+            messageText,
+            senderId,
+            receiverId,
             onSuccess = {
                 edtMessage.setText("")
                 rvMessage.scrollToPosition(messageList.size - 1)
@@ -135,7 +133,4 @@ class ChatActivity : AppCompatActivity() {
             })
     }
 
-    private fun sendNotification() {
-
-    }
 }

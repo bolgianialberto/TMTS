@@ -1,6 +1,7 @@
 package com.example.tmts.adapters
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -35,7 +36,9 @@ class MessageAdapter(
         var result: RecyclerView.ViewHolder? = null
         when(viewType) {
             SENT_MSG -> result = SentMessageViewHolder(LayoutInflater.from(context).inflate(R.layout.message_chat_item_sent, parent, false))
-            RECEIVED_MSG -> result = ReceivedMessageViewHolder(LayoutInflater.from(context).inflate(R.layout.message_chat_item_received, parent, false))
+            RECEIVED_MSG -> {
+                result = ReceivedMessageViewHolder(LayoutInflater.from(context).inflate(R.layout.message_chat_item_received, parent, false))
+            }
         }
         return result!!
     }
@@ -58,6 +61,18 @@ class MessageAdapter(
             val viewHolder = holder as ReceivedMessageViewHolder
             viewHolder.tvReceivedMessage.text = message.text
             viewHolder.tvTimeReceivedMessage.text = convertTimestampToDateString(message.timestamp)
+            if (!message.read){
+                Log.d("Binding", "bind: $message")
+                FirebaseInteraction.notifyMessageRead(
+                    message,
+                    onSuccess = {
+                        Log.d("ReadNotify", "Complete for $message")
+                    },
+                    onFailure = {
+                        Log.e("ReadNotify Error", it.message!!)
+                    }
+                )
+            }
         }
     }
 
