@@ -891,7 +891,7 @@ object FirebaseInteraction {
         onFailure: (String) -> Unit
     ) {
         val lowerStartingChars = startingChars.lowercase()
-        mDbRef.child("users").addValueEventListener(object: ValueEventListener {
+        mDbRef.child("users").addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val users = mutableListOf<User>()
                 snapshot.children.forEach {usr ->
