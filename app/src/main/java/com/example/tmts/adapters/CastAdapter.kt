@@ -10,8 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.R
 import com.example.tmts.beans.CastMember
-import com.example.tmts.beans.Network
-import org.w3c.dom.Text
 
 class CastAdapter (
     private val context: Context,

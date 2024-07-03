@@ -11,7 +11,6 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
@@ -19,15 +18,6 @@ import com.example.tmts.R
 import com.example.tmts.Utils
 import com.example.tmts.activities.EpisodeDetailsActivity
 import com.example.tmts.beans.EpisodeDetails
-import com.example.tmts.beans.Network
-import com.example.tmts.beans.SeasonDetails
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 
 class EpisodeAdapter(
     private val context: Context,

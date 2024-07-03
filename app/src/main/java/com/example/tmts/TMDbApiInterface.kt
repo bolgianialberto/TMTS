@@ -1,10 +1,13 @@
 package com.example.tmts
 
+import com.example.tmts.beans.CastMember
+import com.example.tmts.beans.CastResponse
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.Genre
 import com.example.tmts.beans.GenreResponse
 import com.example.tmts.beans.MediaResponse
 import com.example.tmts.beans.MovieDetails
+import com.example.tmts.beans.ProviderResponse
 import com.example.tmts.beans.SeasonDetails
 import com.example.tmts.beans.SerieDetails
 import retrofit2.Call
@@ -91,4 +94,28 @@ interface TMDbApiInterface {
     fun getSerieGenres(
         @Query("api_key") apiKey: String
     ): Call<GenreResponse>
+
+    @GET("tv/{serie_id}/watch/providers")
+    fun getSerieProviders(
+        @Path("serie_id") serieId: Int,
+        @Query("api_key") apiKey: String
+    ): Call<ProviderResponse>
+
+    @GET("movie/{movie_id}/watch/providers")
+    fun getMovieProviders(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): Call<ProviderResponse>
+
+    @GET("movie/{movie_id}/credits")
+    fun getMovieCast(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): Call<CastResponse>
+
+    @GET("tv/{tv_id}/credits")
+    fun getSerieCast(
+        @Path("tv_id") tvId: Int,
+        @Query("api_key") apiKey: String
+    ): Call<CastResponse>
 }

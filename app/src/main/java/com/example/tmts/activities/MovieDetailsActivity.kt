@@ -27,6 +27,8 @@ import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.Utils
 import com.example.tmts.adapters.AddToWatchlistAdapter
+import com.example.tmts.adapters.CastAdapter
+import com.example.tmts.adapters.ProviderAdapter
 import com.example.tmts.beans.MovieDetails
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
@@ -49,6 +51,11 @@ class MovieDetailsActivity : AppCompatActivity() {
     private lateinit var ivFilledStar: ImageView
     private lateinit var layout: ScrollView
     private lateinit var ivSeen: ImageView
+    private lateinit var rvProviders: RecyclerView
+    private lateinit var providerAdapter: ProviderAdapter
+    private lateinit var tvProviders: TextView
+    private lateinit var rvCast: RecyclerView
+    private lateinit var castAdapter: CastAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -75,9 +82,20 @@ class MovieDetailsActivity : AppCompatActivity() {
         ivFilledStar = findViewById(R.id.iv_filled_star)
         layout = findViewById(R.id.sv_movie_details)
         ivSeen = findViewById(R.id.iv_seen)
+        rvProviders = findViewById(R.id.rv_movie_providers)
+        providerAdapter = ProviderAdapter(this, emptyList())
+        tvProviders = findViewById(R.id.tv_providers)
+        rvCast = findViewById(R.id.rv_cast)
+        castAdapter = CastAdapter(this, emptyList())
 
         val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
         backdropImageView.colorFilter = colorFilter
+
+        rvProviders.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvProviders.adapter = providerAdapter
+
+        rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvCast.adapter = castAdapter
 
         MediaRepository.getMovieDetails(
             movieId,
@@ -147,6 +165,20 @@ class MovieDetailsActivity : AppCompatActivity() {
         // origin language
         originalLanguage.text = movie.original_language
 
+        // providers
+        MediaRepository.getMovieProviders(
+            "IT",
+            movie.id,
+            onSuccess = {providers ->
+                if (providers.isNotEmpty()){
+                    providerAdapter.updateMedia(providers)
+                } else {
+                    tvProviders.visibility = View.GONE
+                }
+            },
+            onError = ::onError
+        )
+
         // average rate
         FirebaseInteraction.getAverageRateForMedia(
             movie.id,
@@ -193,6 +225,15 @@ class MovieDetailsActivity : AppCompatActivity() {
         btnAddToWatchlist.setOnClickListener{
             showWatchlistPopover(movie)
         }
+
+        // cast
+        MediaRepository.getMovieCast(
+            movie.id,
+            onSuccess = {cast ->
+                castAdapter.updateMedia(cast)
+            },
+            onError = ::onError
+        )
     }
 
     private fun showWatchlistPopover(movie: MovieDetails) {

@@ -1,6 +1,8 @@
 package com.example.tmts
 
 import android.util.Log
+import com.example.tmts.beans.CastMember
+import com.example.tmts.beans.CastResponse
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.Genre
 import com.example.tmts.beans.GenreResponse
@@ -8,6 +10,8 @@ import com.example.tmts.beans.Media
 import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.MediaResponse
 import com.example.tmts.beans.MovieDetails
+import com.example.tmts.beans.Provider
+import com.example.tmts.beans.ProviderResponse
 import com.example.tmts.beans.SeasonDetails
 import com.example.tmts.beans.SerieDetails
 import retrofit2.Call
@@ -16,6 +20,125 @@ import retrofit2.Response
 
 object MediaRepository {
     private var tmdbApiClient = TMDbApiClient()
+
+    fun getMovieCast(
+        movieId: Int,
+        onSuccess: (List<CastMember>) -> Unit,
+        onError: () -> Unit
+    ){
+        val call = tmdbApiClient.getClient().getMovieCast(movieId, tmdbApiClient.getApiKey())
+        call.enqueue(object: Callback<CastResponse>{
+            override fun onResponse(call: Call<CastResponse>, response: Response<CastResponse>) {
+                if (response.isSuccessful){
+                    val castResponse = response.body()
+                    if (castResponse != null) {
+                        val cast = castResponse.results
+                        onSuccess.invoke(cast)
+                    } else {
+                        onError.invoke()
+                    }
+                } else {
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<CastResponse>, t: Throwable) {
+                onError.invoke()
+            }
+        })
+    }
+
+    fun getSerieCast(
+        serieId: Int,
+        onSuccess: (List<CastMember>) -> Unit,
+        onError: () -> Unit
+    ){
+        val call = tmdbApiClient.getClient().getSerieCast(serieId, tmdbApiClient.getApiKey())
+        call.enqueue(object: Callback<CastResponse>{
+            override fun onResponse(call: Call<CastResponse>, response: Response<CastResponse>) {
+                if (response.isSuccessful){
+                    val castResponse = response.body()
+                    if (castResponse != null) {
+                        val cast = castResponse.results
+                        onSuccess.invoke(cast)
+                    } else {
+                        onError.invoke()
+                    }
+                } else {
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<CastResponse>, t: Throwable) {
+                onError.invoke()
+            }
+        })
+    }
+
+    fun getMovieProviders(
+        countryCode: String,
+        movieId: Int,
+        onSuccess: (List<Provider>) -> Unit,
+        onError: () -> Unit
+    ) {
+        val call = tmdbApiClient.getClient().getMovieProviders(movieId, tmdbApiClient.getApiKey())
+        call.enqueue(object : Callback<ProviderResponse> {
+            override fun onResponse(
+                call: Call<ProviderResponse>,
+                response: Response<ProviderResponse>
+            ) {
+                if (response.isSuccessful) {
+                    val countryToData = response.body()
+                    if (countryToData != null) {
+                        val flatratesForIT = countryToData.results[countryCode]?.flatrate ?: emptyList()
+                        onSuccess.invoke(flatratesForIT)
+                    } else {
+                        onError.invoke()
+                    }
+                } else {
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<ProviderResponse>, t: Throwable) {
+                onError.invoke()
+            }
+        })
+    }
+
+    fun getSerieProviders(
+        countryCode: String,
+        serieId: Int,
+        onSuccess: (providers: List<Provider>) -> Unit,
+        onError: () -> Unit
+    ){
+        val call = tmdbApiClient.getClient().getSerieProviders(serieId, tmdbApiClient.getApiKey())
+        call.enqueue(object: Callback<ProviderResponse>{
+            override fun onResponse(
+                call: Call<ProviderResponse>,
+                response: Response<ProviderResponse>
+            ) {
+                if (response.isSuccessful){
+                    val countryToData = response.body()
+
+                    if (countryToData != null) {
+                        val providers = countryToData.results[countryCode]?.flatrate ?: emptyList()
+
+                        onSuccess.invoke(providers)
+                    } else {
+                        onError.invoke()
+                    }
+                } else {
+                    onError.invoke()
+                }
+            }
+
+            override fun onFailure(call: Call<ProviderResponse>, t: Throwable) {
+                onError.invoke()
+            }
+
+        })
+    }
 
     fun getMovieGenres(
         onSuccess: (genres: List<Genre>) -> Unit,

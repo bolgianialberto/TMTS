@@ -25,22 +25,12 @@ import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
-import com.example.tmts.TMDbApiClient
 import com.example.tmts.Utils
 import com.example.tmts.adapters.AddToWatchlistAdapter
-import com.example.tmts.adapters.NetworkAdapter
-import com.example.tmts.adapters.SeasonAdapter
-import com.example.tmts.beans.MovieDetails
-import com.example.tmts.beans.SeasonDetails
+import com.example.tmts.adapters.CastAdapter
+import com.example.tmts.adapters.ProviderAdapter
 import com.example.tmts.beans.SerieDetails
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ServerValue
 import com.google.firebase.database.ValueEventListener
 
 class SerieDetailsActivity : AppCompatActivity() {
@@ -56,8 +46,8 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var originalLanguage: TextView
     private lateinit var firstReleaseDate: TextView
     private lateinit var llSeasons: LinearLayout
-    private lateinit var rvNetwork: RecyclerView
-    private lateinit var networkAdapter: NetworkAdapter
+    private lateinit var rvProviders: RecyclerView
+    private lateinit var providerAdapter: ProviderAdapter
     private lateinit var llComments: LinearLayout
     private lateinit var btnRate: Button
     private lateinit var tvAverageRate: TextView
@@ -66,6 +56,9 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var layout: ScrollView
     private lateinit var ivSeen: ImageView
     private var serieId: Int = 0
+    private lateinit var tvProviders: TextView
+    private lateinit var rvCast: RecyclerView
+    private lateinit var castAdapter: CastAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,8 +78,8 @@ class SerieDetailsActivity : AppCompatActivity() {
         originCountry = findViewById(R.id.tv_serie_details_origin_country)
         originalLanguage = findViewById(R.id.tv_serie_details_origin_language)
         firstReleaseDate = findViewById(R.id.tv_serie_details_release_date)
-        networkAdapter = NetworkAdapter(this, emptyList())
-        rvNetwork = findViewById(R.id.rv_serie_networks)
+        providerAdapter = ProviderAdapter(this, emptyList())
+        rvProviders = findViewById(R.id.rv_serie_providers)
         llSeasons = findViewById(R.id.ll_seasons)
         llComments = findViewById(R.id.ll_comments)
         btnRate = findViewById(R.id.btn_rate)
@@ -95,12 +88,18 @@ class SerieDetailsActivity : AppCompatActivity() {
         btnWatchlist = findViewById(R.id.btn_watchlist)
         layout = findViewById(R.id.sv_serie_details)
         ivSeen = findViewById(R.id.iv_seen)
+        tvProviders = findViewById(R.id.tv_providers)
+        rvCast = findViewById(R.id.rv_cast)
+        castAdapter = CastAdapter(this, emptyList())
 
         val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
         backdropImageView.colorFilter = colorFilter
 
-        rvNetwork.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvNetwork.adapter = networkAdapter
+        rvProviders.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvProviders.adapter = providerAdapter
+
+        rvCast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvCast.adapter = castAdapter
 
         ivBackSearch.setOnClickListener {
             onBackPressed()
@@ -208,7 +207,21 @@ class SerieDetailsActivity : AppCompatActivity() {
         val serieIdToCheck: String = (serie.id).toString()
 
         // networks
-        networkAdapter.updateMedia(serie.networks)
+        //providerAdapter.updateMedia(serie.networks)
+
+        // providers
+        MediaRepository.getSerieProviders(
+            "IT",
+            serie.id,
+            onSuccess = {providers ->
+                if (providers.isNotEmpty()){
+                    providerAdapter.updateMedia(providers)
+                } else {
+                    tvProviders.visibility = View.GONE
+                }
+            },
+            onError = ::onError
+        )
 
         // seasons
         llSeasons.setOnClickListener {
@@ -251,6 +264,17 @@ class SerieDetailsActivity : AppCompatActivity() {
         btnWatchlist.setOnClickListener{
             showWatchlistPopover(serie)
         }
+
+        // cast
+        MediaRepository.getSerieCast(
+            serie.id,
+            onSuccess = {cast ->
+                if(cast.isNotEmpty()){
+                    castAdapter.updateMedia(cast)
+                }
+            },
+            onError = ::onError
+        )
     }
 
     private fun showWatchlistPopover(serie: SerieDetails) {
