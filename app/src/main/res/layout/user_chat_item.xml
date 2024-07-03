@@ -51,7 +51,7 @@
                 android:layout_marginTop="3dp"
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
-                android:text="Last message"
+                android:text="Last last last last last last last last last last last message"
                 android:textSize="14sp"
                 android:ellipsize="end"
                 android:maxLines="2"/>

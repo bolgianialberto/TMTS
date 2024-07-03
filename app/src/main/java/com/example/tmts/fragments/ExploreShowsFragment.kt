@@ -25,7 +25,7 @@ import com.example.tmts.interfaces.OnMoreAccountClickListener
 import com.example.tmts.interfaces.OnShowDetailsClickListener
 import kotlin.math.min
 
-class ExploreShowsFragment : Fragment(), OnMoreAccountClickListener, OnShowDetailsClickListener {
+class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDetailsClickListener {
 
     private val MAX_USERS_PER_SHOW: Int = 4
     private lateinit var rvExplore: RecyclerView
