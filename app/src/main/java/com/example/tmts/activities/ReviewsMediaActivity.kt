@@ -29,6 +29,8 @@ class ReviewsMediaActivity : AppCompatActivity() {
     private lateinit var reviewsAdapter: ReviewAdapter
     private lateinit var mediaType: String
     private lateinit var layout: ConstraintLayout
+    private lateinit var llNoComment: LinearLayout
+
     private var mediaId: Int = 0
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +45,7 @@ class ReviewsMediaActivity : AppCompatActivity() {
         btnArrowBack = findViewById(R.id.iv_arrow_back_comment_activity)
         rvReview = findViewById(R.id.rv_reviews)
         layout = findViewById(R.id.cl_media_review)
+        llNoComment = findViewById(R.id.ll_no_comments)
 
         reviewsAdapter = ReviewAdapter(this, emptyList()) // Pass an empty list initially
         rvReview.layoutManager = LinearLayoutManager(this)
@@ -91,7 +94,15 @@ class ReviewsMediaActivity : AppCompatActivity() {
             media.id.toString(),
             mediaType,
             onSuccess = { reviews ->
-                reviewsAdapter.updateMedia(reviews)
+                if (reviews.isNotEmpty()) {
+                    rvReview.visibility = View.VISIBLE
+                    llNoComment.visibility = View.GONE
+                    reviewsAdapter.updateMedia(reviews)
+                } else {
+                    rvReview.visibility = View.GONE
+                    llNoComment.visibility = View.VISIBLE
+                }
+
             },
             onError = { error ->
                 Log.e("ReviewsMovieActivity", "Error loading reviews: $error")
