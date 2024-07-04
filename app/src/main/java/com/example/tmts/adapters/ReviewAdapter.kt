@@ -67,19 +67,20 @@ class ReviewAdapter (
 
             FirebaseInteraction.getReviewRefInStorage(
                 review,
-                onSuccess = {reviewImageRef ->
+                onSuccess = { reviewImageRef ->
                     reviewImageRef.downloadUrl.addOnSuccessListener { uri ->
                         Glide.with(context)
                             .load(uri)
                             .into(ivPhoto)
                         ivPhoto.visibility = View.VISIBLE
                     }.addOnFailureListener { exception ->
-                        Log.e("FirebaseStorage", "Errore durante il download dell'immagine", exception)
+                        Log.e("FirebaseStorage", "Errore durante il download dell'immagine del commento", exception)
                         ivPhoto.visibility = View.GONE
                     }
                 },
-                onError = {message ->
+                onError = { message ->
                     Log.d("ReviewAdapter", message)
+                    ivPhoto.visibility = View.GONE
                 }
             )
 
@@ -91,7 +92,7 @@ class ReviewAdapter (
                             .load(uri)
                             .into(ivUserPhoto)
                     }.addOnFailureListener { exception ->
-                        Log.e("FirebaseStorage", "Errore durante il download dell'immagine", exception)
+                        Log.e("FirebaseStorage", "Errore durante il download dell'immagine di profilo di ${review.idUser}", exception)
                     }
                 },
                 onError = {message ->

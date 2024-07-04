@@ -165,11 +165,11 @@ object FirebaseInteraction {
         onError: (String) -> Unit
     ) {
         val filePath = "users/${userId}/profileImage"
-        val userImageRef = storageRef.child(filePath)
-        if (userImageRef != null) {
-            onSuccess(userImageRef)
-        } else {
-            onError("User image not found")
+
+        storageRef.child(filePath).metadata.addOnSuccessListener {
+            onSuccess(storageRef.child(filePath))
+        }.addOnFailureListener { exception ->
+            onError("Errore durante il recupero del riferimento: ${exception.message}")
         }
     }
 
@@ -244,11 +244,11 @@ object FirebaseInteraction {
         onError: (String) -> Unit
     ){
         val filePath = "reviews/${review.id}.jpg" // Assumi che review abbia un campo reviewId
-        val reviewImageRef = storageRef.child(filePath)
-        if(reviewImageRef != null){
-            onSuccess(reviewImageRef)
-        } else {
-            onError("Review image not found")
+
+        storageRef.child(filePath).metadata.addOnSuccessListener {
+            onSuccess(storageRef.child(filePath))
+        }.addOnFailureListener { exception ->
+            onError("Errore durante il recupero del riferimento: ${exception.message}")
         }
     }
 

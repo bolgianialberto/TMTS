@@ -36,11 +36,13 @@ class ExploreShowsFragment : Fragment(), OnMoreAccountClickListener{
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_explore_shows, container, false)
+
         exploreMoviesAdapter = ExploreShowsAdapter(requireContext(), ArrayList(), this)
         rvExplore = view.findViewById(R.id.rv_explore_movie)
         rvExplore.layoutManager = LinearLayoutManager(requireContext())
         rvExplore.adapter = exploreMoviesAdapter
         loadData()
+
         return view
     }
 

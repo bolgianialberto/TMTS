@@ -104,7 +104,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         )
 
         ivBackSearch.setOnClickListener {
-            onBackPressed()
+            finish()
         }
 
         setInitialButtonState(movieId)
@@ -113,7 +113,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         layout.setOnTouchListener(Utils.detectSwipe(this){ direction ->
             when (direction) {
                 "MOVE_RIGHT" -> {
-                    onBackPressed()
+                    finish()
                 }
             }
         })
