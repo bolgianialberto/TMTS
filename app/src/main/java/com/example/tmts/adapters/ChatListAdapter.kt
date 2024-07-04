@@ -93,12 +93,6 @@ class ChatListAdapter(
         notifyItemInserted(position)
     }
 
-    fun deleteUser(user: User) {
-        val position = usersWithLastMessageList.indexOf(usersWithLastMessageList.find { it.first == user })
-        usersWithLastMessageList.removeAt(position)
-        notifyItemRemoved(position)
-    }
-
     fun updateUser(userWithLastMessage: Pair<User, Message>) {
         val previousPair = usersWithLastMessageList.find { it.first == userWithLastMessage.first }
         var previousIndex = -1
@@ -109,6 +103,12 @@ class ChatListAdapter(
         val newIndex = addMessageWithTimestampOrder(userWithLastMessage)
         notifyItemMoved(previousIndex, newIndex)
         notifyItemChanged(newIndex)
+    }
+
+    fun removeUser(user: User){
+        val position = usersWithLastMessageList.map { it.first }.indexOf(user)
+        usersWithLastMessageList.removeAt(position)
+        notifyItemRemoved(position)
     }
 
 
