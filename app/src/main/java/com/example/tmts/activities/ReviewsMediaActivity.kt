@@ -60,7 +60,7 @@ class ReviewsMediaActivity : AppCompatActivity() {
         val swipeHandler = { direction: String ->
             when (direction) {
                 "MOVE_RIGHT" -> {
-                    onBackPressed()
+                    finish()
                 }
             }
         }
@@ -87,7 +87,7 @@ class ReviewsMediaActivity : AppCompatActivity() {
         tvMediaName.text = media.title
 
         btnArrowBack.setOnClickListener{
-            onBackPressed()
+            finish()
         }
 
         FirebaseInteraction.getReviewsForMedia(

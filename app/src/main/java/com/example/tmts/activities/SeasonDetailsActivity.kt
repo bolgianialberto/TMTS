@@ -37,7 +37,7 @@ class SeasonDetailsActivity : AppCompatActivity() {
         layout = findViewById(R.id.main)
 
         seasonAdapter = SeasonAdapter(this, emptyList()){
-            onBackPressed()
+            finish()
         }
         rvSeasons = findViewById(R.id.rv_seasons)
 
@@ -45,7 +45,7 @@ class SeasonDetailsActivity : AppCompatActivity() {
         rvSeasons.adapter = seasonAdapter
 
         btnBackArrow.setOnClickListener{
-            onBackPressed()
+            finish()
         }
 
         applySwipeGesture()
@@ -57,7 +57,7 @@ class SeasonDetailsActivity : AppCompatActivity() {
         val swipeHandler = { direction: String ->
             when (direction) {
                 "MOVE_RIGHT" -> {
-                    onBackPressed()
+                    finish()
                 }
             }
         }

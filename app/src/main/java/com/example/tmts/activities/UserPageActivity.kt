@@ -134,7 +134,7 @@ class UserPageActivity: AppCompatActivity() {
         }
 
         bBackSearch.setOnClickListener {
-            onBackPressed()
+            finish()
         }
 
         setInitialButtonState(uid)

@@ -61,7 +61,7 @@ class SearchActivity : AppCompatActivity() {
         }
 
         ivBackSearch.setOnClickListener {
-            onBackPressed()
+            finish()
         }
     }
 

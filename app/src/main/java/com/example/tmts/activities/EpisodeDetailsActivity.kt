@@ -80,13 +80,13 @@ class EpisodeDetailsActivity : AppCompatActivity() {
         )
 
         btnBackSearch.setOnClickListener {
-            onBackPressed()
+            finish()
         }
 
         layout.setOnTouchListener(Utils.detectSwipe(this){direction ->
             when (direction) {
                 "MOVE_RIGHT" -> {
-                    onBackPressed()
+                    finish()
                 }
             }
         })

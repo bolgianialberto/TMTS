@@ -102,13 +102,13 @@ class SerieDetailsActivity : AppCompatActivity() {
         rvCast.adapter = castAdapter
 
         ivBackSearch.setOnClickListener {
-            onBackPressed()
+            finish()
         }
 
         layout.setOnTouchListener(Utils.detectSwipe(this){ direction ->
             when (direction) {
                 "MOVE_RIGHT" -> {
-                    onBackPressed()
+                    finish()
                 }
             }
         })
