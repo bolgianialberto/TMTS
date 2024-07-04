@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tmts.FirebaseInteraction
@@ -15,9 +17,15 @@ import com.example.tmts.R
 import com.example.tmts.adapters.HomeSerieAdapter
 import com.example.tmts.beans.EpisodeDetails
 import com.example.tmts.beans.SerieDetails
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
     private lateinit var homeSerieAdapter: HomeSerieAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var llNoSeries: LinearLayout
+    private lateinit var btnSearch: Button
+    private lateinit var bottomNavigationView: BottomNavigationView
+
     val episodeDetailsList = mutableListOf<Pair<EpisodeDetails, Long>>()
     val followingSeries = mutableListOf<Triple<String, String, Long>>() // (serieId, nextToSee, timestamp)
 
@@ -28,8 +36,11 @@ class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
         val view = inflater.inflate(R.layout.fragment_serie_home, container, false)
 
         homeSerieAdapter = HomeSerieAdapter(requireContext(), emptyList(), this)
+        recyclerView= view.findViewById(R.id.rv_home_serie)
+        llNoSeries = view.findViewById(R.id.empty_state_layout)
+        btnSearch = view.findViewById(R.id.btn_search_series)
+        bottomNavigationView = requireActivity().findViewById(R.id.bottomNavigationView)
 
-        val recyclerView: RecyclerView = view.findViewById(R.id.rv_home_serie)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = homeSerieAdapter
 
@@ -48,8 +59,28 @@ class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
         followingSeries.clear()
 
         FirebaseInteraction.getFollowingSeries { series ->
-            followingSeries.addAll(series)
-            fetchNextEpisodes()
+            if (series.isNotEmpty()) {
+                recyclerView.visibility = View.VISIBLE
+                llNoSeries.visibility = View.GONE
+
+                followingSeries.addAll(series)
+                fetchNextEpisodes()
+            } else {
+                llNoSeries.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+            }
+
+        }
+
+        btnSearch.setOnClickListener {
+            val parentFragmentManager = parentFragmentManager
+            val searchFragment = SearchFragment()
+
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.flFragment, searchFragment)
+                bottomNavigationView.selectedItemId = R.id.search
+                commit()
+            }
         }
     }
 
