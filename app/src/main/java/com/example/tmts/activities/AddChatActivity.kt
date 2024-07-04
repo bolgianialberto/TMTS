@@ -36,7 +36,6 @@ class AddChatActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
-
         bttBack = findViewById(R.id.btt_arrow_back_chats)
         bttBack.setOnClickListener {
             val resultIntent = Intent()
@@ -53,7 +52,6 @@ class AddChatActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val startingChars = s.toString().lowercase()
-                Log.d("Strating Chars", startingChars)
                 actuallyShownUsers
                     .filterNot { it.name.lowercase().startsWith(startingChars) }
                     .map { addChatAdapter.removeUser(it) }
@@ -66,7 +64,6 @@ class AddChatActivity : AppCompatActivity() {
                     .filterNot { actuallyShownUsers.contains(it) }
                     .filter { it.name.lowercase().startsWith(startingChars) }
                     .map { actuallyShownUsers.add(it) }
-                Log.d("SHOWN", actuallyShownUsers.toString())
             }
         })
         rvUsers = findViewById(R.id.rv_add_chat)

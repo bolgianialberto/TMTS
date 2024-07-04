@@ -3,8 +3,8 @@
     android:id="@+id/ll_user_chat_item"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_chat_account_image"
@@ -18,28 +18,52 @@
         app:srcCompat="@drawable/account"
         app:shapeAppearanceOverlay="@style/exploreAccountRoundedImageView" />
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/cl_chat_account_data_layout"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:orientation="vertical">
+        android:padding="2dp" >
 
         <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:id="@+id/ll_chat_account_name_and_message"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentStart="true"
+            android:layout_toStartOf="@+id/ll_chat_account_last_message_and_read"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_chat_account_username"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginTop="6dp"
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
                 android:text="Name placeholder"
                 android:textSize="17sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_chat_account_last_message"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:text="Last last last last last last last last last last last message"
+                android:textSize="14sp"
+                android:ellipsize="end"
+                android:maxLines="2"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_chat_account_last_message_and_read"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_alignParentEnd="true">
 
             <TextView
                 android:id="@+id/tv_chat_account_last_message_time"
@@ -51,19 +75,22 @@
                 android:text="Time"
                 android:textSize="14sp" />
 
+            <com.google.android.material.imageview.ShapeableImageView
+                android:id="@+id/iv_chat_read_msg"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_gravity="end"
+                android:layout_marginStart="2dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
+                android:scaleType="centerCrop"
+                app:srcCompat="@drawable/account_user_chat_background"
+                app:shapeAppearanceOverlay="@style/chatReadMsgRoundedImageView"
+                android:visibility="gone" />
 
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tv_chat_account_last_message"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            android:text="Other accounts"
-            android:textSize="14sp" />
-
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

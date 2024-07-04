@@ -14,17 +14,21 @@ import com.example.tmts.FirebaseInteraction.onError
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
 import com.example.tmts.activities.MoreShowAccountsActivity
+import com.example.tmts.activities.MovieDetailsActivity
+import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.adapters.ExploreShowsAdapter
 import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SerieDetails
 import com.example.tmts.beans.User
 import com.example.tmts.beans.results.ShowDetailsResult
 import com.example.tmts.interfaces.OnMoreAccountClickListener
+import com.example.tmts.interfaces.OnShowDetailsClickListener
 import kotlin.math.min
 
-class ExploreShowsFragment : Fragment(), OnMoreAccountClickListener{
+class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDetailsClickListener {
 
     private val MAX_USERS_PER_SHOW: Int = 4
+
     private lateinit var rvExplore: RecyclerView
     private lateinit var exploreMoviesAdapter: ExploreShowsAdapter
     private var loggedUser: User? = null
@@ -36,14 +40,17 @@ class ExploreShowsFragment : Fragment(), OnMoreAccountClickListener{
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_explore_shows, container, false)
-
-        exploreMoviesAdapter = ExploreShowsAdapter(requireContext(), ArrayList(), this)
+        exploreMoviesAdapter = ExploreShowsAdapter(requireContext(), ArrayList(), this, this)
         rvExplore = view.findViewById(R.id.rv_explore_movie)
         rvExplore.layoutManager = LinearLayoutManager(requireContext())
         rvExplore.adapter = exploreMoviesAdapter
         loadData()
 
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
     }
 
     private fun loadData() {
@@ -66,7 +73,7 @@ class ExploreShowsFragment : Fragment(), OnMoreAccountClickListener{
     }
 
     private fun fetchDetails() {
-        for (show in retrievedShows) {
+        for (show in retrievedShows.shuffled()) {
             val showId = show.second
             when (show.first) {
                 "MOV" -> {
@@ -114,9 +121,9 @@ class ExploreShowsFragment : Fragment(), OnMoreAccountClickListener{
             followers.remove(loggedUser!!.id)
         }
         show.retrievedUsers.addAll(followers)
-        val nUsersShowed = if (show.retrievedUsers.size <= 4) min(MAX_USERS_PER_SHOW - 1, show.retrievedUsers.size - 1) else MAX_USERS_PER_SHOW - 2
-        for (i in 0..nUsersShowed) {
-            val it = followers[i]
+        val nUsersShowed = if (show.retrievedUsers.size <= 4) min(MAX_USERS_PER_SHOW, show.retrievedUsers.size) else MAX_USERS_PER_SHOW - 1
+        for (i in 1..nUsersShowed) {
+            val it = followers[i - 1]
             FirebaseInteraction.getUserInfo(it,
                 onSuccess = { user ->
                     show.loadedUsers.add(user)
@@ -139,6 +146,21 @@ class ExploreShowsFragment : Fragment(), OnMoreAccountClickListener{
         intent.putExtra("retrievedFollowers", moreAccountClickResult.retrievedUsers)
         intent.putExtra("loadedUsers", ArrayList(moreAccountClickResult.loadedUsers.map { it.id }))
         context?.startActivity(intent)
+    }
+
+    override fun onShowDetailsClickListener(showInfo: ShowDetailsResult) {
+        when (showInfo.showTypeId) {
+            "MOV" -> {
+                val showIntent = Intent(context, MovieDetailsActivity::class.java)
+                showIntent.putExtra("movieId", showInfo.movieDetails!!.id)
+                startActivity(showIntent)
+            }
+            "SER" -> {
+                val showIntent = Intent(context, SerieDetailsActivity::class.java)
+                showIntent.putExtra("serieId", showInfo.serieDetails!!.id)
+                startActivity(showIntent)
+            }
+        }
     }
 
 

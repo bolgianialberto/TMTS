@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
@@ -22,6 +23,12 @@ import com.example.tmts.beans.Message
 
 class ChatActivity : AppCompatActivity() {
 
+    private var senderId: String? = null
+    private var receiverId: String? = null
+    private var receiverRoom: String? = null
+    private var senderRoom: String? = null
+
+    private lateinit var chatLayoutView: View
     private lateinit var bttBack: Button
     private lateinit var ivUserImage: ImageView
     private lateinit var tvUser: TextView
@@ -29,34 +36,35 @@ class ChatActivity : AppCompatActivity() {
     private lateinit var edtMessage: EditText
     private lateinit var bttSend: Button
     private lateinit var messageAdapter: MessageAdapter
+    private var standardHeight = -1
     private lateinit var messageList: ArrayList<Pair<String, Message>>
-    private var messageSent = false
-    var receiverRoom: String? = null
-    var senderRoom: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_chat)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_chat_layout)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(systemBars.left, 0, systemBars.right, 0)
             insets
         }
+        chatLayoutView = findViewById(R.id.main_chat_layout)
+        standardHeight = chatLayoutView.height
+        chatLayoutView.viewTreeObserver.addOnGlobalLayoutListener {
+            val newHeight = chatLayoutView.height
+            if (newHeight != standardHeight) {
+                rvMessage.scrollToPosition(messageList.size - 1)
+            }
+        }
         val receiverUsername = intent.getStringExtra("username")!!
-        val receiverId = intent.getStringExtra("userId")!!
-        val senderId = FirebaseInteraction.user.uid
+        receiverId = intent.getStringExtra("userId")!!
+        senderId = FirebaseInteraction.user.uid
         senderRoom = receiverId + senderId
         receiverRoom = senderId + receiverId
         messageList = ArrayList()
 
-        bttBack = findViewById(R.id.btt_arrow_back_chat
-        )
+        bttBack = findViewById(R.id.btt_arrow_back_chat)
         bttBack.setOnClickListener {
-            /*val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra("reload", true)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-            startActivity(intent)*/
             val resultIntent = Intent()
             resultIntent.putExtra("closed", true)
             setResult(Activity.RESULT_OK, resultIntent)
@@ -67,9 +75,8 @@ class ChatActivity : AppCompatActivity() {
         rvMessage = findViewById(R.id.rv_chat_messages)
         edtMessage = findViewById(R.id.edt_chat_message)
         bttSend = findViewById(R.id.btt_send_message)
-
         FirebaseInteraction.getUserProfileImageRef(
-            receiverId,
+            receiverId!!,
             onSuccess = {
                 it.downloadUrl.addOnSuccessListener { uri ->
                     Glide.with(this)
@@ -87,13 +94,9 @@ class ChatActivity : AppCompatActivity() {
         rvMessage.layoutManager = LinearLayoutManager(this)
         rvMessage.adapter = messageAdapter
         bttSend.setOnClickListener {
-            val message = Message(
-                edtMessage.text.toString(),
-                senderId,
-                receiverId,
-                System.currentTimeMillis()
-            )
-            sendMessage(message)
+            if (edtMessage.text.toString().isNotEmpty()) {
+                sendMessage(edtMessage.text.toString(), senderId!!, receiverId!!)
+            }
         }
         loadMessages()
     }
@@ -104,6 +107,8 @@ class ChatActivity : AppCompatActivity() {
             messageList,
             senderRoom!!,
             onSuccess = { messages ->
+                Log.d("Loading messages", "${messages.size}")
+                messages.forEach {Log.d("MessageDetail", it.toString())}
                 messageList.addAll(messages)
                 messages.forEach { messageAdapter.updateMessages(it.second) }
                 rvMessage.scrollToPosition(messageList.size - 1)
@@ -113,9 +118,11 @@ class ChatActivity : AppCompatActivity() {
             })
     }
 
-    private fun sendMessage(message: Message) {
+    private fun sendMessage(messageText: String, senderId: String, receiverId: String) {
         FirebaseInteraction.sendMessage(
-            message,
+            messageText,
+            senderId,
+            receiverId,
             onSuccess = {
                 edtMessage.setText("")
                 rvMessage.scrollToPosition(messageList.size - 1)
@@ -125,4 +132,5 @@ class ChatActivity : AppCompatActivity() {
                 Log.e("SEND MSG ERROR", it)
             })
     }
+
 }

@@ -18,7 +18,7 @@ import com.example.tmts.beans.User
 
 class AddChatAdapter(
     private val context: Context,
-    private val userList: MutableList<User> = mutableListOf<User>()
+    private val userList: MutableList<User> = mutableListOf()
 ) : RecyclerView.Adapter<AddChatAdapter.AddChatViewHolder>() {
     inner class AddChatViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
@@ -41,8 +41,8 @@ class AddChatAdapter(
                         Glide.with(context)
                             .load(uri)
                             .into(ivUserImage)
-                    }.addOnFailureListener{ exc ->
-                        Log.e("STORAGE DOWNLOAD", "Error: $exc")
+                    }.addOnFailureListener{
+                        Log.e("StorageImg Err", "Image not found")
                     }
                 }, onFailure = {
                     Log.e("IMAGE ERROR", it)

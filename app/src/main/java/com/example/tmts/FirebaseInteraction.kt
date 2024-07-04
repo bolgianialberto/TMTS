@@ -8,12 +8,12 @@ import android.util.Log
 import android.widget.Toast
 import com.example.tmts.beans.Media
 import com.example.tmts.beans.MediaDetails
+import com.example.tmts.beans.Message
 import com.example.tmts.beans.Review
 import com.example.tmts.beans.Watchlist
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
-import com.example.tmts.beans.Message
 import com.example.tmts.beans.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -28,6 +28,7 @@ import java.util.Date
 import java.util.Locale
 
 object FirebaseInteraction {
+    private val MAX_SHOWS_PULLED_EXPLORE_SECTION = 10
 
     var mDbRef = FirebaseDatabase.getInstance().getReference()
     val mStRef = FirebaseStorage.getInstance().getReference()
@@ -1474,7 +1475,7 @@ object FirebaseInteraction {
     fun getMovieFollowers(movieId: Int, callback: ((List<String>) -> Unit)) {
 
         val movieFollowersRef = mDbRef.child("shows").child("movies").child(movieId.toString()).child("followers")
-        movieFollowersRef.addValueEventListener(object: ValueEventListener {
+        movieFollowersRef.addListenerForSingleValueEvent(object: ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -1497,7 +1498,7 @@ object FirebaseInteraction {
     fun getSerieFollowers(serieId: Int, callback: ((List<String>) -> Unit)) {
 
         val serieFollowersRef = mDbRef.child("shows").child("series").child(serieId.toString()).child("followers")
-        serieFollowersRef.addValueEventListener(object: ValueEventListener {
+        serieFollowersRef.addListenerForSingleValueEvent(object: ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -1518,6 +1519,7 @@ object FirebaseInteraction {
     }
 
     fun getExploreShows(callback: (List<Pair<String, String>>) -> Unit) {
+        val result = mutableListOf<Pair<String, String>>()
         followingMoviesRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val movies = mutableListOf<Pair<String, String>>()
@@ -1528,6 +1530,7 @@ object FirebaseInteraction {
                         movies.add(Pair("MOV", movieId))
                     }
                 }
+                result.addAll(movies)
 
                 followingSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
@@ -1539,19 +1542,63 @@ object FirebaseInteraction {
                                 series.add(Pair("SER", seriesId))
                             }
                         }
-                        callback((series + movies).shuffled())
+
+                        result.addAll(series)
+                         mDbRef.child("shows").child("movies")
+                             .addListenerForSingleValueEvent(object: ValueEventListener{
+                                 override fun onDataChange(snapshot: DataSnapshot) {
+                                     var addedShows = 0
+                                     for (child in snapshot.children) {
+                                         val movId = child.key
+                                         if (movId != null && !result.map { it.second }.contains(movId)) {
+                                             result.add(Pair("MOV", movId))
+                                             addedShows++
+                                             if (addedShows >= 10) break
+                                         }
+                                     }
+                                     if (addedShows >= 10) {
+                                         callback(result)
+                                     } else {
+                                         mDbRef.child("shows").child("series")
+                                             .addListenerForSingleValueEvent(object: ValueEventListener{
+                                                 override fun onDataChange(snapshot: DataSnapshot) {
+                                                     for (child in snapshot.children) {
+                                                         val serId = child.key
+                                                         if (serId != null && !result.map { it.second }.contains(serId)) {
+                                                             result.add(Pair("SER", serId))
+                                                             addedShows++
+                                                             if (addedShows >= 10) break
+                                                         }
+                                                     }
+                                                     callback(result)
+                                                 }
+
+                                                 override fun onCancelled(error: DatabaseError) {
+                                                     Log.e("Firebase Explore", error.message)
+                                                     callback(emptyList())
+                                                 }
+
+                                             })
+                                     }
+                                 }
+
+                                 override fun onCancelled(error: DatabaseError) {
+                                     Log.e("Firebase Explore", error.message)
+                                     callback(emptyList())
+                                 }
+
+                             })
                     }
 
                     override fun onCancelled(error: DatabaseError) {
-                        println("Errore nel recupero dei dati: ${error.message}")
+                        Log.e("Firebase Explore", error.message)
                         callback(emptyList())
                     }
                 })
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Log.e("Firebase", "Errore nel recupero dei dati: ${error.message}")
-                // Chiamata della callback con lista vuota in caso di errore
+                Log.e("Firebase Explore", error.message)
                 callback(emptyList())
             }
         })
@@ -1570,56 +1617,13 @@ object FirebaseInteraction {
         }
     }
 
-    fun getUserChats(
-        onSuccess: (List<Pair<String, Message>>) -> Unit,
-        onFailure: (String) -> Unit
-    ) {
-        mDbRef.child("chat").addListenerForSingleValueEvent(object: ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                val chats = mutableListOf<Pair<String, Message>>()
-
-                snapshot.children.forEach { chat ->
-                    val chatId = chat.key
-                    val lastMessage = chat.child("messages").children.maxByOrNull { it.child("timestamp").value as Long }!!
-                    val senderId = lastMessage.child("senderId").value
-                    val receiverId = lastMessage.child("receiverId").value
-                    val text = lastMessage.child("text").value
-                    val timestamp = lastMessage.child("timestamp").value
-                    if (
-                        chatId != null &&
-                        chatId.toString().startsWith(user.uid) &&
-                        senderId != null &&
-                        receiverId != null &&
-                        text != null &&
-                        timestamp != null
-                        ) {
-                        val userId = chatId.drop(user.uid.length)
-                        val lastMsg = Message(
-                            text.toString(),
-                            senderId.toString(),
-                            receiverId.toString(),
-                            timestamp as Long
-                        )
-                        chats.add(Pair(userId, lastMsg))
-                    }
-                }
-                onSuccess(chats)
-            }
-
-            override fun onCancelled(error: DatabaseError) {
-                onFailure("Users not Found")
-            }
-        })
-
-    }
-
     fun getUsersStartingWith(
         startingChars: String,
         onSuccess: (List<User>) -> Unit,
         onFailure: (String) -> Unit
     ) {
         val lowerStartingChars = startingChars.lowercase()
-        mDbRef.child("users").addValueEventListener(object: ValueEventListener {
+        mDbRef.child("users").addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val users = mutableListOf<User>()
                 snapshot.children.forEach {usr ->
@@ -1646,6 +1650,57 @@ object FirebaseInteraction {
         })
     }
 
+    fun getUserChats(
+        onSuccess: (List<Pair<String, Message>>) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        mDbRef.child("chat").addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val chats = mutableListOf<Pair<String, Message>>()
+
+                snapshot.children.forEach { chat ->
+                    val chatId = chat.key
+                    val lastMessage = chat.child("messages").children.maxByOrNull { it.child("timestamp").value as Long }!!
+                    val messageId = lastMessage.key
+                    val senderId = lastMessage.child("senderId").value
+                    val receiverId = lastMessage.child("receiverId").value
+                    val text = lastMessage.child("text").value
+                    val timestamp = lastMessage.child("timestamp").value
+                    val read = lastMessage.child("read").value
+                    Log.d("CHAT", "${chat.key} \n $lastMessage")
+                    if (
+                        messageId != null &&
+                        chatId != null &&
+                        chatId.toString().startsWith(user.uid) &&
+                        senderId != null &&
+                        receiverId != null &&
+                        text != null &&
+                        timestamp != null &&
+                        read != null
+                        ) {
+                        val userId = chatId.drop(user.uid.length)
+                        val lastMsg = Message(
+                            messageId,
+                            text.toString(),
+                            senderId.toString(),
+                            receiverId.toString(),
+                            timestamp as Long,
+                            read.toString() == "true"
+                        )
+                        Log.d("Message added", lastMsg.toString())
+                        chats.add(Pair(userId, lastMsg))
+                    }
+                }
+                onSuccess(chats)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure("Users not Found")
+            }
+        })
+
+    }
+
     fun getSenderRoomNewMessages(
         previousMessages: List<Pair<String, Message>>,
         senderRoom: String,
@@ -1661,19 +1716,23 @@ object FirebaseInteraction {
                     val receiverId = dataSnapshot.child("receiverId").value
                     val text = dataSnapshot.child("text").value
                     val timestamp = dataSnapshot.child("timestamp").value
+                    val read = dataSnapshot.child("read").value
                     if (
                         messageId != null &&
                         !previousMessages.map { it.first }.contains(messageId) &&
                         senderId != null &&
                         receiverId != null &&
                         text != null &&
-                        timestamp != null
+                        timestamp != null &&
+                        read != null
                         ) {
                         messages.add(Pair(messageId, Message(
+                            messageId,
                             text.toString(),
                             senderId.toString(),
                             receiverId.toString(),
-                            timestamp as Long
+                            timestamp as Long,
+                            read.toString().lowercase() == "true"
                         )))
                     }
                 }
@@ -1688,17 +1747,113 @@ object FirebaseInteraction {
     }
 
     fun sendMessage(
-        message: Message,
+        messageText: String,
+        senderId: String,
+        receiverId: String,
         onSuccess: (Message) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        val senderRoom = message.receiverId + message.senderId
-        val receiverRoom = message.senderId + message.receiverId
-        mDbRef.child("chat").child(senderRoom).child("messages").push().setValue(message).addOnSuccessListener {
-            mDbRef.child("chat").child(receiverRoom).child("messages").push().setValue(message).addOnSuccessListener {
-                onSuccess(message)
-            }.addOnFailureListener { fail -> onFailure(fail.toString()) }
-        }.addOnFailureListener { fail -> onFailure(fail.toString()) }
+        val senderRoom = receiverId + senderId
+        val receiverRoom = senderId + receiverId
+        val senderRoomMessagesRef = mDbRef.child("chat").child(senderRoom).child("messages")
+        val receiverRoomMessagesRef = mDbRef.child("chat").child(receiverRoom).child("messages")
+        val messageId = senderRoomMessagesRef.push().key
+
+        if (messageId != null) {
+            val message = Message(
+                messageId,
+                messageText,
+                senderId,
+                receiverId,
+                System.currentTimeMillis(),
+                false
+            )
+            senderRoomMessagesRef.child(messageId).setValue(message).addOnSuccessListener {
+                receiverRoomMessagesRef.child(messageId).setValue(message).addOnSuccessListener {
+                    onSuccess(message)
+                }.addOnFailureListener { exc ->
+                    onFailure(exc.message!!)
+                }
+            }.addOnFailureListener { exc ->
+                onFailure(exc.message!!)
+            }
+        } else {
+            onFailure("Message Id not found")
+        }
+    }
+
+    fun notifyMessageRead(
+        message: Message,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val senderRoomReadMessageRef = mDbRef.child("chat")
+            .child(message.receiverId + message.senderId)
+            .child("messages")
+            .child(message.messageId)
+            .child("read")
+        val receiverRoomReadMessageRef = mDbRef.child("chat")
+            .child(message.senderId + message.receiverId)
+            .child("messages")
+            .child(message.messageId)
+            .child("read")
+
+        senderRoomReadMessageRef.get().addOnSuccessListener { senderRead ->
+            if (senderRead.value != null && senderRead.value.toString() != "true"){
+                senderRoomReadMessageRef.setValue("true")
+                    .addOnSuccessListener {
+                        receiverRoomReadMessageRef.get().addOnSuccessListener {receiverRead ->
+                            if (receiverRead.value != null && receiverRead.value.toString() != "true") {
+                                receiverRoomReadMessageRef.setValue("true").addOnSuccessListener {
+                                    onSuccess()
+                                }.addOnFailureListener {
+                                    onFailure(it)
+                                }
+                            }
+                        }
+                    }
+                    .addOnFailureListener { onFailure(it) }
+            }
+
+        }.addOnFailureListener {
+            onFailure(it)
+        }
+
+    }
+
+    fun addToken(
+        token: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        userRef.child("token").setValue(token).addOnSuccessListener {
+            onSuccess(token)
+        }.addOnFailureListener { exc ->
+            onFailure(exc)
+        }
+    }
+
+    fun getUserToken(
+        userId: String,
+        onSuccess: (String) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        val tokenRef = mDbRef.child("users").child(userId).child("token")
+        tokenRef.addValueEventListener(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val token = snapshot.value?.toString()
+                if (token != null) {
+                    onSuccess(token)
+                } else {
+                    onFailure(Exception("Token value is null"))
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure(error.toException())
+            }
+
+        })
     }
 
     fun onError(){

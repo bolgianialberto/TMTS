@@ -31,6 +31,7 @@ class ChatListAdapter(
         private lateinit var tvUsername: TextView
         private lateinit var tvLastMessage: TextView
         private lateinit var tvLastMessageTime: TextView
+        private lateinit var ivReadMessage: ImageView
 
         fun bind(userWithLastMessage: Pair<User, Message>) {
             val user = userWithLastMessage.first
@@ -41,6 +42,7 @@ class ChatListAdapter(
             tvUsername = itemView.findViewById(R.id.tv_chat_account_username)
             tvLastMessage = itemView.findViewById(R.id.tv_chat_account_last_message)
             tvLastMessageTime = itemView.findViewById(R.id.tv_chat_account_last_message_time)
+            ivReadMessage = itemView.findViewById(R.id.iv_chat_read_msg)
 
             FirebaseInteraction.getUserProfileImageRef(
                 user.id,
@@ -65,6 +67,11 @@ class ChatListAdapter(
                 intent.putExtra("username", user.name)
                 context.startActivity(intent)*/
             }
+            if (!lastMessage.read && lastMessage.receiverId == FirebaseInteraction.user.uid) {
+                ivReadMessage.visibility = View.VISIBLE
+            } else {
+                ivReadMessage.visibility = View.GONE
+            }
         }
     }
 
@@ -86,12 +93,6 @@ class ChatListAdapter(
         notifyItemInserted(position)
     }
 
-    fun deleteUser(user: User) {
-        val position = usersWithLastMessageList.indexOf(usersWithLastMessageList.find { it.first == user })
-        usersWithLastMessageList.removeAt(position)
-        notifyItemRemoved(position)
-    }
-
     fun updateUser(userWithLastMessage: Pair<User, Message>) {
         val previousPair = usersWithLastMessageList.find { it.first == userWithLastMessage.first }
         var previousIndex = -1
@@ -102,6 +103,12 @@ class ChatListAdapter(
         val newIndex = addMessageWithTimestampOrder(userWithLastMessage)
         notifyItemMoved(previousIndex, newIndex)
         notifyItemChanged(newIndex)
+    }
+
+    fun removeUser(user: User){
+        val position = usersWithLastMessageList.map { it.first }.indexOf(user)
+        usersWithLastMessageList.removeAt(position)
+        notifyItemRemoved(position)
     }
 
 
