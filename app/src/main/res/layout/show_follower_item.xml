@@ -3,16 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_margin="10dp">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_show_more_followers_image"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="2dp"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/account"
         app:shapeAppearanceOverlay="@style/exploreAccountRoundedImageView" />
@@ -51,9 +49,6 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center_vertical"
-        android:layout_marginBottom="4dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="15dp"
         android:background="@drawable/chat" />
 
 </LinearLayout>
