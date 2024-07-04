@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import androidx.activity.enableEdgeToEdge
@@ -53,7 +52,6 @@ class AddChatActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 val startingChars = s.toString().lowercase()
-                Log.d("Strating Chars", startingChars)
                 actuallyShownUsers
                     .filterNot { it.name.lowercase().startsWith(startingChars) }
                     .map { addChatAdapter.removeUser(it) }
@@ -66,7 +64,6 @@ class AddChatActivity : AppCompatActivity() {
                     .filterNot { actuallyShownUsers.contains(it) }
                     .filter { it.name.lowercase().startsWith(startingChars) }
                     .map { actuallyShownUsers.add(it) }
-                Log.d("SHOWN", actuallyShownUsers.toString())
             }
         })
         rvUsers = findViewById(R.id.rv_add_chat)

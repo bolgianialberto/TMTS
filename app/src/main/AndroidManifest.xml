@@ -75,6 +75,7 @@
             android:exported="false" />
         <activity
             android:name=".activities.MainActivity"
+            android:windowSoftInputMode="adjustNothing"
             android:exported="false" />
         <activity
             android:name=".activities.LoginActivity"

@@ -1,13 +1,7 @@
 package com.example.tmts.activities
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.example.tmts.R
 import com.example.tmts.fragments.AccountFragment
@@ -19,6 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bottomNavigationView: BottomNavigationView
+    /*
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
@@ -28,6 +23,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(this, " You won't receive any notification :(", Toast.LENGTH_SHORT).show()
         }
     }
+    */
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
-        askNotificationPermission()
+        // askNotificationPermission()
     }
 
     private fun setCurrentFragment(fragment: Fragment)=
@@ -60,6 +56,7 @@ class MainActivity : AppCompatActivity() {
             commit()
         }
 
+    /*
     private fun askNotificationPermission() {
         // This is only necessary for API level >= 33 (TIRAMISU)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -79,4 +76,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+    */
 }

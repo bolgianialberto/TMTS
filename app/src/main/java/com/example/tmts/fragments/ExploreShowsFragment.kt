@@ -7,6 +7,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tmts.FirebaseInteraction
@@ -21,6 +23,7 @@ import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SerieDetails
 import com.example.tmts.beans.User
 import com.example.tmts.beans.results.ShowDetailsResult
+import com.example.tmts.beans.viewmodels.UsersViewModel
 import com.example.tmts.interfaces.OnMoreAccountClickListener
 import com.example.tmts.interfaces.OnShowDetailsClickListener
 import kotlin.math.min
@@ -28,6 +31,9 @@ import kotlin.math.min
 class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDetailsClickListener {
 
     private val MAX_USERS_PER_SHOW: Int = 4
+
+    private val sharedViewModel: UsersViewModel by activityViewModels()
+
     private lateinit var rvExplore: RecyclerView
     private lateinit var exploreMoviesAdapter: ExploreShowsAdapter
     private var loggedUser: User? = null
@@ -43,8 +49,17 @@ class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDet
         rvExplore = view.findViewById(R.id.rv_explore_movie)
         rvExplore.layoutManager = LinearLayoutManager(requireContext())
         rvExplore.adapter = exploreMoviesAdapter
+        // Log.d("ViewMod TEST 2", "${usersViewModel.users.value?.toString()}")
         loadData()
         return view
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        sharedViewModel.text.observe(viewLifecycleOwner, Observer { newText ->
+            Log.d("TEST RES", newText)
+        })
     }
 
     private fun loadData() {
