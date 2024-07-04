@@ -4,7 +4,8 @@
     android:id="@+id/fragment_explore_shows"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.ExploreShowsFragment">
+    tools:context=".fragments.ExploreShowsFragment"
+    android:padding="5dp">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_explore_movie"
