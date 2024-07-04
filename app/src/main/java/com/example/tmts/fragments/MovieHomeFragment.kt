@@ -1,19 +1,24 @@
 package com.example.tmts.fragments
 
 import android.os.Bundle
+import android.text.TextUtils.replace
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.OnCheckButtonClickListener
 import com.example.tmts.R
+import com.example.tmts.activities.MainActivity
 import com.example.tmts.adapters.HomeMovieAdapter
 import com.example.tmts.beans.MovieDetails
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
@@ -24,6 +29,11 @@ import com.google.firebase.database.ValueEventListener
 
 class MovieHomeFragment : Fragment(), OnCheckButtonClickListener {
     private lateinit var homeMovieAdapter: HomeMovieAdapter
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var llNoMovies: LinearLayout
+    private lateinit var btnSearch: Button
+    private lateinit var bottomNavigationView: BottomNavigationView
+
     val movieDetailsList = mutableListOf<Pair<MovieDetails, Long>>()
     val followingMovies = mutableListOf<Pair<String, Long>>()
     override fun onCreateView(
@@ -34,8 +44,11 @@ class MovieHomeFragment : Fragment(), OnCheckButtonClickListener {
         val view = inflater.inflate(R.layout.fragment_movie_home, container, false)
 
         homeMovieAdapter = HomeMovieAdapter(requireContext(), emptyList(), this)
+        recyclerView= view.findViewById(R.id.rv_home_movie)
+        llNoMovies = view.findViewById(R.id.empty_state_layout)
+        btnSearch = view.findViewById(R.id.btn_search_movies)
+        bottomNavigationView = requireActivity().findViewById(R.id.bottomNavigationView)
 
-        val recyclerView: RecyclerView = view.findViewById(R.id.rv_home_movie)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = homeMovieAdapter
 
@@ -51,8 +64,27 @@ class MovieHomeFragment : Fragment(), OnCheckButtonClickListener {
         FirebaseInteraction.getFollowingMovies { movies ->
             Log.d("Firebase", "Movies retrieved: $movies")
             Log.d("Firebase", "Movie list: $followingMovies")
-            followingMovies.addAll(movies)
-            fetchMovieDetails()
+
+            if (movies.isNotEmpty()) {
+                recyclerView.visibility = View.VISIBLE
+                llNoMovies.visibility = View.GONE
+                followingMovies.addAll(movies)
+                fetchMovieDetails()
+            } else {
+                llNoMovies.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+            }
+        }
+
+        btnSearch.setOnClickListener {
+            val parentFragmentManager = parentFragmentManager
+            val searchFragment = SearchFragment()
+
+            parentFragmentManager.beginTransaction().apply {
+                replace(R.id.flFragment, searchFragment)
+                bottomNavigationView.selectedItemId = R.id.search
+                commit()
+            }
         }
     }
 

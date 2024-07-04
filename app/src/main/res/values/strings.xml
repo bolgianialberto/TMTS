@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">TMTS</string>
     <string name="et_search_page_hint">Type to search a show</string>
-    <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="empty_state_text">Nothing yet\n</string>
+    <string name="search_movies_button_text">Search movies</string>
+    <string name="search_series_button_text">Search series</string>
 </resources>

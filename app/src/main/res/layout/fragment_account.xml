@@ -19,7 +19,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             app:cardCornerRadius="8dp"
-            app:cardElevation="4dp"
+            app:cardElevation="8dp"
             app:cardBackgroundColor="@color/lightgray"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -38,14 +38,14 @@
                     android:gravity="center_vertical">
 
                     <androidx.cardview.widget.CardView
-                        android:layout_width="64dp"
-                        android:layout_height="64dp"
-                        app:cardCornerRadius="32dp">
+                        android:layout_width="84dp"
+                        android:layout_height="84dp"
+                        app:cardCornerRadius="42dp">
 
                         <ImageView
                             android:id="@+id/account_icon"
-                            android:layout_width="64dp"
-                            android:layout_height="64dp"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
                             android:scaleType="centerCrop"
                             android:src="@drawable/account" />
                     </androidx.cardview.widget.CardView>
@@ -74,52 +74,65 @@
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center_vertical"
-                        android:paddingStart="16dp">
-
-                        <TextView
-                            android:id="@+id/tv_follower_count"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="50"
-                            android:textSize="16sp"
-                            android:textColor="#358247"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tv_follower"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Followers"
-                            android:textSize="14sp"
-                            android:textColor="#3a6e43" />
-
-                        <Space
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="8dp" />
-
-                        <TextView
-                            android:id="@+id/tv_following_count"
-                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="30"
-                            android:textSize="16sp"
-                            android:textColor="#358247"
-                            android:textStyle="bold" />
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical">
 
-                        <TextView
-                            android:id="@+id/tv_following"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Following"
-                            android:textSize="14sp"
-                            android:textColor="#3a6e43" />
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:paddingTop="10dp">
+
+                                <TextView
+                                    android:id="@+id/tv_follower_count"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="50"
+                                    android:textSize="16sp"
+                                    android:textColor="#358247"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tv_follower"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Followers"
+                                    android:textSize="14sp"
+                                    android:textColor="#3a6e43" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:orientation="vertical"
+                                android:paddingTop="10dp">
+
+                                <TextView
+                                    android:id="@+id/tv_following_count"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="30"
+                                    android:textSize="16sp"
+                                    android:textColor="#358247"
+                                    android:textStyle="bold" />
+
+                                <TextView
+                                    android:id="@+id/tv_following"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="Following"
+                                    android:textSize="14sp"
+                                    android:textColor="#3a6e43" />
+
+                            </LinearLayout>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -136,6 +149,7 @@
             </LinearLayout>
 
         </androidx.cardview.widget.CardView>
+
 
         <!-- Watched Movies Section -->
         <LinearLayout

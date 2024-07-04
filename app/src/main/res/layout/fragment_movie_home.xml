@@ -3,15 +3,45 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.MovieHomeFragment"
     android:padding="5dp"
-    android:background="@color/lightergray">
+    android:background="@color/lightergray"
+    tools:context=".fragments.MovieHomeFragment">
 
-    <!-- TODO: Update blank fragment layout -->
+    <!-- RecyclerView per mostrare i film -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_home_movie"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:listitem="@layout/home_movie_item"/>
+        tools:listitem="@layout/home_movie_item"
+        android:visibility="gone" />
+
+    <!-- Layout alternativo quando RecyclerView è vuoto -->
+    <LinearLayout
+        android:id="@+id/empty_state_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <!-- Immagine -->
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/zzz"/>
+
+        <!-- Bottone di ricerca -->
+        <Button
+            android:id="@+id/btn_search_movies"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_movies_button_text"
+            android:textColor="@android:color/white"
+            android:background="@color/selectedColor"
+            android:layout_marginTop="16dp"
+            android:textSize="20sp"
+            android:padding="5dp" />
+
+    </LinearLayout>
 
 </FrameLayout>
