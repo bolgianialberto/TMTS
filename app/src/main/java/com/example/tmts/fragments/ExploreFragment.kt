@@ -48,10 +48,12 @@ class ExploreFragment : Fragment() {
 
         bttExplore.setOnClickListener {
             sectionSelected = exploreShowsSectionSelected
+            edtExplore.text.clear()
             toggleButtonColor(bttExplore)
             replaceFragment(ExploreShowsFragment())}
         bttChat.setOnClickListener {
             sectionSelected = chatSectionSelected
+            edtExplore.text.clear()
             toggleButtonColor(bttChat)
             replaceFragment(ChatListFragment())
         }
