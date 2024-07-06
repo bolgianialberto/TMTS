@@ -62,10 +62,6 @@ class ChatListAdapter(
             tvLastMessageTime.text = convertTimestampToDateString(lastMessage.timestamp)
             llUser.setOnClickListener {
                 chatClickListener.onChatClickListener(user.id, user.name)
-                /*val intent = Intent(context, ChatActivity::class.java)
-                intent.putExtra("userId", user.id)
-                intent.putExtra("username", user.name)
-                context.startActivity(intent)*/
             }
             if (!lastMessage.read && lastMessage.receiverId == FirebaseInteraction.user.uid) {
                 ivReadMessage.visibility = View.VISIBLE
@@ -122,8 +118,18 @@ class ChatListAdapter(
     }
 
     private fun convertTimestampToDateString(timestamp: Long): String {
-        val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+        var result: String? = null
+        val hourFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+        val dayFormatter = SimpleDateFormat("dd/MM/yy", Locale.getDefault())
         val date = Date(timestamp)
-        return formatter.format(date).toString()
+
+        result = if (dayFormatter.format(date) == dayFormatter.format(Date(System.currentTimeMillis()))){
+            // Message arrived today
+            hourFormatter.format(date).toString()
+        } else {
+            // Message arrived before today
+            dayFormatter.format(date).toString()
+        }
+        return result
     }
 }

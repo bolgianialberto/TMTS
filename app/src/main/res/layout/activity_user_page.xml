@@ -56,9 +56,7 @@
             android:textSize="20sp"
             android:layout_gravity="center"
             android:gravity="center"
-            android:hint="Username biography"
-            android:ellipsize="end"
-            android:maxLines="2" />
+            android:hint="Username biography" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"

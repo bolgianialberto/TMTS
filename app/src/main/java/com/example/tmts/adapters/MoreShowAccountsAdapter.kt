@@ -41,13 +41,15 @@ class MoreShowAccountsAdapter(
     }
     inner class MoreShowAccountsViewHolder (itemView: View): RecyclerView.ViewHolder(itemView) {
 
-        private lateinit var tvUsername: TextView
         private lateinit var ivUserImage: ImageView
+        private lateinit var tvUsername: TextView
+        private lateinit var tvBio: TextView
         private lateinit var bttChat: Button
+
         fun bind(user: User) {
-            Log.d("Binding", "$user")
-            tvUsername = itemView.findViewById(R.id.tv_show_more_followers_item_username)
             ivUserImage = itemView.findViewById(R.id.iv_show_more_followers_image)
+            tvUsername = itemView.findViewById(R.id.tv_show_more_followers_item_username)
+            tvBio = itemView.findViewById(R.id.tv_show_more_followers_item_info)
             bttChat = itemView.findViewById(R.id.btt_chat_with_user)
 
             FirebaseInteraction.getUserProfileImageRef(
@@ -64,6 +66,9 @@ class MoreShowAccountsAdapter(
                     Log.e("IMAGE ERROR", it)
                 })
             tvUsername.text = user.name
+            if (!user.biography.isNullOrBlank()) {
+                tvBio.text = user.biography
+            }
             bttChat.setOnClickListener { chatToUserClickListener.onChatClickListener(user.id, user.name) }
         }
     }
