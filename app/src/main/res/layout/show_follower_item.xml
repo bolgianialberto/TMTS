@@ -18,8 +18,9 @@
         app:shapeAppearanceOverlay="@style/exploreAccountRoundedImageView" />
 
     <LinearLayout
+        android:id="@+id/ll_show_follower_user_info"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -39,7 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="3dp"
             android:layout_marginStart="6dp"
-            android:text="Other accounts"
+            android:text="Biography or blank"
             android:textSize="14sp"
             android:ellipsize="end"
             android:maxLines="2" />

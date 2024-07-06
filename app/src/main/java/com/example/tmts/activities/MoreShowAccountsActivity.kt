@@ -19,10 +19,12 @@ import com.example.tmts.R
 import com.example.tmts.adapters.MoreShowAccountsAdapter
 import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SerieDetails
+import com.example.tmts.beans.User
 import com.example.tmts.interfaces.OnChatClickListener
+import com.example.tmts.interfaces.OnUserClickListener
 import kotlin.math.min
 
-class MoreShowAccountsActivity : AppCompatActivity(), OnChatClickListener {
+class MoreShowAccountsActivity : AppCompatActivity(), OnUserClickListener, OnChatClickListener {
 
     private val MAX_USERS: Int = 30
     private var movieDetails: MovieDetails? = null
@@ -48,7 +50,7 @@ class MoreShowAccountsActivity : AppCompatActivity(), OnChatClickListener {
         val showId = intent.getStringExtra("showId")!!
         followers = intent.getStringArrayListExtra("retrievedFollowers")!!
         val loadedFollowers = intent.getStringArrayListExtra("loadedUsers")
-        moreShowAccountsAdapter = MoreShowAccountsAdapter(this, ArrayList(), this)
+        moreShowAccountsAdapter = MoreShowAccountsAdapter(this, ArrayList(), this, this)
         rvAccounts = findViewById(R.id.rv_more_show_accounts)
         rvAccounts.layoutManager = LinearLayoutManager(this)
         rvAccounts.adapter = moreShowAccountsAdapter
@@ -137,6 +139,12 @@ class MoreShowAccountsActivity : AppCompatActivity(), OnChatClickListener {
         val intent = Intent(this, ChatActivity::class.java)
         intent.putExtra("userId", userId)
         intent.putExtra("username", username)
+        startActivity(intent)
+    }
+
+    override fun onUserClickListener(user: User) {
+        val intent = Intent(this, UserPageActivity::class.java)
+        intent.putExtra("uid", user.id)
         startActivity(intent)
     }
 

@@ -56,7 +56,11 @@ class SearchUserAdapter(
                 }
             )
             tvUsername.text = user.name
-            tvUserInfo.text = "Info..."
+            if (!user.biography.isNullOrBlank()) {
+                tvUserInfo.text = user.biography
+            } else {
+                tvUserInfo.text = ""
+            }
             bttChat.setOnClickListener {
                 chatClickListener.onChatClickListener(user.id, user.name)
             }

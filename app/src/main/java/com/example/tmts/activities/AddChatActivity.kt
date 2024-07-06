@@ -74,15 +74,14 @@ class AddChatActivity : AppCompatActivity(), OnChatClickListener {
     }
 
     private fun loadUsers() {
-        FirebaseInteraction.getUsersStartingWith(
-            "",
+        FirebaseInteraction.getUsers(
             onSuccess = {users ->
                 allUsers.addAll(users)
                 actuallyShownUsers.addAll(users)
                 users.forEach{ addChatAdapter.updateUsers(it) }
             },
             onFailure = {
-                Log.e("AddChatErr", it)
+                Log.e("AddChatErr", "${it.message}")
             }
         )
     }

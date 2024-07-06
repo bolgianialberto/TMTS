@@ -1635,6 +1635,42 @@ object FirebaseInteraction {
         }
     }
 
+    fun getUsers(
+        onSuccess: (List<User>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        mDbRef.child("users").addListenerForSingleValueEvent(object: ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                val users = mutableListOf<User>()
+                snapshot.children.forEach {usr ->
+                    val userId = usr.key
+                    val username = usr.child("name").value
+                    val email = usr.child("email").value
+                    val biography = usr.child("bio").value
+                    if (
+                        userId != null &&
+                        username != null &&
+                        email != null
+                    ){
+                        val res = User(
+                            userId,
+                            username.toString(),
+                            email.toString(),
+                            biography?.toString())
+                        users.add(res)
+                    }
+                }
+                onSuccess(users)
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                onFailure(error.toException())
+            }
+
+        })
+    }
+
+
     fun getUsersStartingWith(
         startingChars: String,
         onSuccess: (List<User>) -> Unit,
@@ -1648,13 +1684,19 @@ object FirebaseInteraction {
                     val userId = usr.key
                     val username = usr.child("name").value
                     val email = usr.child("email").value
+                    val biography = usr.child("bio").value
                     if (
                         userId != null &&
-                        userId != user.uid &&
                         username != null &&
                         username.toString().lowercase().startsWith(lowerStartingChars) &&
-                        email != null) {
-                        val res = User(userId, username.toString(), email.toString())
+                        email != null
+                    ) {
+                        val res = User(
+                            userId,
+                            username.toString(),
+                            email.toString(),
+                            biography?.toString()
+                        )
                         users.add(res)
                     }
                 }
@@ -1667,6 +1709,7 @@ object FirebaseInteraction {
 
         })
     }
+
 
     fun getUserChats(
         onSuccess: (List<Pair<String, Message>>) -> Unit,
