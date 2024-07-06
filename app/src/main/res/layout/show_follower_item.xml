@@ -9,8 +9,8 @@
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_show_more_followers_image"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
         android:scaleType="centerCrop"
         app:srcCompat="@drawable/account"
         app:shapeAppearanceOverlay="@style/exploreAccountRoundedImageView" />
