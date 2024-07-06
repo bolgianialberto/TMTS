@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -13,11 +12,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
-import com.example.tmts.activities.ChatActivity
 import com.example.tmts.beans.User
+import com.example.tmts.interfaces.OnChatClickListener
 
 class AddChatAdapter(
     private val context: Context,
+    private val onChatClickListener: OnChatClickListener,
     private val userList: MutableList<User> = mutableListOf()
 ) : RecyclerView.Adapter<AddChatAdapter.AddChatViewHolder>() {
     inner class AddChatViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -45,16 +45,14 @@ class AddChatAdapter(
                         Log.e("StorageImg Err", "Image not found")
                     }
                 }, onFailure = {
-                    Log.e("IMAGE ERROR", it)
-                })
+                    Log.e("Image Error", it)
+                }
+            )
             tvUsername.text = user.name
             tvBio.text = "Bio"
             tvLastMessageTime.visibility = View.GONE
             llUser.setOnClickListener {
-                val intent = Intent(context, ChatActivity::class.java)
-                intent.putExtra("userId", user.id)
-                intent.putExtra("username", user.name)
-                context.startActivity(intent)
+                onChatClickListener.onChatClickListener(user.id, user.name)
             }
         }
     }

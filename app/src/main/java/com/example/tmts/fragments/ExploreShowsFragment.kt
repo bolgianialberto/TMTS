@@ -16,6 +16,7 @@ import com.example.tmts.R
 import com.example.tmts.activities.MoreShowAccountsActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
+import com.example.tmts.activities.UserPageActivity
 import com.example.tmts.adapters.ExploreShowsAdapter
 import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SerieDetails
@@ -23,9 +24,10 @@ import com.example.tmts.beans.User
 import com.example.tmts.beans.results.ShowDetailsResult
 import com.example.tmts.interfaces.OnMoreAccountClickListener
 import com.example.tmts.interfaces.OnShowDetailsClickListener
+import com.example.tmts.interfaces.OnUserClickListener
 import kotlin.math.min
 
-class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDetailsClickListener {
+class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDetailsClickListener, OnUserClickListener {
 
     private val MAX_USERS_PER_SHOW: Int = 4
 
@@ -40,17 +42,13 @@ class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDet
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_explore_shows, container, false)
-        exploreMoviesAdapter = ExploreShowsAdapter(requireContext(), ArrayList(), this, this)
+        exploreMoviesAdapter = ExploreShowsAdapter(requireContext(), ArrayList(), this, this, this)
         rvExplore = view.findViewById(R.id.rv_explore_movie)
         rvExplore.layoutManager = LinearLayoutManager(requireContext())
         rvExplore.adapter = exploreMoviesAdapter
         loadData()
 
         return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
     }
 
     private fun loadData() {
@@ -161,6 +159,12 @@ class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDet
                 startActivity(showIntent)
             }
         }
+    }
+
+    override fun onUserClickListener(user: User) {
+        val intent = Intent(requireContext(), UserPageActivity::class.java)
+        intent.putExtra("uid", user.id)
+        startActivity(intent)
     }
 
 

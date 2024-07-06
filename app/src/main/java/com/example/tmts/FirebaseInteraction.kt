@@ -4,17 +4,16 @@ import android.content.Context
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.util.Log
-
 import android.widget.Toast
 import com.example.tmts.beans.Media
 import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.Message
 import com.example.tmts.beans.Review
+import com.example.tmts.beans.User
 import com.example.tmts.beans.Watchlist
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
-import com.example.tmts.beans.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -176,24 +175,20 @@ object FirebaseInteraction {
 
     fun getUserBio(
         userId: String? = user.uid,
-        onSuccess: (String) -> Unit, onFailure: (String) -> Unit
+        onSuccess: (String) -> Unit,
+        onFailure: (String) -> Unit
     ) {
-        var ref = mDbRef
+        val ref = if (userId.isNullOrBlank() || userId == user.uid)
+                userBioRef
+            else
+                mDbRef.child("users").child(userId).child("bio")
 
-        if (userId.isNullOrBlank() || userId == user.uid) {
-            ref = userBioRef
-        } else {
-            ref = mDbRef
-                .child("users")
-                .child(userId!!)
-                .child("bio")
-        }
 
         ref.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val bio = snapshot.getValue(String::class.java)
+                val bio = snapshot.value
                 if (bio != null) {
-                    onSuccess(bio)
+                    onSuccess(bio.toString())
                 } else {
                     onFailure("No biography found for user ID: ${user.uid}")
                 }
@@ -210,10 +205,16 @@ object FirebaseInteraction {
 
         userRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                val username = snapshot.child("name").getValue(String::class.java)
-                val email = snapshot.child("email").getValue(String::class.java)
+                val username = snapshot.child("name").value
+                val email = snapshot.child("email").value
+                val biography = snapshot.child("bio").value
                 if (username != null && email != null) {
-                    val result = User(userId, username, email)
+                    val result = User(
+                        userId,
+                        username.toString(),
+                        email.toString(),
+                        biography?.toString()
+                    )
                     onSuccess(result)
                 } else {
                     onFailure("Username not found for user ID: ${user.uid}")
@@ -423,46 +424,63 @@ object FirebaseInteraction {
         })
     }
 
-    fun getFollowedUsers(callback: (List<String>) -> Unit, ){
-        followedUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+    fun getFollowedUsers(
+        userId: String? = null,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ){
+        val followedRef = if (userId.isNullOrBlank())
+            followedUsersRef
+        else
+            mDbRef.child("users").child(userId).child("followed")
+
+
+        followedRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val followed = mutableListOf<String>()
 
                 snapshot.children.forEach { child ->
-                    val followedID = child.key
-                    if (followedID != null) {//TODO: forse devo fare anche check se l'id effettivamente è id di un utente
-                        followed.add(followedID)
+                    val followedId = child.key
+                    if (followedId != null) {
+                        followed.add(followedId)
                     }
                 }
 
-                callback(followed)
+                onSuccess(followed)
             }
 
             override fun onCancelled(error: DatabaseError) {
-                println("Errore nel recupero dei dati: ${error.message}")
-                callback(emptyList())
+                onFailure(error.toException())
             }
         })
     }
 
-    fun getFollowersUsers(callback: (List<String>) -> Unit, ){
-        followersUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+    fun getFollowersUsers(
+        userId: String? = null,
+        onSuccess: (List<String>) -> Unit,
+        onFailure: (Exception) -> Unit
+    ){
+        val followersRef = if (userId.isNullOrBlank())
+            followersUsersRef
+        else
+            mDbRef.child("users").child(userId).child("followers")
+
+        followersRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val followers = mutableListOf<String>()
 
                 snapshot.children.forEach { child ->
-                    val followerID = child.key
-                    if (followerID != null) {//TODO: forse devo fare anche check se l'id effettivamente è id di un utente
-                        followers.add(followerID)
+                    val followerId = child.key
+                    if (followerId != null) {
+                        followers.add(followerId)
                     }
                 }
 
-                callback(followers)
+                onSuccess(followers)
             }
 
             override fun onCancelled(error: DatabaseError) {
-                println("Errore nel recupero dei dati: ${error.message}")
-                callback(emptyList())
+                onFailure(error.toException())
             }
         })
     }
@@ -1923,32 +1941,40 @@ object FirebaseInteraction {
             }
     }
 
-    fun removeTargetUserFromFollowing(targetUid: String, onSuccess: (() -> Unit)? = null) {
-        val targetRef = followedUsersRef
-            .child(targetUid)
-
-        targetRef.removeValue()
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onSuccess?.invoke()
-                } else {
-                    //TODO
-                }
-            }
+    fun removeTargetUserFromFollowing(
+        targetUid: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        followedUsersRef.child(targetUid).removeValue()
+            .addOnSuccessListener {
+                mDbRef.child("users")
+                    .child(targetUid)
+                    .child("followers")
+                    .child(user.uid)
+                    .removeValue()
+                    .addOnSuccessListener {
+                        onSuccess()
+                    }.addOnFailureListener(onFailure)
+            }.addOnFailureListener(onFailure)
     }
 
-    fun addTargetUserToFollowing(targetUid: String, onSuccess: (() -> Unit)? = null) {
-        val targetRef = followedUsersRef
-            .child(targetUid)
+    fun addTargetUserToFollowing(
+        targetUid: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        followedUsersRef.child(targetUid).setValue(true)
+            .addOnSuccessListener {
+                mDbRef.child("users")
+                    .child(targetUid)
+                    .child("followers")
+                    .child(user.uid)
+                    .setValue(true)
+                    .addOnSuccessListener { onSuccess() }
+                    .addOnFailureListener(onFailure)
+            }.addOnFailureListener(onFailure)
 
-        targetRef.setValue(true)
-            .addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    onSuccess?.invoke()
-                } else {
-                    //TODO
-                }
-            }
     }
 
     //fun addMovieToWatched(movieId: Int) {

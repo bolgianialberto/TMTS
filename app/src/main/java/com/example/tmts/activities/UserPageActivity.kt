@@ -8,10 +8,11 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.text.isDigitsOnly
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
@@ -19,13 +20,14 @@ import com.example.tmts.adapters.MediaAdapter
 import com.example.tmts.beans.Media
 
 class UserPageActivity: AppCompatActivity() {
+
     private lateinit var tvUsername: TextView
     private lateinit var tvBio: TextView
-    private lateinit var tvFollowerCount: TextView
+    private lateinit var tvFollowersCount: TextView
     private lateinit var tvFollowingCount: TextView
     private lateinit var ivAccountIcon: ImageView
-    private lateinit var bBackSearch: Button
-    private lateinit var bFollowUnfollow: Button
+    private lateinit var bttBackSearch: Button
+    private lateinit var bttFollowUnfollow: Button
     private lateinit var followedMoviesAdapter: MediaAdapter
     private lateinit var followedSeriesAdapter: MediaAdapter
     private lateinit var llFollowedMovies: LinearLayout
@@ -35,62 +37,38 @@ class UserPageActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_user_page)
 
-        val intent = intent
-        val uid = intent.getStringExtra("uid")
+        val uid = intent.getStringExtra("uid")!!
 
-        // Initialize views
-        tvUsername = findViewById(R.id.tv_account_username)
-        tvBio = findViewById(R.id.tv_bio)
-        tvFollowerCount = findViewById(R.id.tv_follower_count)
+        tvUsername = findViewById(R.id.tv_user_page_username)
+        tvBio = findViewById(R.id.tv_user_page_bio)
+        tvFollowersCount = findViewById(R.id.tv_follower_count)
         tvFollowingCount = findViewById(R.id.tv_following_count)
-        ivAccountIcon = findViewById(R.id.account_icon)
-        bFollowUnfollow = findViewById(R.id.b_follow)
+        ivAccountIcon = findViewById(R.id.iv_user_page_icon)
+        bttFollowUnfollow = findViewById(R.id.btt_follow_unfollow)
         llFollowedMovies = findViewById(R.id.ll_followed_movies)
         llFollowedSeries = findViewById(R.id.ll_followed_series)
-        bBackSearch = findViewById(R.id.b_arrow_back_user_page)
+        bttBackSearch = findViewById(R.id.btt_user_page_arrow_back)
 
-        // Setup adapters for Recycle Views
         followedMoviesAdapter = MediaAdapter(this, emptyList()) { movie ->
             val intent = Intent(this, MovieDetailsActivity::class.java)
             intent.putExtra("movieId", movie.id)
             startActivity(intent)
         }
-
-        followedSeriesAdapter = MediaAdapter(this, emptyList()) {serie ->
+        followedSeriesAdapter = MediaAdapter(this, emptyList()) { series ->
             val intent = Intent(this, SerieDetailsActivity::class.java)
-            intent.putExtra("serieId", serie.id)
+            intent.putExtra("serieId", series.id)
             startActivity(intent)
         }
 
         val rvFollowedMovie: RecyclerView = findViewById(R.id.rv_followed_movies)
         rvFollowedMovie.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvFollowedMovie.adapter = followedMoviesAdapter
+        val rvFollowedSeries: RecyclerView = findViewById(R.id.rv_followed_series)
+        rvFollowedSeries.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        rvFollowedSeries.adapter = followedSeriesAdapter
 
-        val rvFollowedSerie: RecyclerView = findViewById(R.id.rv_followed_series)
-        rvFollowedSerie.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
-        rvFollowedSerie.adapter = followedSeriesAdapter
-
-        // Update TextViews and other data
-        FirebaseInteraction.getUsername(
-            userId = uid!!,
-            onSuccess = { username ->
-                tvUsername.text = username
-            },
-            onFailure = { errorMessage ->
-                Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
-            })
-
-        FirebaseInteraction.getUserBio(
-            uid!!,
-            onSuccess = { bio ->
-                tvBio.text = bio
-            },
-            onFailure = {
-
-            }
-        )
-
-        loadUserFollowerData()
+        loadUserData(uid)
+        loadUserFollowerData(uid)
 
         FirebaseInteraction.getFollowingMovies(uid) { movies ->
             val followingMovies = mutableListOf<String>()
@@ -98,8 +76,9 @@ class UserPageActivity: AppCompatActivity() {
             for (movieId in movies) {
                 followingMovies.add(movieId.first)
             }
+            val n =
 
-            onFollowedMoviesFetched(followingMovies)
+            onFollowedMoviesFetched(movies.map { it.first })
         }
 
         FirebaseInteraction.getFollowingSeries(uid) { series ->
@@ -121,26 +100,82 @@ class UserPageActivity: AppCompatActivity() {
         }
 
         llFollowedSeries.setOnClickListener{
-            if (rvFollowedSerie.visibility == View.GONE) {
-                rvFollowedSerie.visibility = View.VISIBLE
+            if (rvFollowedSeries.visibility == View.GONE) {
+                rvFollowedSeries.visibility = View.VISIBLE
             } else {
-                rvFollowedSerie.visibility = View.GONE
+                rvFollowedSeries.visibility = View.GONE
             }
         }
 
         // Setup button listeners and initial state
-        bFollowUnfollow.setOnClickListener{
-            followUnfollowUser(uid!!)
+        bttFollowUnfollow.setOnClickListener{
+            followUnfollowUser(uid)
         }
 
-        bBackSearch.setOnClickListener {
+        bttBackSearch.setOnClickListener {
             onBackPressed()
         }
 
         setInitialButtonState(uid)
     }
 
-    private fun onFollowedMoviesFetched(movieIds: MutableList<String>) {
+    private fun loadUserData(userId: String) {
+        FirebaseInteraction.getUserProfileImageRef(
+            userId,
+            onSuccess = {
+                it.downloadUrl.addOnSuccessListener { uri ->
+                    Glide.with(this)
+                        .load(uri)
+                        .into(ivAccountIcon)
+                }.addOnFailureListener{
+                    Log.e("StorageImg Err", "Image not found")
+                }
+            }, onFailure = {
+                Log.e("Image Error", it)
+            }
+        )
+
+        FirebaseInteraction.getUserInfo(
+            userId,
+            onSuccess = { user ->
+                tvUsername.text = user.name
+                if (user.biography.isNullOrBlank()) {
+                    tvBio.text = "This user has no biography yet"
+                } else {
+                    tvBio.text = user.biography
+                }
+            },
+            onFailure = {
+                Log.e("User Error", "Error retrieving user $userId")
+            }
+        )
+    }
+
+    private fun loadUserFollowerData(userId: String) {
+
+        FirebaseInteraction.getFollowersUsers(
+            userId,
+            onSuccess = { followers ->
+                tvFollowersCount.text = followers.size.toString()
+            }, onFailure = {
+                Log.e("Followers Error", "Error getting $userId followers. ${it.message}")
+            }
+        )
+
+        FirebaseInteraction.getFollowedUsers(
+            userId,
+            onSuccess = { followed ->
+                tvFollowingCount.text = followed.size.toString()
+            },
+            onFailure = {
+                Log.e("Followed Error", "Error getting $userId followed. ${it.message}")
+            }
+        )
+
+    }
+
+
+    private fun onFollowedMoviesFetched(movieIds: List<String>) {
         val movies = mutableListOf<Media>()
         var completedRequests = 0
         val totalRequests = movieIds.size
@@ -183,46 +218,53 @@ class UserPageActivity: AppCompatActivity() {
 
 
     private fun followUnfollowUser(uid: String) {
-        FirebaseInteraction.getFollowedUsers { followedUsers ->
-            if (followedUsers.contains(uid)) {
-                FirebaseInteraction.removeSelfFromUserFollowers(uid) {
-                    FirebaseInteraction.removeTargetUserFromFollowing(uid) {}
-                    bFollowUnfollow.setBackgroundResource(R.drawable.add)
+        FirebaseInteraction.getFollowedUsers(
+            onSuccess = { followedUsers ->
+                Log.d("FollowingUsers", "${followedUsers.size}\n$followedUsers")
+                if (followedUsers.contains(uid)) {
+                    // logged user is follower of user in this page
+                    FirebaseInteraction.removeTargetUserFromFollowing(
+                        uid,
+                        onSuccess = {
+                            if (tvFollowersCount.text.isDigitsOnly()) {
+                                val newFollowersValue = tvFollowersCount.text.toString().toInt() - 1
+                                tvFollowersCount.text = newFollowersValue.toString()
+                            }
+                            bttFollowUnfollow.setBackgroundResource(R.drawable.add)
+                        },
+                        onFailure = {
+                        Log.e("Error in follow action", "${it.message}")
+                    })
+                } else {
+                    // logged user is not follower of user in this page
+                    FirebaseInteraction.addTargetUserToFollowing(
+                        uid,
+                        onSuccess = {
+                            if (tvFollowersCount.text.isDigitsOnly()) {
+                                val newFollowersValue = tvFollowersCount.text.toString().toInt() + 1
+                                tvFollowersCount.text = newFollowersValue.toString()
+                            }
+                            bttFollowUnfollow.setBackgroundResource(R.drawable.remove)
+                        },
+                        onFailure = {
+                            Log.e("Error in follow action", "${it.message}")
+                    })
                 }
-            } else {
-                FirebaseInteraction.addTargetUserToFollowing(uid) {
-                    FirebaseInteraction.addSelfToFollowed(uid) {}
-                    bFollowUnfollow.setBackgroundResource(R.drawable.remove)
-                }
+            },
+            onFailure = {
+                Log.e("FirebaseDB Error", "Error getting $uid followed users. ${it.message}")
             }
-
-            loadUserFollowerData()
-        }
-    }
-
-    private fun loadUserFollowerData() {
-        // Set number of users following me from Firebase
-        FirebaseInteraction.getFollowersUsers { followers -> //TODO: add uid requirement
-            tvFollowerCount.text = followers.size.toString()
-        }
-
-        // Check number of users I follow from Firebase
-        FirebaseInteraction.getFollowedUsers { followed ->
-            tvFollowingCount.text = followed.size.toString()
-        }
+        )
     }
 
     private fun setInitialButtonState(userId: String) {
         FirebaseInteraction.checkFollowedExistance(userId) { exists ->
             if(exists) {
-                bFollowUnfollow.setBackgroundResource(R.drawable.remove)
+                bttFollowUnfollow.setBackgroundResource(R.drawable.remove)
             } else {
-                bFollowUnfollow.setBackgroundResource(R.drawable.add)
+                bttFollowUnfollow.setBackgroundResource(R.drawable.add)
             }
         }
     }
 
-    private fun onError(){
-        Log.e("CommentsMovieActivity", "Something went wrong")
-    }
 }

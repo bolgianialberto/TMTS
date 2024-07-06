@@ -14,50 +14,51 @@
         android:orientation="vertical">
 
         <Button
-            android:id="@+id/b_arrow_back_user_page"
+            android:id="@+id/btt_user_page_arrow_back"
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:background="@drawable/arrow_back"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"/>
 
-        <ImageView
-            android:id="@+id/account_icon"
-            android:layout_width="132dp"
-            android:layout_height="128dp"
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_user_page_icon"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
             android:layout_gravity="center"
-            android:layout_marginTop="50sp"
-
-            android:src="@drawable/account"
-            android:contentDescription="User Profile Image" />
+            android:layout_marginTop="30dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/account"
+            app:shapeAppearanceOverlay="@style/userPageRoundedImageView" />
 
         <TextView
-            android:id="@+id/tv_account_username"
-            android:layout_width="wrap_content"
+            android:id="@+id/tv_user_page_username"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
             android:layout_gravity="center"
-
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
             android:text="Username"
-            android:textColor="#1A472A "
+            android:textColor="#1A472A"
             android:textSize="35sp"
             android:textStyle="bold"
-            android:gravity="center" />
+            android:gravity="center"
+            android:ellipsize="end"
+            android:maxLines="2" />
 
         <TextView
-            android:id="@+id/tv_bio"
-            android:layout_width="200sp"
+            android:id="@+id/tv_user_page_bio"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-
-            android:layout_marginTop="5sp"
-
-            android:maxLength="97"
+            android:layout_marginStart="30dp"
+            android:layout_marginEnd="30dp"
+            android:layout_marginTop="5dp"
             android:textSize="20sp"
-
             android:layout_gravity="center"
             android:gravity="center"
-
-            android:hint="Username biography" />
+            android:hint="Username biography"
+            android:ellipsize="end"
+            android:maxLines="2" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="wrap_content"
@@ -71,7 +72,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">
 
@@ -88,7 +88,7 @@
                     android:id="@+id/tv_follower_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="50"
+                    android:text="0"
                     android:textSize="20sp"
                     android:textColor="#358247" />
 
@@ -100,10 +100,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="center"
-
                 app:layout_constraintStart_toEndOf="@id/ll_follower"
                 app:layout_constraintTop_toTopOf="parent"
-
                 android:layout_marginStart="15sp">
 
                 <TextView
@@ -120,7 +118,7 @@
                     android:id="@+id/tv_following_count"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="30"
+                    android:text="0"
                     android:textSize="20sp"
                     android:textColor="#358247" />
 
@@ -129,7 +127,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <Button
-            android:id="@+id/b_follow"
+            android:id="@+id/btt_follow_unfollow"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginTop="15sp"
@@ -142,7 +140,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/b_follow"
+            app:layout_constraintTop_toBottomOf="@id/btt_follow_unfollow"
             android:paddingHorizontal="20dp"
             android:layout_marginTop="30dp">
 

@@ -33,6 +33,7 @@ import com.example.tmts.R
 import com.example.tmts.activities.MainEmptyActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
+import com.example.tmts.activities.UserFollowActivity
 import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.adapters.MediaAdapter
 import com.example.tmts.beans.Media
@@ -64,6 +65,7 @@ class AccountFragment : Fragment() {
     private lateinit var llRvTvMovies: LinearLayout
     private lateinit var llRvTvSeries: LinearLayout
     private lateinit var llRvBtnWatchlist: LinearLayout
+    private lateinit var llFollow: LinearLayout
 
 
     val currentUser = mAuth.currentUser!!
@@ -123,6 +125,7 @@ class AccountFragment : Fragment() {
         llRvTvMovies = view.findViewById(R.id.ll_rv_tv_movies)
         llRvTvSeries = view.findViewById(R.id.ll_rv_tv_series)
         llRvBtnWatchlist = view.findViewById(R.id.ll_rv_btn_watchlist)
+        llFollow = view.findViewById(R.id.ll_user_account_follow)
 
         // Setup adapters for Recycle Views
         watchedMoviesAdapter = MediaAdapter(requireContext(), emptyList(), 66, 100) { movie ->
@@ -263,6 +266,10 @@ class AccountFragment : Fragment() {
             }
         }
 
+        llFollow.setOnClickListener {
+            val intent = Intent(requireContext(), UserFollowActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun onWatchedMoviesFetched(movieIds: List<String>){
@@ -306,15 +313,24 @@ class AccountFragment : Fragment() {
     }
 
     private fun loadUserFollowerData() {
-        // Set number of users following me from Firebase
-        FirebaseInteraction.getFollowersUsers { followers ->
-            tvFollowerCount.text = followers.size.toString()
-        }
+        FirebaseInteraction.getFollowersUsers(
+            onSuccess = { followers ->
+                tvFollowerCount.text = followers.size.toString()
+            },
+            onFailure = {
+                Log.e("FollowersError", "${it.message}")
+            }
+        )
 
-        // Check number of users I follow from Firebase
-        FirebaseInteraction.getFollowedUsers { followed ->
-            tvFollowingCount.text = followed.size.toString()
-        }
+        FirebaseInteraction.getFollowedUsers(
+            onSuccess = { followed ->
+                tvFollowingCount.text = followed.size.toString()
+
+            },
+            onFailure = {
+                Log.e("FollowedError", "${it.message}")
+            }
+        )
     }
 
     private fun showEditBioDialog() {

@@ -36,7 +36,6 @@ class MoreShowAccountsAdapter(
     }
 
     fun updateUsers(follower: User) {
-        Log.d("UPDATED FOLLOWER", "$follower")
         usersList.add(follower)
         notifyItemInserted(usersList.size - 1)
     }
