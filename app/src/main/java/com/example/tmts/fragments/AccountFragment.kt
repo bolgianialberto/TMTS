@@ -31,6 +31,7 @@ import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
+import com.example.tmts.TMDbApiClient
 import com.example.tmts.activities.MainEmptyActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
@@ -38,9 +39,10 @@ import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.adapters.MediaAdapter
 import com.example.tmts.beans.Media
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class AccountFragment : Fragment() {
-    private var mAuth = FirebaseAuth.getInstance()
+    private lateinit var mAuth: FirebaseAuth
     private lateinit var ivAccountIcon: ImageView
     private lateinit var tvBio: TextView
     private lateinit var tvUsername: TextView
@@ -65,14 +67,15 @@ class AccountFragment : Fragment() {
     private lateinit var llRvTvMovies: LinearLayout
     private lateinit var llRvTvSeries: LinearLayout
     private lateinit var llRvBtnWatchlist: LinearLayout
-
-
-    val currentUser = mAuth.currentUser!!
+    private lateinit var currentUser: FirebaseUser
 
     private lateinit var selectImageFromGalleryResult: ActivityResultLauncher<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        mAuth = FirebaseAuth.getInstance()
+        currentUser = mAuth.currentUser!!
 
         selectImageFromGalleryResult = registerForActivityResult(ActivityResultContracts.GetContent()) {uri ->
             uri?.let{
@@ -374,8 +377,21 @@ class AccountFragment : Fragment() {
 
     private fun performLogout(): Boolean {
         mAuth.signOut()
+
+        FirebaseInteraction.reset()
+
+        requireContext().cacheDir.deleteRecursively()
+
+        // Clear SharedPreferences
+        val sharedPreferences = requireContext().getSharedPreferences("your_prefs_name", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.clear()
+        editor.apply()
+
         val intent = Intent(requireContext(), MainEmptyActivity::class.java)
         startActivity(intent)
+        requireActivity().finish()
+
         return true
     }
 

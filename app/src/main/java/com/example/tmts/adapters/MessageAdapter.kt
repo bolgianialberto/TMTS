@@ -45,7 +45,7 @@ class MessageAdapter(
 
     override fun getItemViewType(position: Int): Int {
         val currentMessage = messageList[position]
-        if (FirebaseInteraction.user.uid == currentMessage.senderId) {
+        if (FirebaseInteraction.user!!.uid == currentMessage.senderId) {
             return SENT_MSG
         }
         return RECEIVED_MSG

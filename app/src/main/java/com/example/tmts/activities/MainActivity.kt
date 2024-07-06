@@ -3,16 +3,19 @@ package com.example.tmts.activities
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
 import com.example.tmts.fragments.AccountFragment
 import com.example.tmts.fragments.ExploreFragment
 import com.example.tmts.fragments.HomeFragment
 import com.example.tmts.fragments.SearchFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : AppCompatActivity() {
     private lateinit var bottomNavigationView: BottomNavigationView
+
     /*
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -31,6 +34,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView)
+
         val searchFragment = SearchFragment()
         val homeFragment = HomeFragment()
         val accountFragment = AccountFragment()

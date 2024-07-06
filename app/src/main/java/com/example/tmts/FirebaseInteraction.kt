@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
 import com.example.tmts.beans.User
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
@@ -30,42 +31,82 @@ import java.util.Locale
 object FirebaseInteraction {
     private val MAX_SHOWS_PULLED_EXPLORE_SECTION = 10
 
-    var mDbRef = FirebaseDatabase.getInstance().getReference()
-    val mStRef = FirebaseStorage.getInstance().getReference()
-    var mAuth = FirebaseAuth.getInstance()
-    val user = mAuth.currentUser!!
-    val userRef = mDbRef.child("users").child(user.uid)
-    val followingSeriesRef = userRef.child("following_series")
-    val followingMoviesRef = userRef.child("following_movies")
-    val watchedMoviesRef = userRef.child("watched_movies")
-    val watchedSeriesRef = userRef.child("watched_series")
-    val moviesRef = mDbRef.child("shows").child("movies")
-    val seriesRef = mDbRef.child("shows").child("series")
-    val reviewsRef = mDbRef.child("reviews")
-    val storageRef = FirebaseStorage.getInstance().reference
-    val userRatingsRef = userRef.child("ratings")
-    val watchlistRef = userRef.child("watchlists")
-    val followedUsersRef = userRef.child("followed")
-    val followersUsersRef = userRef.child("followers")
-    val userBioRef = userRef.child("bio")
+    var mDbRef: DatabaseReference? = null
+    var mStRef: StorageReference? = null
+    var mAuth: FirebaseAuth? = null
+    var user: FirebaseUser? = null
+    var userRef: DatabaseReference? = null
+    var followingSeriesRef: DatabaseReference? = null
+    var followingMoviesRef: DatabaseReference? = null
+    var watchedMoviesRef: DatabaseReference? = null
+    var watchedSeriesRef: DatabaseReference? = null
+    var moviesRef: DatabaseReference? = null
+    var seriesRef: DatabaseReference? = null
+    var reviewsRef: DatabaseReference? = null
+    var storageRef: StorageReference? = null
+    var userRatingsRef: DatabaseReference? = null
+    var watchlistRef: DatabaseReference? = null
+    var followedUsersRef: DatabaseReference? = null
+    var followersUsersRef: DatabaseReference? = null
+    var userBioRef: DatabaseReference? = null
+
+    init {
+        reset()
+    }
+
+    fun reset() {
+        mDbRef = FirebaseDatabase.getInstance().getReference()
+        mStRef = FirebaseStorage.getInstance().getReference()
+        mAuth = FirebaseAuth.getInstance()
+        user = mAuth?.currentUser
+
+        if (user != null) {
+            userRef = mDbRef?.child("users")?.child(user!!.uid)
+            followingSeriesRef = userRef?.child("following_series")
+            followingMoviesRef = userRef?.child("following_movies")
+            watchedMoviesRef = userRef?.child("watched_movies")
+            watchedSeriesRef = userRef?.child("watched_series")
+            userRatingsRef = userRef?.child("ratings")
+            watchlistRef = userRef?.child("watchlists")
+            followedUsersRef = userRef?.child("followed")
+            followersUsersRef = userRef?.child("followers")
+            userBioRef = userRef?.child("bio")
+        } else {
+            userRef = null
+            followingSeriesRef = null
+            followingMoviesRef = null
+            watchedMoviesRef = null
+            watchedSeriesRef = null
+            userRatingsRef = null
+            watchlistRef = null
+            followedUsersRef = null
+            followersUsersRef = null
+            userBioRef = null
+        }
+
+        moviesRef = mDbRef?.child("shows")?.child("movies")
+        seriesRef = mDbRef?.child("shows")?.child("series")
+        reviewsRef = mDbRef?.child("reviews")
+        storageRef = mStRef
+    }
 
     fun updateUserProfileImage(
         uri: Uri,
-        userId: String? = user.uid,
+        userId: String? = user?.uid,
         onSuccess: () -> Unit,
         onError: (String) -> Unit
     ){
         val filename = "users/${userId}/profileImage"
-        val profileImageRef = storageRef.child(filename)
-        profileImageRef.putFile(uri).addOnSuccessListener {
+        val profileImageRef = storageRef?.child(filename)
+        profileImageRef?.putFile(uri)?.addOnSuccessListener {
             onSuccess()
-        }.addOnFailureListener() {
+        }?.addOnFailureListener() {
             onError.invoke("impossible to update user profile image")
         }
     }
 
     fun fetchWatchlistsWithDetails(onSuccess: (List<Watchlist>) -> Unit, onError: (String) -> Unit) {
-        watchlistRef.get().addOnSuccessListener { snapshot ->
+        watchlistRef?.get()?.addOnSuccessListener { snapshot ->
             val watchlistTasks = snapshot.children.mapNotNull { watchlistSnapshot ->
                 val name = watchlistSnapshot.key ?: return@mapNotNull null
                 val movieIds = watchlistSnapshot.child("movies").children.mapNotNull { it.key?.toIntOrNull() }
@@ -81,7 +122,7 @@ object FirebaseInteraction {
                 .addOnFailureListener { exception ->
                     onError(exception.message ?: "Error fetching watchlists")
                 }
-        }.addOnFailureListener { exception ->
+        }?.addOnFailureListener { exception ->
             onError(exception.message ?: "Error fetching watchlists")
         }
     }
@@ -122,7 +163,7 @@ object FirebaseInteraction {
 
 
     fun getLoggedUser(onSuccess: ((User) -> Unit), onFailure: (String) -> Unit){
-        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        userRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val userId = snapshot.key
                 val username = snapshot.child("name").getValue(String::class.java)
@@ -131,7 +172,7 @@ object FirebaseInteraction {
                     val result = User(userId, username, email)
                     onSuccess(result)
                 } else {
-                    onFailure("Username not found for user ID: ${user.uid}")
+                    onFailure("Username not found for user ID: ${user?.uid}")
                 }
             }
 
@@ -142,15 +183,15 @@ object FirebaseInteraction {
     }
 
     fun getUsername(userId: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
-        val usernameRef = mDbRef.child("users").child(userId).child("name")
+        val usernameRef = mDbRef?.child("users")?.child(userId)?.child("name")
 
-        usernameRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        usernameRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val username = snapshot.getValue(String::class.java)
                 if (username != null) {
                     onSuccess(username)
                 } else {
-                    onFailure("Username not found for user ID: ${user.uid}")
+                    onFailure("Username not found for user ID: ${user?.uid}")
                 }
             }
 
@@ -161,41 +202,41 @@ object FirebaseInteraction {
     }
 
     fun getUserRefInStorage(
-        userId: (String)? = user.uid,
+        userId: (String)? = user?.uid,
         onSuccess: (StorageReference) -> Unit,
         onError: (String) -> Unit
     ) {
         val filePath = "users/${userId}/profileImage"
 
-        storageRef.child(filePath).metadata.addOnSuccessListener {
-            onSuccess(storageRef.child(filePath))
-        }.addOnFailureListener { exception ->
+        storageRef?.child(filePath)?.metadata?.addOnSuccessListener {
+            onSuccess(storageRef!!.child(filePath))
+        }?.addOnFailureListener { exception ->
             onError("Errore durante il recupero del riferimento: ${exception.message}")
         }
     }
 
     fun getUserBio(
-        userId: String? = user.uid,
+        userId: String? = user?.uid,
         onSuccess: (String) -> Unit, onFailure: (String) -> Unit
     ) {
         var ref = mDbRef
 
-        if (userId.isNullOrBlank() || userId == user.uid) {
+        if (userId.isNullOrBlank() || userId == user?.uid) {
             ref = userBioRef
         } else {
             ref = mDbRef
-                .child("users")
-                .child(userId!!)
-                .child("bio")
+                ?.child("users")
+                ?.child(userId!!)
+                ?.child("bio")
         }
 
-        ref.addListenerForSingleValueEvent(object: ValueEventListener {
+        ref?.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val bio = snapshot.getValue(String::class.java)
                 if (bio != null) {
                     onSuccess(bio)
                 } else {
-                    onFailure("No biography found for user ID: ${user.uid}")
+                    onFailure("No biography found for user ID: ${user?.uid}")
                 }
             }
 
@@ -206,9 +247,9 @@ object FirebaseInteraction {
     }
 
     fun getUserInfo(userId: String, onSuccess: (User) -> Unit, onFailure: (String) -> Unit) {
-        val userRef = mDbRef.child("users").child(userId)
+        val userRef = mDbRef?.child("users")?.child(userId)
 
-        userRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        userRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val username = snapshot.child("name").getValue(String::class.java)
                 val email = snapshot.child("email").getValue(String::class.java)
@@ -216,7 +257,7 @@ object FirebaseInteraction {
                     val result = User(userId, username, email)
                     onSuccess(result)
                 } else {
-                    onFailure("Username not found for user ID: ${user.uid}")
+                    onFailure("Username not found for user ID: ${user?.uid}")
                 }
             }
 
@@ -227,8 +268,8 @@ object FirebaseInteraction {
     }
 
     fun saveBioToFirebase(newBio: String, onSuccess: (() -> Unit)? = null, onFailure: (() -> Unit)? = null) {
-        userBioRef.setValue(newBio)
-            .addOnCompleteListener { task ->
+        userBioRef?.setValue(newBio)
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onSuccess?.invoke()
                     Log.d("Firebase", "Bio aggiunta con successo a Firebase")
@@ -246,9 +287,9 @@ object FirebaseInteraction {
     ){
         val filePath = "reviews/${review.id}.jpg" // Assumi che review abbia un campo reviewId
 
-        storageRef.child(filePath).metadata.addOnSuccessListener {
-            onSuccess(storageRef.child(filePath))
-        }.addOnFailureListener { exception ->
+        storageRef?.child(filePath)?.metadata?.addOnSuccessListener {
+            onSuccess(storageRef!!.child(filePath))
+        }?.addOnFailureListener { exception ->
             onError("Errore durante il recupero del riferimento: ${exception.message}")
         }
     }
@@ -260,12 +301,12 @@ object FirebaseInteraction {
         onError: (String) -> Unit
     ) {
         val mediaReviewsRef = if (mediaType == "movie") {
-            moviesRef.child(mediaId).child("reviews")
+            moviesRef?.child(mediaId)?.child("reviews")
         } else {
-            seriesRef.child(mediaId).child("reviews")
+            seriesRef?.child(mediaId)?.child("reviews")
         }
 
-        mediaReviewsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        mediaReviewsRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val reviews = mutableListOf<Review>()
                 val reviewIds = mutableListOf<String>()
@@ -281,9 +322,9 @@ object FirebaseInteraction {
 
                 // Step 2: Fetch details for each review using its ID
                 reviewIds.forEach { id ->
-                    val reviewDetailsRef = reviewsRef.child(id)
+                    val reviewDetailsRef = reviewsRef?.child(id)
 
-                    reviewDetailsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                    reviewDetailsRef?.addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(reviewSnapshot: DataSnapshot) {
                             val revId = reviewSnapshot.child("id").getValue(String::class.java)
                             val usId = reviewSnapshot.child("idUser").getValue(String::class.java)
@@ -325,21 +366,21 @@ object FirebaseInteraction {
     }
 
     fun getFollowingSeries(
-        userId: String? = user.uid,
+        userId: String? = user?.uid,
         callback: (List<Triple<String, String, Long>>) -> Unit
     ){
         var ref = mDbRef
 
-        if (userId.isNullOrBlank() || userId == user.uid) {
+        if (userId.isNullOrBlank() || userId == user?.uid) {
             ref = followingSeriesRef
         } else {
             ref = mDbRef
-                .child("users")
-                .child(userId!!)
-                .child("following_series")
+                ?.child("users")
+                ?.child(userId!!)
+                ?.child("following_series")
         }
 
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+        ref?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val series = mutableListOf<Triple<String, String, Long>>()
 
@@ -363,7 +404,7 @@ object FirebaseInteraction {
     }
 
     fun getUnorderedFollowingMovies(callback: (List<String>) -> Unit) {
-        followingMoviesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        followingMoviesRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val movies = mutableListOf<String>()
 
@@ -386,21 +427,22 @@ object FirebaseInteraction {
     }
 
     fun getFollowingMovies(
-        userId: String? = user.uid,
+        userId: String? = user?.uid,
         callback: (List<Pair<String, Long>>) -> Unit
     ) {
+        Log.d("Firebase", "User: ${userId}")
         var ref = mDbRef
 
-        if (userId.isNullOrBlank() || userId == user.uid) {
+        if (userId.isNullOrBlank() || userId == user?.uid) {
             ref = followingMoviesRef
         } else {
             ref = mDbRef
-                .child("users")
-                .child(userId!!)
-                .child("following_movies")
+                ?.child("users")
+                ?.child(userId!!)
+                ?.child("following_movies")
         }
 
-        ref.addListenerForSingleValueEvent(object : ValueEventListener {
+        ref?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val movies = mutableListOf<Pair<String, Long>>()
 
@@ -424,7 +466,7 @@ object FirebaseInteraction {
     }
 
     fun getFollowedUsers(callback: (List<String>) -> Unit, ){
-        followedUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        followedUsersRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val followed = mutableListOf<String>()
 
@@ -446,7 +488,7 @@ object FirebaseInteraction {
     }
 
     fun getFollowersUsers(callback: (List<String>) -> Unit, ){
-        followersUsersRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        followersUsersRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val followers = mutableListOf<String>()
 
@@ -479,7 +521,7 @@ object FirebaseInteraction {
             seriesRef
         }
 
-        mediaRef.child(mediaId.toString()).addListenerForSingleValueEvent(object : ValueEventListener {
+        mediaRef?.child(mediaId.toString())?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     val averageRate = dataSnapshot.child("average_rate").getValue(Double::class.java)
@@ -504,7 +546,7 @@ object FirebaseInteraction {
         onSuccess: ((Float) -> Unit)?,
         onError: (String) -> Unit
     ){
-        userRatingsRef.child(mediaId).addListenerForSingleValueEvent(object : ValueEventListener {
+        userRatingsRef?.child(mediaId)?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     // Estrai il valore della chiave movieId
@@ -532,7 +574,7 @@ object FirebaseInteraction {
         callback: (Boolean) -> Unit
     ){
         followedUsersRef
-            .child(userId!!).addListenerForSingleValueEvent(object : ValueEventListener {
+            ?.child(userId!!)?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val exists = dataSnapshot.exists()
                 callback(exists)
@@ -550,7 +592,7 @@ object FirebaseInteraction {
         onSuccess: (Boolean) -> Unit,
         onError: (String) -> Unit
     ){
-        userRatingsRef.child(mediaId.toString()).addListenerForSingleValueEvent(object : ValueEventListener {
+        userRatingsRef?.child(mediaId.toString())?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 if (dataSnapshot.exists()) {
                     onSuccess.invoke(true)
@@ -570,9 +612,9 @@ object FirebaseInteraction {
         callback: (Boolean) -> Unit
     ){
         val serieRef = followingSeriesRef
-            .child(serieId.toString())
+            ?.child(serieId.toString())
 
-        serieRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        serieRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val exists = dataSnapshot.exists()
                 callback(exists)
@@ -590,9 +632,9 @@ object FirebaseInteraction {
         callback: (Boolean) -> Unit
     ){
         val movieRef = followingMoviesRef
-            .child(movieId.toString())
+            ?.child(movieId.toString())
 
-        movieRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        movieRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val exists = dataSnapshot.exists()
                 callback(exists)
@@ -610,9 +652,9 @@ object FirebaseInteraction {
         onSuccess: (Boolean) -> Unit,
         onError: (String) -> Unit
     ){
-        val watchedSerieRef = watchedSeriesRef.child(serieId.toString())
+        val watchedSerieRef = watchedSeriesRef?.child(serieId.toString())
 
-        watchedSerieRef.addListenerForSingleValueEvent(object: ValueEventListener{
+        watchedSerieRef?.addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 onSuccess(dataSnapshot.exists())
             }
@@ -628,9 +670,9 @@ object FirebaseInteraction {
         onSuccess: (Boolean) -> Unit,
         onError: (String) -> Unit
     ){
-        val watchedMovieRef = watchedMoviesRef.child(movieId.toString())
+        val watchedMovieRef = watchedMoviesRef?.child(movieId.toString())
 
-        watchedMovieRef.addListenerForSingleValueEvent(object: ValueEventListener{
+        watchedMovieRef?.addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 onSuccess(dataSnapshot.exists())
             }
@@ -651,11 +693,11 @@ object FirebaseInteraction {
         val mediaField = if (mediaType == "movie") "movies" else "series"
 
         val watchlistMediaRef = watchlistRef
-            .child(watchlistName)
-            .child(mediaField)
-            .child(mediaId.toString())
+            ?.child(watchlistName)
+            ?.child(mediaField)
+            ?.child(mediaId.toString())
 
-        watchlistMediaRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        watchlistMediaRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 onSuccess(dataSnapshot.exists())
             }
@@ -672,17 +714,19 @@ object FirebaseInteraction {
         episodeNumber: Int,
         callback: (Boolean?) -> Unit
     ){
-        val episodeRef = mDbRef
-            .child("users")
-            .child(user.uid)
-            .child("following_series")
-            .child(serieId.toString())
-            .child("seasons")
-            .child(seasonNumber.toString())
-            .child("episodes")
-            .child(episodeNumber.toString())
+        val episodeRef = user?.let {
+            mDbRef
+                ?.child("users")
+                ?.child(it.uid)
+                ?.child("following_series")
+                ?.child(serieId.toString())
+                ?.child("seasons")
+                ?.child(seasonNumber.toString())
+                ?.child("episodes")
+                ?.child(episodeNumber.toString())
+        }
 
-        episodeRef.addListenerForSingleValueEvent(object: ValueEventListener{
+        episodeRef?.addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (snapshot.exists()) {
                     val episodeValue = snapshot.getValue(Boolean::class.java)
@@ -703,10 +747,10 @@ object FirebaseInteraction {
 
     fun removeSerieFromFollowing(serieId: Int, onSuccess: (() -> Unit)? = null) {
         val serieRef = followingSeriesRef
-            .child(serieId.toString())
+            ?.child(serieId.toString())
 
-        serieRef.removeValue()
-            .addOnCompleteListener { task ->
+        serieRef?.removeValue()
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     // La serie è stata rimossa con successo
                     onSuccess?.invoke() // Esegui la callback onSuccess se è stata fornita
@@ -719,10 +763,10 @@ object FirebaseInteraction {
 
     fun removeMovieFromFollowing(movieId: Int, onSuccess: (() -> Unit)? = null) {
         val movieRef = followingMoviesRef
-            .child(movieId.toString())
+            ?.child(movieId.toString())
 
-        movieRef.removeValue()
-            .addOnCompleteListener {task ->
+        movieRef?.removeValue()
+            ?.addOnCompleteListener {task ->
                 if (task.isSuccessful) {
                     onSuccess?.invoke()
                     Log.d("Firebase", "Film rimosso con successo")
@@ -733,15 +777,15 @@ object FirebaseInteraction {
     }
 
     fun removeFollowerFromMovie(movieId: Int, onSuccess: (() -> Unit)? = null) {
-        val movieRef = moviesRef.child(movieId.toString())
-        val followersRef = movieRef.child("followers")
+        val movieRef = moviesRef?.child(movieId.toString())
+        val followersRef = movieRef?.child("followers")
 
-        followersRef.get().addOnCompleteListener { task ->
+        followersRef?.get()?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val followersList = task.result?.children?.map { it.value.toString() }?.toMutableList() ?: mutableListOf()
 
-                if (followersList.contains(user.uid)) {
-                    followersList.remove(user.uid)
+                if (followersList.contains(user?.uid)) {
+                    followersList.remove(user?.uid)
                     followersRef.setValue(followersList).addOnCompleteListener { setValueTask ->
                         if (setValueTask.isSuccessful) {
                             onSuccess?.invoke()
@@ -761,15 +805,15 @@ object FirebaseInteraction {
     }
 
     fun removeFollowerFromSeries(seriesId: Int, onSuccess: (() -> Unit)? = null) {
-        val seriesRef = seriesRef.child(seriesId.toString())
-        val followersRef = seriesRef.child("followers")
+        val seriesRef = seriesRef?.child(seriesId.toString())
+        val followersRef = seriesRef?.child("followers")
 
-        followersRef.get().addOnCompleteListener { task ->
+        followersRef?.get()?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val followersList = task.result?.children?.map { it.value.toString() }?.toMutableList() ?: mutableListOf()
 
-                if (followersList.contains(user.uid)) {
-                    followersList.remove(user.uid)
+                if (followersList.contains(user?.uid)) {
+                    followersList.remove(user?.uid)
                     followersRef.setValue(followersList).addOnCompleteListener { setValueTask ->
                         if (setValueTask.isSuccessful) {
                             onSuccess?.invoke()
@@ -800,15 +844,15 @@ object FirebaseInteraction {
         onSuccess: (() -> Unit)?,
         onError: (String) -> Unit
     ) {
-        val watchlistNameRef = watchlistRef.child(watchlistName)
+        val watchlistNameRef = watchlistRef?.child(watchlistName)
         val mediaField = if (mediaType == "movie") "movies" else "series"
 
         val mediaRef = watchlistNameRef
-            .child(mediaField)
-            .child(mediaId.toString())
+            ?.child(mediaField)
+            ?.child(mediaId.toString())
 
-        mediaRef.setValue(true)
-            .addOnCompleteListener { task ->
+        mediaRef?.setValue(true)
+            ?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 onSuccess?.invoke()
             } else {
@@ -827,8 +871,8 @@ object FirebaseInteraction {
         onSuccess: (() -> Unit)?,
         onError: (String) -> Unit
     ){
-        userRatingsRef.child(mediaId).setValue(rating)
-            .addOnCompleteListener { task ->
+        userRatingsRef?.child(mediaId)?.setValue(rating)
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onSuccess?.invoke()
                 } else {
@@ -852,28 +896,28 @@ object FirebaseInteraction {
         onFailure: ((Exception) -> Unit)? = null
     ) {
         val mediaReviewsRef = if (mediaType == "movie") {
-            moviesRef.child(mediaId).child("reviews")
+            moviesRef?.child(mediaId)?.child("reviews")
         } else {
-            seriesRef.child(mediaId).child("reviews")
+            seriesRef?.child(mediaId)?.child("reviews")
         }
-        val userReviewsRef = userRef.child("reviews")
+        val userReviewsRef = userRef?.child("reviews")
 
         // Genera un ID unico per la nuova recensione
-        val newReviewRef = reviewsRef.push()
-        val reviewId = newReviewRef.key
+        val newReviewRef = reviewsRef?.push()
+        val reviewId = newReviewRef?.key
 
         val currentDate = getCurrentDateTime()
 
         if (reviewId != null) {
             if (uri != null) {
                 val filePath = "reviews/$reviewId.jpg"
-                val imageRef = storageRef.child(filePath)
+                val imageRef = storageRef?.child(filePath)
 
-                imageRef.putFile(uri).addOnSuccessListener {
+                imageRef?.putFile(uri)?.addOnSuccessListener {
                     imageRef.downloadUrl.addOnSuccessListener { imageUrl ->
                         val review = Review(
                             id = reviewId,
-                            idUser = user.uid,
+                            idUser = user?.uid,
                             idShow = mediaId,
                             comment = comment,
                             date = currentDate,
@@ -884,10 +928,10 @@ object FirebaseInteraction {
                         newReviewRef.setValue(review).addOnCompleteListener { task ->
                             if (task.isSuccessful) {
                                 // Aggiungi l'ID della recensione alla lista delle recensioni del media
-                                mediaReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
+                                mediaReviewsRef?.child(reviewId)?.setValue(true)?.addOnCompleteListener { task2 ->
                                     if (task2.isSuccessful) {
                                         // Aggiungi l'ID della recensione alla lista delle recensioni dell'utente
-                                        userReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task3 ->
+                                        userReviewsRef?.child(reviewId)?.setValue(true)?.addOnCompleteListener { task3 ->
                                             if (task3.isSuccessful) {
                                                 onSuccess?.invoke()
                                             } else {
@@ -905,13 +949,13 @@ object FirebaseInteraction {
                     }.addOnFailureListener { exception ->
                         onFailure?.invoke(exception)
                     }
-                }.addOnFailureListener { exception ->
+                }?.addOnFailureListener { exception ->
                     onFailure?.invoke(exception)
                 }
             } else {
                 val review = Review(
                     id = reviewId,
-                    idUser = user.uid,
+                    idUser = user?.uid,
                     idShow = mediaId,
                     comment = comment,
                     date = currentDate
@@ -921,10 +965,10 @@ object FirebaseInteraction {
                 newReviewRef.setValue(review).addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                         // Aggiungi l'ID della recensione alla lista delle recensioni del media
-                        mediaReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task2 ->
+                        mediaReviewsRef?.child(reviewId)?.setValue(true)?.addOnCompleteListener { task2 ->
                             if (task2.isSuccessful) {
                                 // Aggiungi l'ID della recensione alla lista delle recensioni dell'utente
-                                userReviewsRef.child(reviewId).setValue(true).addOnCompleteListener { task3 ->
+                                userReviewsRef?.child(reviewId)?.setValue(true)?.addOnCompleteListener { task3 ->
                                     if (task3.isSuccessful) {
                                         onSuccess?.invoke()
                                     } else {
@@ -946,15 +990,15 @@ object FirebaseInteraction {
     }
 
     fun addFollowerToSeries(seriesId: Int, onSuccess: (() -> Unit)? = null) {
-        val seriesRef = seriesRef.child(seriesId.toString())
-        val followersRef = seriesRef.child("followers")
+        val seriesRef = seriesRef?.child(seriesId.toString())
+        val followersRef = seriesRef?.child("followers")
 
-        followersRef.get().addOnCompleteListener { task ->
+        followersRef?.get()?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val followersList = task.result?.children?.map { it.value.toString() }?.toMutableList() ?: mutableListOf()
 
-                if (!followersList.contains(user.uid)) {
-                    followersList.add(user.uid)
+                if (!followersList.contains(user?.uid)) {
+                    user?.let { followersList.add(it.uid) }
                     followersRef.setValue(followersList).addOnCompleteListener { setValueTask ->
                         if (setValueTask.isSuccessful) {
                             onSuccess?.invoke()
@@ -978,26 +1022,26 @@ object FirebaseInteraction {
             serieId,
             onSuccess = { serie ->
                 val serieRef = followingSeriesRef
-                    .child(serieId.toString())
+                    ?.child(serieId.toString())
 
-                serieRef.child("nextToSee").setValue("1_1")
-                serieRef.child("timestamp").setValue(ServerValue.TIMESTAMP)
+                serieRef?.child("nextToSee")?.setValue("1_1")
+                serieRef?.child("timestamp")?.setValue(ServerValue.TIMESTAMP)
 
                 var operationsToComplete = serie.number_of_seasons
 
                 for (n_season in 1..serie.number_of_seasons) {
-                    val seasonRef = serieRef.child("seasons").child(n_season.toString())
-                    seasonRef.child("status").setValue(false)
+                    val seasonRef = serieRef?.child("seasons")?.child(n_season.toString())
+                    seasonRef?.child("status")?.setValue(false)
 
                     MediaRepository.getSeasonDetails(
                         serieId,
                         n_season,
                         onSuccess = { season ->
                             season?.let {
-                                val episodesRef = seasonRef.child("episodes")
+                                val episodesRef = seasonRef?.child("episodes")
 
                                 for (n_episode in 1..it.number_of_episodes) {
-                                    episodesRef.child(n_episode.toString()).setValue(false)
+                                    episodesRef?.child(n_episode.toString())?.setValue(false)
                                 }
                             }
                             // Controlla se tutte le operazioni sono completate
@@ -1015,11 +1059,11 @@ object FirebaseInteraction {
     }
 
     fun addMovieToFollowing(movieId: Int, onSuccess: (() -> Unit)? = null) {
-        val movieRef = followingMoviesRef.child(movieId.toString())
+        val movieRef = followingMoviesRef?.child(movieId.toString())
         val timestampValue = ServerValue.TIMESTAMP
 
-        movieRef.child("timestamp").setValue(timestampValue)
-            .addOnCompleteListener { task ->
+        movieRef?.child("timestamp")?.setValue(timestampValue)
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onSuccess?.invoke()
                     Log.d("Firebase", "Film aggiunto con successo a Firebase")
@@ -1030,15 +1074,15 @@ object FirebaseInteraction {
     }
 
     fun addFollowerToMovie(movieId: Int, onSuccess: (() -> Unit)? = null) {
-        val movieRef = moviesRef.child(movieId.toString())
-        val followersRef = movieRef.child("followers")
+        val movieRef = moviesRef?.child(movieId.toString())
+        val followersRef = movieRef?.child("followers")
 
-        followersRef.get().addOnCompleteListener { task ->
+        followersRef?.get()?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val followersList = task.result?.children?.map { it.value.toString() }?.toMutableList() ?: mutableListOf()
 
-                if (!followersList.contains(user.uid)) {
-                    followersList.add(user.uid)
+                if (!followersList.contains(user?.uid)) {
+                    user?.let { followersList.add(it.uid) }
                     followersRef.setValue(followersList).addOnCompleteListener { setValueTask ->
                         if (setValueTask.isSuccessful) {
                             onSuccess?.invoke()
@@ -1058,9 +1102,9 @@ object FirebaseInteraction {
     }
 
     fun addMovieToWatched(movieId: Int) {
-        val movieRef = watchedMoviesRef.child(movieId.toString())
+        val movieRef = watchedMoviesRef?.child(movieId.toString())
 
-        movieRef.get().addOnCompleteListener { task ->
+        movieRef?.get()?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 val currentCount = task.result?.getValue(Int::class.java) ?: 0
                 movieRef.setValue(currentCount + 1).addOnCompleteListener { updateTask ->
@@ -1198,10 +1242,10 @@ object FirebaseInteraction {
         watchedEpisode: Int,
         callback: (() -> Unit)? = null
     ) {
-        val serieRef = followingSeriesRef.child(serieId.toString())
-        val episodeRef = serieRef.child("seasons").child(watchedSeason.toString()).child("episodes").child(watchedEpisode.toString())
+        val serieRef = followingSeriesRef?.child(serieId.toString())
+        val episodeRef = serieRef?.child("seasons")?.child(watchedSeason.toString())?.child("episodes")?.child(watchedEpisode.toString())
 
-        episodeRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        episodeRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val currentValue = snapshot.getValue(Boolean::class.java) ?: false
                 val newValue = !currentValue
@@ -1271,8 +1315,8 @@ object FirebaseInteraction {
                                 callback?.invoke()
 
                                 // Aggiorna il contatore delle serie viste
-                                val watchedSeriesRef = mDbRef.child("users").child(user!!.uid).child("watched_series").child(serieId.toString())
-                                watchedSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                                val watchedSeriesRef = mDbRef?.child("users")?.child(user!!.uid)?.child("watched_series")?.child(serieId.toString())
+                                watchedSeriesRef?.addListenerForSingleValueEvent(object : ValueEventListener {
                                     override fun onDataChange(dataSnapshot: DataSnapshot) {
                                         val currentCount = dataSnapshot.getValue(Int::class.java) ?: 0
                                         watchedSeriesRef.setValue(currentCount + 1).addOnCompleteListener { task ->
@@ -1322,9 +1366,9 @@ object FirebaseInteraction {
 
     fun getNextToSee(serieId: Int, callback: (Pair<Int, Int>?) -> Unit){
         val serieRef = followingSeriesRef
-            .child(serieId.toString())
+            ?.child(serieId.toString())
 
-        serieRef.child("nextToSee").addListenerForSingleValueEvent(object : ValueEventListener {
+        serieRef?.child("nextToSee")?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val nextToSeeValue = snapshot.getValue(String::class.java)
                 if (nextToSeeValue != null) {
@@ -1354,11 +1398,11 @@ object FirebaseInteraction {
         callback: (() -> Unit)?
     ) {
         val serieRef = followingSeriesRef
-            .child(serieId.toString())
+            ?.child(serieId.toString())
 
         val nextToSee = "${seasonNumber}_$episodeNumber"
-        serieRef.child("nextToSee").setValue(nextToSee)
-            .addOnCompleteListener { task ->
+        serieRef?.child("nextToSee")?.setValue(nextToSee)
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     callback?.invoke()
                 } else {
@@ -1375,15 +1419,15 @@ object FirebaseInteraction {
         callback: (() -> Unit)?
     ){
         val serieRef = followingSeriesRef
-            .child(serieId.toString())
+            ?.child(serieId.toString())
 
-        val episodeRef = serieRef.child("seasons")
-            .child(seasonNumber.toString())
-            .child("episodes")
-            .child(episodeNumber.toString())
+        val episodeRef = serieRef?.child("seasons")
+            ?.child(seasonNumber.toString())
+            ?.child("episodes")
+            ?.child(episodeNumber.toString())
 
-        episodeRef.setValue(value)
-            .addOnCompleteListener { task ->
+        episodeRef?.setValue(value)
+            ?.addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 // Operazione completata con successo, invoca la callback
                 callback?.invoke()
@@ -1402,12 +1446,12 @@ object FirebaseInteraction {
         onError: (String) -> Unit
     ){
         val mediaRef = if(mediaType.equals("movie")){
-            moviesRef.child(mediaId)
+            moviesRef?.child(mediaId)
         } else {
-            seriesRef.child(mediaId)
+            seriesRef?.child(mediaId)
         }
 
-        mediaRef.addListenerForSingleValueEvent(object: ValueEventListener{
+        mediaRef?.addListenerForSingleValueEvent(object: ValueEventListener{
             override fun onDataChange(snapshot: DataSnapshot) {
                 val currentTotalRatings = snapshot.child("n_ratings").getValue(Int::class.java) ?: 0
 
@@ -1474,8 +1518,8 @@ object FirebaseInteraction {
 
     fun getMovieFollowers(movieId: Int, callback: ((List<String>) -> Unit)) {
 
-        val movieFollowersRef = mDbRef.child("shows").child("movies").child(movieId.toString()).child("followers")
-        movieFollowersRef.addListenerForSingleValueEvent(object: ValueEventListener {
+        val movieFollowersRef = mDbRef?.child("shows")?.child("movies")?.child(movieId.toString())?.child("followers")
+        movieFollowersRef?.addListenerForSingleValueEvent(object: ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -1497,8 +1541,8 @@ object FirebaseInteraction {
 
     fun getSerieFollowers(serieId: Int, callback: ((List<String>) -> Unit)) {
 
-        val serieFollowersRef = mDbRef.child("shows").child("series").child(serieId.toString()).child("followers")
-        serieFollowersRef.addListenerForSingleValueEvent(object: ValueEventListener {
+        val serieFollowersRef = mDbRef?.child("shows")?.child("series")?.child(serieId.toString())?.child("followers")
+        serieFollowersRef?.addListenerForSingleValueEvent(object: ValueEventListener {
 
             override fun onDataChange(snapshot: DataSnapshot) {
 
@@ -1520,7 +1564,7 @@ object FirebaseInteraction {
 
     fun getExploreShows(callback: (List<Pair<String, String>>) -> Unit) {
         val result = mutableListOf<Pair<String, String>>()
-        followingMoviesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+        followingMoviesRef?.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val movies = mutableListOf<Pair<String, String>>()
 
@@ -1532,7 +1576,7 @@ object FirebaseInteraction {
                 }
                 result.addAll(movies)
 
-                followingSeriesRef.addListenerForSingleValueEvent(object : ValueEventListener {
+                followingSeriesRef?.addListenerForSingleValueEvent(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val series = mutableListOf<Pair<String, String>>()
 
@@ -1544,8 +1588,8 @@ object FirebaseInteraction {
                         }
 
                         result.addAll(series)
-                         mDbRef.child("shows").child("movies")
-                             .addListenerForSingleValueEvent(object: ValueEventListener{
+                         mDbRef?.child("shows")?.child("movies")
+                             ?.addListenerForSingleValueEvent(object: ValueEventListener{
                                  override fun onDataChange(snapshot: DataSnapshot) {
                                      var addedShows = 0
                                      for (child in snapshot.children) {
@@ -1559,7 +1603,7 @@ object FirebaseInteraction {
                                      if (addedShows >= 10) {
                                          callback(result)
                                      } else {
-                                         mDbRef.child("shows").child("series")
+                                         mDbRef?.child("shows")!!.child("series")
                                              .addListenerForSingleValueEvent(object: ValueEventListener{
                                                  override fun onDataChange(snapshot: DataSnapshot) {
                                                      for (child in snapshot.children) {
@@ -1609,7 +1653,7 @@ object FirebaseInteraction {
         onSuccess: (StorageReference) -> Unit,
         onFailure: (String) -> Unit
     ){
-        val imageRef = mStRef.child("users/$userId/profileImage")
+        val imageRef = mStRef?.child("users/$userId/profileImage")
         if (imageRef != null) {
             onSuccess(imageRef)
         } else {
@@ -1623,7 +1667,7 @@ object FirebaseInteraction {
         onFailure: (String) -> Unit
     ) {
         val lowerStartingChars = startingChars.lowercase()
-        mDbRef.child("users").addListenerForSingleValueEvent(object: ValueEventListener {
+        mDbRef?.child("users")?.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val users = mutableListOf<User>()
                 snapshot.children.forEach {usr ->
@@ -1632,7 +1676,7 @@ object FirebaseInteraction {
                     val email = usr.child("email").value
                     if (
                         userId != null &&
-                        userId != user.uid &&
+                        userId != user?.uid &&
                         username != null &&
                         username.toString().lowercase().startsWith(lowerStartingChars) &&
                         email != null) {
@@ -1654,7 +1698,7 @@ object FirebaseInteraction {
         onSuccess: (List<Pair<String, Message>>) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        mDbRef.child("chat").addListenerForSingleValueEvent(object: ValueEventListener {
+        mDbRef?.child("chat")?.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val chats = mutableListOf<Pair<String, Message>>()
 
@@ -1671,14 +1715,14 @@ object FirebaseInteraction {
                     if (
                         messageId != null &&
                         chatId != null &&
-                        chatId.toString().startsWith(user.uid) &&
+                        user?.let { chatId.toString().startsWith(it.uid) } == true &&
                         senderId != null &&
                         receiverId != null &&
                         text != null &&
                         timestamp != null &&
                         read != null
                         ) {
-                        val userId = chatId.drop(user.uid.length)
+                        val userId = chatId.drop(user!!.uid.length)
                         val lastMsg = Message(
                             messageId,
                             text.toString(),
@@ -1707,7 +1751,7 @@ object FirebaseInteraction {
         onSuccess: (List<Pair<String, Message>>) -> Unit,
         onFailure: (String) -> Unit
     ) {
-        mDbRef.child("chat").child(senderRoom).child("messages").addValueEventListener(object: ValueEventListener {
+        mDbRef?.child("chat")?.child(senderRoom)?.child("messages")?.addValueEventListener(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val messages = mutableListOf<Pair<String, Message>>()
                 for (dataSnapshot in snapshot.children) {
@@ -1755,9 +1799,9 @@ object FirebaseInteraction {
     ) {
         val senderRoom = receiverId + senderId
         val receiverRoom = senderId + receiverId
-        val senderRoomMessagesRef = mDbRef.child("chat").child(senderRoom).child("messages")
-        val receiverRoomMessagesRef = mDbRef.child("chat").child(receiverRoom).child("messages")
-        val messageId = senderRoomMessagesRef.push().key
+        val senderRoomMessagesRef = mDbRef?.child("chat")?.child(senderRoom)?.child("messages")
+        val receiverRoomMessagesRef = mDbRef?.child("chat")?.child(receiverRoom)?.child("messages")
+        val messageId = senderRoomMessagesRef?.push()?.key
 
         if (messageId != null) {
             val message = Message(
@@ -1769,9 +1813,9 @@ object FirebaseInteraction {
                 false
             )
             senderRoomMessagesRef.child(messageId).setValue(message).addOnSuccessListener {
-                receiverRoomMessagesRef.child(messageId).setValue(message).addOnSuccessListener {
+                receiverRoomMessagesRef?.child(messageId)?.setValue(message)?.addOnSuccessListener {
                     onSuccess(message)
-                }.addOnFailureListener { exc ->
+                }?.addOnFailureListener { exc ->
                     onFailure(exc.message!!)
                 }
             }.addOnFailureListener { exc ->
@@ -1787,22 +1831,22 @@ object FirebaseInteraction {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        val senderRoomReadMessageRef = mDbRef.child("chat")
-            .child(message.receiverId + message.senderId)
-            .child("messages")
-            .child(message.messageId)
-            .child("read")
-        val receiverRoomReadMessageRef = mDbRef.child("chat")
-            .child(message.senderId + message.receiverId)
-            .child("messages")
-            .child(message.messageId)
-            .child("read")
+        val senderRoomReadMessageRef = mDbRef?.child("chat")
+            ?.child(message.receiverId + message.senderId)
+            ?.child("messages")
+            ?.child(message.messageId)
+            ?.child("read")
+        val receiverRoomReadMessageRef = mDbRef?.child("chat")
+            ?.child(message.senderId + message.receiverId)
+            ?.child("messages")
+            ?.child(message.messageId)
+            ?.child("read")
 
-        senderRoomReadMessageRef.get().addOnSuccessListener { senderRead ->
+        senderRoomReadMessageRef?.get()?.addOnSuccessListener { senderRead ->
             if (senderRead.value != null && senderRead.value.toString() != "true"){
                 senderRoomReadMessageRef.setValue("true")
                     .addOnSuccessListener {
-                        receiverRoomReadMessageRef.get().addOnSuccessListener {receiverRead ->
+                        receiverRoomReadMessageRef?.get()?.addOnSuccessListener {receiverRead ->
                             if (receiverRead.value != null && receiverRead.value.toString() != "true") {
                                 receiverRoomReadMessageRef.setValue("true").addOnSuccessListener {
                                     onSuccess()
@@ -1815,7 +1859,7 @@ object FirebaseInteraction {
                     .addOnFailureListener { onFailure(it) }
             }
 
-        }.addOnFailureListener {
+        }?.addOnFailureListener {
             onFailure(it)
         }
 
@@ -1826,9 +1870,9 @@ object FirebaseInteraction {
         onSuccess: (String) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        userRef.child("token").setValue(token).addOnSuccessListener {
+        userRef?.child("token")?.setValue(token)?.addOnSuccessListener {
             onSuccess(token)
-        }.addOnFailureListener { exc ->
+        }?.addOnFailureListener { exc ->
             onFailure(exc)
         }
     }
@@ -1838,8 +1882,8 @@ object FirebaseInteraction {
         onSuccess: (String) -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        val tokenRef = mDbRef.child("users").child(userId).child("token")
-        tokenRef.addValueEventListener(object: ValueEventListener {
+        val tokenRef = mDbRef?.child("users")?.child(userId)?.child("token")
+        tokenRef?.addValueEventListener(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val token = snapshot.value?.toString()
                 if (token != null) {
@@ -1861,7 +1905,7 @@ object FirebaseInteraction {
     }
 
     fun getWatchedMovies(callback: (List<String>) -> Unit) {
-        watchedMoviesRef.addListenerForSingleValueEvent(object: ValueEventListener {
+        watchedMoviesRef?.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val movieIds = mutableListOf<String>()
                 snapshot.children.forEach { child ->
@@ -1884,7 +1928,7 @@ object FirebaseInteraction {
     }
 
     fun getWatchedSeries(callback: (List<String>) -> Unit) {
-        watchedSeriesRef.addListenerForSingleValueEvent(object: ValueEventListener {
+        watchedSeriesRef?.addListenerForSingleValueEvent(object: ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 val serieIds = mutableListOf<String>()
                 snapshot.children.forEach { child ->
@@ -1907,14 +1951,16 @@ object FirebaseInteraction {
     }
 
     fun removeSelfFromUserFollowers(targetUid: String, onSuccess: (() -> Unit)? = null) {
-        val selfRefToUserFollowers = mDbRef
-            .child("users")
-            .child(targetUid)
-            .child("followers")
-            .child(user.uid)
+        val selfRefToUserFollowers = user?.let {
+            mDbRef
+                ?.child("users")
+                ?.child(targetUid)
+                ?.child("followers")
+                ?.child(it.uid)
+        }
 
-        selfRefToUserFollowers.removeValue()
-            .addOnCompleteListener { task ->
+        selfRefToUserFollowers?.removeValue()
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onSuccess?.invoke()
                 } else {
@@ -1925,10 +1971,10 @@ object FirebaseInteraction {
 
     fun removeTargetUserFromFollowing(targetUid: String, onSuccess: (() -> Unit)? = null) {
         val targetRef = followedUsersRef
-            .child(targetUid)
+            ?.child(targetUid)
 
-        targetRef.removeValue()
-            .addOnCompleteListener { task ->
+        targetRef?.removeValue()
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onSuccess?.invoke()
                 } else {
@@ -1939,10 +1985,10 @@ object FirebaseInteraction {
 
     fun addTargetUserToFollowing(targetUid: String, onSuccess: (() -> Unit)? = null) {
         val targetRef = followedUsersRef
-            .child(targetUid)
+            ?.child(targetUid)
 
-        targetRef.setValue(true)
-            .addOnCompleteListener { task ->
+        targetRef?.setValue(true)
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onSuccess?.invoke()
                 } else {
@@ -1963,14 +2009,16 @@ object FirebaseInteraction {
     //}
 
     fun addSelfToFollowed(targetUid: String, onSuccess: (() -> Unit)? = null) {
-        val selfRefToUserFollowers = mDbRef
-            .child("users")
-            .child(targetUid)
-            .child("followers")
-            .child(user.uid)
+        val selfRefToUserFollowers = user?.uid?.let {
+            mDbRef
+                ?.child("users")
+                ?.child(targetUid)
+                ?.child("followers")
+                ?.child(it)
+        }
 
-        selfRefToUserFollowers.setValue(true)
-            .addOnCompleteListener { task ->
+        selfRefToUserFollowers?.setValue(true)
+            ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     onSuccess?.invoke()
                 } else {

@@ -67,7 +67,7 @@ class ChatListAdapter(
                 intent.putExtra("username", user.name)
                 context.startActivity(intent)*/
             }
-            if (!lastMessage.read && lastMessage.receiverId == FirebaseInteraction.user.uid) {
+            if (!lastMessage.read && lastMessage.receiverId == FirebaseInteraction.user!!.uid) {
                 ivReadMessage.visibility = View.VISIBLE
             } else {
                 ivReadMessage.visibility = View.GONE

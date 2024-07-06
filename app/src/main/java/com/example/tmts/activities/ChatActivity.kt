@@ -58,7 +58,7 @@ class ChatActivity : AppCompatActivity() {
         }
         val receiverUsername = intent.getStringExtra("username")!!
         receiverId = intent.getStringExtra("userId")!!
-        senderId = FirebaseInteraction.user.uid
+        senderId = FirebaseInteraction.user?.uid
         senderRoom = receiverId + senderId
         receiverRoom = senderId + receiverId
         messageList = ArrayList()
