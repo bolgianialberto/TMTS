@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -49,10 +48,14 @@ class SearchUserAdapter(
                             .load(uri)
                             .into(ivUserImage)
                     }.addOnFailureListener{
-                        Log.e("Image Download", "Image not in DB")
+                        Glide.with(context)
+                            .load(R.drawable.account)
+                            .into(ivUserImage)
                     }
                 }, onFailure = {
-                    Log.e("IMAGE ERROR", it)
+                    Glide.with(context)
+                        .load(R.drawable.account)
+                        .into(ivUserImage)
                 }
             )
             tvUsername.text = user.name

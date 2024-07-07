@@ -62,7 +62,7 @@ class UserFollowersFragment : Fragment(), OnUserClickListener, OnChatClickListen
 
     private fun loadFollowers() {
         FirebaseInteraction.getFollowersUsers(
-            onSuccess = {userIdList ->
+            onSuccess = { userIdList ->
                 userIdList.forEach { userId ->
                     FirebaseInteraction.getUserInfo(
                         userId,

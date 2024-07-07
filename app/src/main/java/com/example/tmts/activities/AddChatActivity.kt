@@ -76,9 +76,10 @@ class AddChatActivity : AppCompatActivity(), OnChatClickListener {
     private fun loadUsers() {
         FirebaseInteraction.getUsers(
             onSuccess = {users ->
-                allUsers.addAll(users)
-                actuallyShownUsers.addAll(users)
-                users.forEach{ addChatAdapter.updateUsers(it) }
+                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user.uid }
+                allUsers.addAll(usersWithoutLoggedUser)
+                actuallyShownUsers.addAll(usersWithoutLoggedUser)
+                usersWithoutLoggedUser.forEach{ addChatAdapter.updateUsers(it) }
             },
             onFailure = {
                 Log.e("AddChatErr", "${it.message}")

@@ -68,10 +68,11 @@ class UserSearchFragment : Fragment(), OnUserClickListener, OnChatClickListener 
 
     private fun loadUsers() {
         FirebaseInteraction.getUsers(
-            onSuccess = {users ->
-                allUsers.addAll(users)
-                actuallyShownUsers.addAll(users)
-                users.forEach{ searchUserAdapter.updateUsers(it) }
+            onSuccess = { users ->
+                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user.uid }
+                allUsers.addAll(usersWithoutLoggedUser)
+                actuallyShownUsers.addAll(usersWithoutLoggedUser)
+                usersWithoutLoggedUser.forEach{ searchUserAdapter.updateUsers(it) }
             },
             onFailure = {
                 Log.e("AddChatErr", "${it.message}")
@@ -82,10 +83,11 @@ class UserSearchFragment : Fragment(), OnUserClickListener, OnChatClickListener 
     private fun loadUsersStartingWith(startingChars: String) {
         FirebaseInteraction.getUsersStartingWith(
             startingChars,
-            onSuccess = {users ->
-                allUsers.addAll(users)
-                actuallyShownUsers.addAll(users)
-                users.forEach{ searchUserAdapter.updateUsers(it) }
+            onSuccess = { users ->
+                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user.uid }
+                allUsers.addAll(usersWithoutLoggedUser)
+                actuallyShownUsers.addAll(usersWithoutLoggedUser)
+                usersWithoutLoggedUser.forEach{ searchUserAdapter.updateUsers(it) }
             },
             onFailure = {
                 Log.e("AddChatErr", it)

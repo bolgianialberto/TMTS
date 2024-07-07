@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -121,11 +120,15 @@ class ExploreShowsAdapter (
                             Glide.with(context)
                                 .load(uri)
                                 .into(ivsUser[index]!!)
-                        }.addOnFailureListener{ exc ->
-                            Log.e("STORAGE DOWNLOAD", "Error: $exc")
+                        }.addOnFailureListener{
+                            Glide.with(context)
+                                .load(R.drawable.account)
+                                .into(ivsUser[index]!!)
                         }
                     }, onFailure = {
-                        Log.e("IMAGE ERROR", it)
+                        Glide.with(context)
+                            .load(R.drawable.account)
+                            .into(ivsUser[index]!!)
                     })
 
                 tvsUser[index]!!.text = user.name

@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,11 +63,15 @@ class MoreShowAccountsAdapter(
                         Glide.with(context)
                             .load(uri)
                             .into(ivUserImage)
-                    }.addOnFailureListener{ exc ->
-                        Log.e("ImageStorageError", "Error: ${exc.message}")
+                    }.addOnFailureListener{
+                        Glide.with(context)
+                            .load(R.drawable.account)
+                            .into(ivUserImage)
                     }
                 }, onFailure = {
-                    Log.e("Image Error", it)
+                    Glide.with(context)
+                        .load(R.drawable.account)
+                        .into(ivUserImage)
                 })
             ivUserImage.setOnClickListener {
                 userClickListener.onUserClickListener(user)

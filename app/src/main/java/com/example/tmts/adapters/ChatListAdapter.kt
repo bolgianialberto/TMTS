@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -51,11 +50,15 @@ class ChatListAdapter(
                         Glide.with(context)
                             .load(uri)
                             .into(ivUserImage)
-                    }.addOnFailureListener{ exc ->
-                        Log.e("STORAGE DOWNLOAD", "Error: $exc")
+                    }.addOnFailureListener{
+                        Glide.with(context)
+                            .load(R.drawable.account)
+                            .into(ivUserImage)
                     }
                 }, onFailure = {
-                    Log.e("IMAGE ERROR", it)
+                    Glide.with(context)
+                        .load(R.drawable.account)
+                        .into(ivUserImage)
                 })
             tvUsername.text = user.name
             tvLastMessage.text = lastMessage.text

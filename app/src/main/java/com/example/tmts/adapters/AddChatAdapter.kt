@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,14 +41,22 @@ class AddChatAdapter(
                             .load(uri)
                             .into(ivUserImage)
                     }.addOnFailureListener{
-                        Log.e("StorageImg Err", "Image not found")
+                        Glide.with(context)
+                            .load(R.drawable.account)
+                            .into(ivUserImage)
                     }
                 }, onFailure = {
-                    Log.e("Image Error", it)
+                    Glide.with(context)
+                        .load(R.drawable.account)
+                        .into(ivUserImage)
                 }
             )
             tvUsername.text = user.name
-            tvBio.text = "Bio"
+            if (!user.biography.isNullOrBlank()) {
+                tvBio.text = user.biography
+            } else {
+                tvBio.text = ""
+            }
             tvLastMessageTime.visibility = View.GONE
             llUser.setOnClickListener {
                 onChatClickListener.onChatClickListener(user.id, user.name)
