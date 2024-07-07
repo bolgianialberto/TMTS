@@ -80,7 +80,7 @@ class UserFollowActivity : AppCompatActivity() {
         button.setBackgroundColor(ContextCompat.getColor(this, R.color.selectedColor))
         button.setTextColor(ContextCompat.getColor(this, R.color.black))
 
-        val nonClickedButton = if (button.id == R.id.btn_film) bttFollowers else bttFollowing
+        val nonClickedButton = if (button.id == R.id.btt_following) bttFollowers else bttFollowing
         nonClickedButton.setBackgroundColor(ContextCompat.getColor(this, R.color.unselectedColor))
         nonClickedButton.setTextColor(ContextCompat.getColor(this, R.color.gray))
     }
