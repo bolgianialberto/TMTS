@@ -84,9 +84,17 @@ class SearchUserAdapter(
     }
 
     fun updateUsers(user: User) {
-        val position = userList.size
-        userList.add(position, user)
+        val position = addUserWithAlphabeticOrder(user)
         notifyItemInserted(position)
+    }
+
+    private fun addUserWithAlphabeticOrder(user: User): Int {
+        val position = userList.binarySearch {
+            it.name.compareTo(user.name)
+        }
+        val insertionPoint = if (position < 0) -(position + 1) else position
+        userList.add(insertionPoint,user)
+        return insertionPoint
     }
 
     fun removeUser(user: User){

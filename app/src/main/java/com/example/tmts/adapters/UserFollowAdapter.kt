@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -42,10 +41,14 @@ class UserFollowAdapter(
                             .load(uri)
                             .into(ivUserImage)
                     }.addOnFailureListener{ exc ->
-                        Log.e("Storage Download", "Error: ${exc.message}")
+                        Glide.with(context)
+                            .load(R.drawable.account)
+                            .into(ivUserImage)
                     }
                 }, onFailure = {
-                    Log.e("Image Error", it)
+                    Glide.with(context)
+                        .load(R.drawable.account)
+                        .into(ivUserImage)
                 }
             )
             ivUserImage.setOnClickListener {
@@ -53,7 +56,11 @@ class UserFollowAdapter(
             }
 
             tvUsername.text = user.name
-            tvBio.text = "Bio"
+            if (!user.biography.isNullOrBlank()) {
+                tvBio.text = user.biography
+            } else {
+                tvBio.text = ""
+            }
             chatBtt.setOnClickListener{
                 chatClickListener.onChatClickListener(user.id, user.name)
             }
@@ -73,8 +80,17 @@ class UserFollowAdapter(
     }
 
     fun updateUsers(user: User) {
-        userFollowList.add(user)
-        notifyItemInserted(userFollowList.size - 1)
+        val position = addUserWithAlphabeticOrder(user)
+        notifyItemInserted(position)
+    }
+
+    private fun addUserWithAlphabeticOrder(user: User): Int {
+        val position = userFollowList.binarySearch {
+            it.name.compareTo(user.name)
+        }
+        val insertionPoint = if (position < 0) -(position + 1) else position
+        userFollowList.add(insertionPoint,user)
+        return insertionPoint
     }
 
     fun removeUser(user: User) {
