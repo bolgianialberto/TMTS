@@ -6,7 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -16,30 +15,24 @@ import com.example.tmts.beans.User
 import com.example.tmts.interfaces.OnChatClickListener
 import com.example.tmts.interfaces.OnUserClickListener
 
-class SearchUserAdapter(
+class UserFollowAdapter(
     private val context: Context,
-    private val userList: ArrayList<User> = ArrayList(),
     private val userClickListener: OnUserClickListener,
-    private val chatClickListener: OnChatClickListener
-) : RecyclerView.Adapter<SearchUserAdapter.SearchUserViewHolder>() {
-    inner class SearchUserViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
+    private val chatClickListener: OnChatClickListener,
+    private val userFollowList: ArrayList<User> = ArrayList()
+) : RecyclerView.Adapter<UserFollowAdapter.UserFollowViewHolder>() {
+    inner class UserFollowViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
-        private lateinit var llUserItem: LinearLayout
         private lateinit var ivUserImage: ImageView
         private lateinit var tvUsername: TextView
-        private lateinit var tvUserInfo: TextView
-        private lateinit var bttChat: Button
-
+        private lateinit var tvBio: TextView
+        private lateinit var chatBtt: Button
         fun bind(user: User) {
-            llUserItem = itemView.findViewById(R.id.ll_user_search_item)
-            ivUserImage = itemView.findViewById(R.id.iv_search_user_image)
-            tvUsername = itemView.findViewById(R.id.tv_search_user_username)
-            tvUserInfo = itemView.findViewById(R.id.tv_search_user_info)
-            bttChat = itemView.findViewById(R.id.btt_search_user_chat)
+            ivUserImage = itemView.findViewById(R.id.iv_user_follow)
+            tvUsername = itemView.findViewById(R.id.tv_user_follow_username)
+            tvBio = itemView.findViewById(R.id.tv_user_follow_bio)
+            chatBtt = itemView.findViewById(R.id.btt_follow_chat)
 
-            llUserItem.setOnClickListener {
-                userClickListener.onUserClickListener(user)
-            }
             FirebaseInteraction.getUserProfileImageRef(
                 user.id,
                 onSuccess = {
@@ -47,7 +40,7 @@ class SearchUserAdapter(
                         Glide.with(context)
                             .load(uri)
                             .into(ivUserImage)
-                    }.addOnFailureListener{
+                    }.addOnFailureListener{ exc ->
                         Glide.with(context)
                             .load(R.drawable.account)
                             .into(ivUserImage)
@@ -58,29 +51,32 @@ class SearchUserAdapter(
                         .into(ivUserImage)
                 }
             )
+            ivUserImage.setOnClickListener {
+                userClickListener.onUserClickListener(user)
+            }
+
             tvUsername.text = user.name
             if (!user.biography.isNullOrBlank()) {
-                tvUserInfo.text = user.biography
+                tvBio.text = user.biography
             } else {
-                tvUserInfo.text = ""
+                tvBio.text = ""
             }
-            bttChat.setOnClickListener {
+            chatBtt.setOnClickListener{
                 chatClickListener.onChatClickListener(user.id, user.name)
             }
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchUserViewHolder {
-        val view = LayoutInflater.from(context).inflate(R.layout.user_search_item, parent, false)
-        return SearchUserViewHolder(view)
-    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserFollowViewHolder {
+        val view = LayoutInflater.from(context).inflate(R.layout.user_follow_item, parent, false)
+        return UserFollowViewHolder(view)    }
 
     override fun getItemCount(): Int {
-        return userList.size
+        return userFollowList.size
     }
 
-    override fun onBindViewHolder(holder: SearchUserViewHolder, position: Int) {
-        holder.bind(userList[position])
+    override fun onBindViewHolder(holder: UserFollowViewHolder, position: Int) {
+        holder.bind(userFollowList[position])
     }
 
     fun updateUsers(user: User) {
@@ -89,17 +85,17 @@ class SearchUserAdapter(
     }
 
     private fun addUserWithAlphabeticOrder(user: User): Int {
-        val position = userList.binarySearch {
+        val position = userFollowList.binarySearch {
             it.name.compareTo(user.name)
         }
         val insertionPoint = if (position < 0) -(position + 1) else position
-        userList.add(insertionPoint,user)
+        userFollowList.add(insertionPoint,user)
         return insertionPoint
     }
 
-    fun removeUser(user: User){
-        val position = userList.indexOf(user)
-        userList.removeAt(position)
+    fun removeUser(user: User) {
+        val position = userFollowList.indexOf(user)
+        userFollowList.removeAt(position)
         notifyItemRemoved(position)
     }
 }

@@ -88,7 +88,17 @@ class ChatActivity : AppCompatActivity() {
             }, onFailure = {
                 Log.e("IMAGE ERROR", it)
             })
+        ivUserImage.setOnClickListener {
+            val intent = Intent(this, UserPageActivity::class.java)
+            intent.putExtra("uid", receiverId)
+            startActivity(intent)
+        }
         tvUser.text = receiverUsername
+        tvUser.setOnClickListener {
+            val intent = Intent(this, UserPageActivity::class.java)
+            intent.putExtra("uid", receiverId)
+            startActivity(intent)
+        }
         messageAdapter = MessageAdapter(this, ArrayList(messageList.map { it.second }))
         rvMessage = findViewById(R.id.rv_chat_messages)
         rvMessage.layoutManager = LinearLayoutManager(this)

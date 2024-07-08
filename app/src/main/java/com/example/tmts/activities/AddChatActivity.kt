@@ -18,8 +18,9 @@ import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
 import com.example.tmts.adapters.AddChatAdapter
 import com.example.tmts.beans.User
+import com.example.tmts.interfaces.OnChatClickListener
 
-class AddChatActivity : AppCompatActivity() {
+class AddChatActivity : AppCompatActivity(), OnChatClickListener {
 
     private lateinit var bttBack: Button
     private lateinit var addChatAdapter: AddChatAdapter
@@ -43,7 +44,7 @@ class AddChatActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         }
-        addChatAdapter = AddChatAdapter(this)
+        addChatAdapter = AddChatAdapter(this, this)
         edtUsername = findViewById(R.id.edt_add_user_chat)
         edtUsername.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) { }
@@ -73,16 +74,23 @@ class AddChatActivity : AppCompatActivity() {
     }
 
     private fun loadUsers() {
-        FirebaseInteraction.getUsersStartingWith(
-            "",
+        FirebaseInteraction.getUsers(
             onSuccess = {users ->
-                allUsers.addAll(users)
-                actuallyShownUsers.addAll(users)
-                users.forEach{ addChatAdapter.updateUsers(it) }
+                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user.uid }
+                allUsers.addAll(usersWithoutLoggedUser)
+                actuallyShownUsers.addAll(usersWithoutLoggedUser)
+                usersWithoutLoggedUser.forEach{ addChatAdapter.updateUsers(it) }
             },
             onFailure = {
-                Log.e("AddChatErr", it)
+                Log.e("AddChatErr", "${it.message}")
             }
         )
+    }
+
+    override fun onChatClickListener(userId: String, username: String) {
+        val intent = Intent(this, ChatActivity::class.java)
+        intent.putExtra("userId", userId)
+        intent.putExtra("username", username)
+        startActivity(intent)
     }
 }

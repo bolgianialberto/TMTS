@@ -1,8 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,11 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
-import com.example.tmts.activities.ChatActivity
 import com.example.tmts.beans.User
+import com.example.tmts.interfaces.OnChatClickListener
 
 class AddChatAdapter(
     private val context: Context,
+    private val onChatClickListener: OnChatClickListener,
     private val userList: MutableList<User> = mutableListOf()
 ) : RecyclerView.Adapter<AddChatAdapter.AddChatViewHolder>() {
     inner class AddChatViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
@@ -42,19 +41,25 @@ class AddChatAdapter(
                             .load(uri)
                             .into(ivUserImage)
                     }.addOnFailureListener{
-                        Log.e("StorageImg Err", "Image not found")
+                        Glide.with(context)
+                            .load(R.drawable.account)
+                            .into(ivUserImage)
                     }
                 }, onFailure = {
-                    Log.e("IMAGE ERROR", it)
-                })
+                    Glide.with(context)
+                        .load(R.drawable.account)
+                        .into(ivUserImage)
+                }
+            )
             tvUsername.text = user.name
-            tvBio.text = "Bio"
+            if (!user.biography.isNullOrBlank()) {
+                tvBio.text = user.biography
+            } else {
+                tvBio.text = ""
+            }
             tvLastMessageTime.visibility = View.GONE
             llUser.setOnClickListener {
-                val intent = Intent(context, ChatActivity::class.java)
-                intent.putExtra("userId", user.id)
-                intent.putExtra("username", user.name)
-                context.startActivity(intent)
+                onChatClickListener.onChatClickListener(user.id, user.name)
             }
         }
     }
@@ -73,9 +78,17 @@ class AddChatAdapter(
     }
 
     fun updateUsers(user: User) {
-        val position = userList.size
-        userList.add(position, user)
+        val position = addUserWithAlphabeticOrder(user)
         notifyItemInserted(position)
+    }
+
+    private fun addUserWithAlphabeticOrder(user: User): Int {
+        val position = userList.binarySearch {
+            it.name.compareTo(user.name)
+        }
+        val insertionPoint = if (position < 0) -(position + 1) else position
+        userList.add(insertionPoint,user)
+        return insertionPoint
     }
 
     fun removeUser(user: User){

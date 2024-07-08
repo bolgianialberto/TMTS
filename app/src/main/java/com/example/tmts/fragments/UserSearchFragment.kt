@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
 import com.example.tmts.activities.ChatActivity
+import com.example.tmts.activities.UserPageActivity
 import com.example.tmts.adapters.SearchUserAdapter
 import com.example.tmts.beans.User
 import com.example.tmts.beans.viewmodels.UsersViewModel
@@ -62,16 +63,31 @@ class UserSearchFragment : Fragment(), OnUserClickListener, OnChatClickListener 
         })
 
         val writtenTxt = sharedViewModel.text.value
-        if (writtenTxt != null) loadUsers(writtenTxt) else loadUsers("")
+        if (writtenTxt != null) loadUsersStartingWith(writtenTxt) else loadUsers()
     }
 
-    private fun loadUsers(startingChars: String) {
+    private fun loadUsers() {
+        FirebaseInteraction.getUsers(
+            onSuccess = { users ->
+                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user.uid }
+                allUsers.addAll(usersWithoutLoggedUser)
+                actuallyShownUsers.addAll(usersWithoutLoggedUser)
+                usersWithoutLoggedUser.forEach{ searchUserAdapter.updateUsers(it) }
+            },
+            onFailure = {
+                Log.e("AddChatErr", "${it.message}")
+            }
+        )
+    }
+
+    private fun loadUsersStartingWith(startingChars: String) {
         FirebaseInteraction.getUsersStartingWith(
             startingChars,
-            onSuccess = {users ->
-                allUsers.addAll(users)
-                actuallyShownUsers.addAll(users)
-                users.forEach{ searchUserAdapter.updateUsers(it) }
+            onSuccess = { users ->
+                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user.uid }
+                allUsers.addAll(usersWithoutLoggedUser)
+                actuallyShownUsers.addAll(usersWithoutLoggedUser)
+                usersWithoutLoggedUser.forEach{ searchUserAdapter.updateUsers(it) }
             },
             onFailure = {
                 Log.e("AddChatErr", it)
@@ -87,6 +103,8 @@ class UserSearchFragment : Fragment(), OnUserClickListener, OnChatClickListener 
     }
 
     override fun onUserClickListener(user: User) {
-        TODO("Not yet implemented")
+        val intent = Intent(context, UserPageActivity::class.java)
+        intent.putExtra("uid", user.id)
+        startActivity(intent)
     }
 }

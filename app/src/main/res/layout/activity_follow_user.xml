@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.UserFollowActivity">
+
+    <LinearLayout
+        android:id="@+id/ll_search_follow_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="100"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:padding="2dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/ll_search_follow_menu">
+
+        <Button
+            android:id="@+id/btt_arrow_back_search_follow"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginEnd="10dp"
+            android:background="@drawable/arrow_back" />
+
+        <EditText
+            android:id="@+id/edt_search_follow"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:layout_weight="90"
+            android:hint="Type to search a user" />
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/search"
+            android:layout_marginEnd="10dp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_search_follow_menu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintTop_toBottomOf="@id/ll_search_follow_bar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/fl_search_follow_fragment">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:orientation="horizontal"
+            android:weightSum="100">
+
+            <Button
+                android:id="@+id/btt_followers"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="50"
+                android:text="FOLLOWERS"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:background="@drawable/rectangular_button"/>
+
+            <Button
+                android:id="@+id/btt_following"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="50"
+                android:text="FOLLOWING"
+                android:textSize="16sp"
+                android:gravity="center"
+                android:textColor="@color/black"
+                android:background="@drawable/rectangular_button"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="5dp"
+            android:background="@drawable/rectangular_button" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/fl_search_follow_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/ll_search_follow_menu"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

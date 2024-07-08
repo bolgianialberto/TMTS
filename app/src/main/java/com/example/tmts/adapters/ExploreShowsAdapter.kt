@@ -1,7 +1,6 @@
 package com.example.tmts.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,12 +14,14 @@ import com.example.tmts.R
 import com.example.tmts.beans.results.ShowDetailsResult
 import com.example.tmts.interfaces.OnMoreAccountClickListener
 import com.example.tmts.interfaces.OnShowDetailsClickListener
+import com.example.tmts.interfaces.OnUserClickListener
 
 class ExploreShowsAdapter (
     private val context: Context,
     private val mediaItems: ArrayList<ShowDetailsResult> = ArrayList(),
     private val moreAccountsClickListener: OnMoreAccountClickListener,
-    private val showDetailsClickListener: OnShowDetailsClickListener
+    private val showDetailsClickListener: OnShowDetailsClickListener,
+    private val userClickListener: OnUserClickListener
 ) : RecyclerView.Adapter<ExploreShowsAdapter.ExploreMovieViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ExploreMovieViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.explore_movie_item, parent, false)
@@ -119,14 +120,21 @@ class ExploreShowsAdapter (
                             Glide.with(context)
                                 .load(uri)
                                 .into(ivsUser[index]!!)
-                        }.addOnFailureListener{ exc ->
-                            Log.e("STORAGE DOWNLOAD", "Error: $exc")
+                        }.addOnFailureListener{
+                            Glide.with(context)
+                                .load(R.drawable.account)
+                                .into(ivsUser[index]!!)
                         }
                     }, onFailure = {
-                        Log.e("IMAGE ERROR", it)
+                        Glide.with(context)
+                            .load(R.drawable.account)
+                            .into(ivsUser[index]!!)
                     })
 
                 tvsUser[index]!!.text = user.name
+                cvsUser[index]!!.setOnClickListener {
+                    userClickListener.onUserClickListener(user)
+                }
                 cvsUser[index]!!.visibility = View.VISIBLE
             }
             if (showInfo.retrievedUsers.size > 4) {
