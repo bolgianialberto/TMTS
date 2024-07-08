@@ -25,7 +25,6 @@
             android:id="@+id/iv_arrow_back_search"
             android:layout_width="30dp"
             android:layout_height="30dp"
-
             android:src="@drawable/arrow_back"
             android:layout_marginEnd="10dp" />
 

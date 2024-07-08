@@ -12,7 +12,8 @@
         android:background="@drawable/received_msg_background"
         android:layout_marginStart="5dp"
         android:layout_marginEnd="70dp"
-        android:layout_marginTop="5dp">
+        android:layout_marginTop="5dp"
+        android:elevation="5dp">
 
         <TextView
             android:id="@+id/tv_received_chat_message"
