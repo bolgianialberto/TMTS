@@ -1571,33 +1571,29 @@ object FirebaseInteraction {
                                          if (movId != null && !result.map { it.second }.contains(movId)) {
                                              result.add(Pair("MOV", movId))
                                              addedShows++
-                                             if (addedShows >= 10) break
+                                             if (addedShows >= MAX_SHOWS_PULLED_EXPLORE_SECTION) break
                                          }
                                      }
-                                     if (addedShows >= 10) {
-                                         callback(result)
-                                     } else {
-                                         mDbRef.child("shows").child("series")
-                                             .addListenerForSingleValueEvent(object: ValueEventListener{
-                                                 override fun onDataChange(snapshot: DataSnapshot) {
-                                                     for (child in snapshot.children) {
-                                                         val serId = child.key
-                                                         if (serId != null && !result.map { it.second }.contains(serId)) {
-                                                             result.add(Pair("SER", serId))
-                                                             addedShows++
-                                                             if (addedShows >= 10) break
-                                                         }
+                                     mDbRef.child("shows").child("series")
+                                         .addListenerForSingleValueEvent(object: ValueEventListener{
+                                             override fun onDataChange(snapshot: DataSnapshot) {
+                                                 for (child in snapshot.children) {
+                                                     val serId = child.key
+                                                     if (serId != null && !result.map { it.second }.contains(serId)) {
+                                                         result.add(Pair("SER", serId))
+                                                         addedShows++
+                                                         if (addedShows >= MAX_SHOWS_PULLED_EXPLORE_SECTION * 2) break
                                                      }
-                                                     callback(result)
                                                  }
+                                                 callback(result)
+                                             }
 
-                                                 override fun onCancelled(error: DatabaseError) {
-                                                     Log.e("Firebase Explore", error.message)
-                                                     callback(emptyList())
-                                                 }
+                                             override fun onCancelled(error: DatabaseError) {
+                                                 Log.e("Firebase Explore", error.message)
+                                                 callback(emptyList())
+                                             }
 
-                                             })
-                                     }
+                                         })
                                  }
 
                                  override fun onCancelled(error: DatabaseError) {
