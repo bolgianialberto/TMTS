@@ -10,7 +10,7 @@
     <LinearLayout
         android:id="@+id/ll_search_follow_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
         android:weightSum="100"
         android:orientation="horizontal"
         android:gravity="center"
@@ -32,13 +32,13 @@
             android:layout_width="0dp"
             android:layout_height="50dp"
             android:layout_weight="90"
+            android:layout_marginEnd="10dp"
             android:hint="Type to search a user" />
 
         <ImageView
             android:layout_width="30dp"
             android:layout_height="30dp"
-            android:src="@drawable/search"
-            android:layout_marginEnd="10dp" />
+            android:src="@drawable/search" />
 
     </LinearLayout>
 
