@@ -69,7 +69,7 @@ class UserSearchFragment : Fragment(), OnUserClickListener, OnChatClickListener 
     private fun loadUsers() {
         FirebaseInteraction.getUsers(
             onSuccess = { users ->
-                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user.uid }
+                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user?.uid }
                 allUsers.addAll(usersWithoutLoggedUser)
                 actuallyShownUsers.addAll(usersWithoutLoggedUser)
                 usersWithoutLoggedUser.forEach{ searchUserAdapter.updateUsers(it) }
@@ -84,7 +84,7 @@ class UserSearchFragment : Fragment(), OnUserClickListener, OnChatClickListener 
         FirebaseInteraction.getUsersStartingWith(
             startingChars,
             onSuccess = { users ->
-                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user.uid }
+                val usersWithoutLoggedUser = users.filterNot { it.id == FirebaseInteraction.user?.uid }
                 allUsers.addAll(usersWithoutLoggedUser)
                 actuallyShownUsers.addAll(usersWithoutLoggedUser)
                 usersWithoutLoggedUser.forEach{ searchUserAdapter.updateUsers(it) }
