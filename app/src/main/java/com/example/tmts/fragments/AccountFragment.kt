@@ -419,18 +419,31 @@ class AccountFragment : Fragment() {
 
     private fun loadUserImage() {
         FirebaseInteraction.getUserRefInStorage(
-            onSuccess = {userImageRef ->
+            onSuccess = { userImageRef ->
                 userImageRef.downloadUrl.addOnSuccessListener { uri ->
-                    Glide.with(requireContext())
-                        .load(uri)
-                        .into(ivAccountIcon)
+                    if (isAdded) {
+                        Glide.with(requireContext())
+                            .load(uri)
+                            .into(ivAccountIcon)
+                    }
                 }.addOnFailureListener { exception ->
+                    if (isAdded) {
+                        Glide.with(requireContext())
+                            .load(R.drawable.account)
+                            .into(ivAccountIcon)
+                    }
                     Log.e("FirebaseStorage", "Errore durante il download dell'immagine", exception)
                 }
             },
-            onError = {message ->
+            onError = { message ->
+                if (isAdded) {
+                    Glide.with(requireContext())
+                        .load(R.drawable.account)
+                        .into(ivAccountIcon)
+                }
                 Log.d("AccountFragment", message)
             }
         )
     }
+
 }

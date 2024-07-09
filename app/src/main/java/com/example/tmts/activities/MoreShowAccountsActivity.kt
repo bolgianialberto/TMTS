@@ -100,25 +100,32 @@ class MoreShowAccountsActivity : AppCompatActivity(), OnUserClickListener, OnCha
 
     private fun onSerieDetailsFetched(serieDetailsResult: SerieDetails) {
         serieDetails = serieDetailsResult
-        Glide.with(this)
-            .load("https://image.tmdb.org/t/p/w500${serieDetails!!.posterPath}")
-            .placeholder(R.drawable.movie)
-            .into(ivShowImage)
-        tvShowTitle.text = serieDetails!!.title
-        tvShowOverview.text = serieDetails!!.overview
-        fetchUsers()
+        val activity = this
+        if (!activity.isDestroyed && !activity.isFinishing) {
+            Glide.with(this)
+                .load("https://image.tmdb.org/t/p/w500${serieDetails!!.posterPath}")
+                .placeholder(R.drawable.movie)
+                .into(ivShowImage)
+            tvShowTitle.text = serieDetails!!.title
+            tvShowOverview.text = serieDetails!!.overview
+            fetchUsers()
+        }
     }
 
     private fun onMovieDetailsFetched(movieDetailsResult: MovieDetails) {
         movieDetails = movieDetailsResult
-        Glide.with(this)
-            .load("https://image.tmdb.org/t/p/w500${movieDetails!!.posterPath}")
-            .placeholder(R.drawable.movie)
-            .into(ivShowImage)
-        tvShowTitle.text = movieDetails!!.title
-        tvShowOverview.text = movieDetails!!.overview
-        fetchUsers()
+        val activity = this
+        if (!activity.isDestroyed && !activity.isFinishing) {
+            Glide.with(this)
+                .load("https://image.tmdb.org/t/p/w500${movieDetails!!.posterPath}")
+                .placeholder(R.drawable.movie)
+                .into(ivShowImage)
+            tvShowTitle.text = movieDetails!!.title
+            tvShowOverview.text = movieDetails!!.overview
+            fetchUsers()
+        }
     }
+
 
     private fun fetchUsers() {
         val nUsersShowed = min(MAX_USERS, followers.size)

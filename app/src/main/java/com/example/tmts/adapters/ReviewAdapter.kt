@@ -1,5 +1,6 @@
 package com.example.tmts.adapters
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.util.Log
@@ -69,10 +70,13 @@ class ReviewAdapter (
                 review,
                 onSuccess = { reviewImageRef ->
                     reviewImageRef.downloadUrl.addOnSuccessListener { uri ->
-                        Glide.with(context)
-                            .load(uri)
-                            .into(ivPhoto)
-                        ivPhoto.visibility = View.VISIBLE
+                        val activity = context as? Activity
+                        if (activity != null && !activity.isDestroyed && !activity.isFinishing) {
+                            Glide.with(context)
+                                .load(uri)
+                                .into(ivPhoto)
+                            ivPhoto.visibility = View.VISIBLE
+                        }
                     }.addOnFailureListener { exception ->
                         Log.e("FirebaseStorage", "Errore durante il download dell'immagine del commento", exception)
                         ivPhoto.visibility = View.GONE
@@ -84,21 +88,26 @@ class ReviewAdapter (
                 }
             )
 
+
             FirebaseInteraction.getUserRefInStorage(
                 review.idUser,
-                onSuccess = {userImageRef ->
+                onSuccess = { userImageRef ->
                     userImageRef.downloadUrl.addOnSuccessListener { uri ->
-                        Glide.with(context)
-                            .load(uri)
-                            .into(ivUserPhoto)
+                        val activity = context as? Activity
+                        if (activity != null && !activity.isDestroyed && !activity.isFinishing) {
+                            Glide.with(context)
+                                .load(uri)
+                                .into(ivUserPhoto)
+                        }
                     }.addOnFailureListener { exception ->
                         Log.e("FirebaseStorage", "Errore durante il download dell'immagine di profilo di ${review.idUser}", exception)
                     }
                 },
-                onError = {message ->
+                onError = { message ->
                     Log.d("ReviewAdapter", message)
                 }
             )
+
 
             tvUserName.setOnClickListener {
                 val intent = Intent(context, UserPageActivity::class.java)

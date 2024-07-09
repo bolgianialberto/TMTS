@@ -1,5 +1,6 @@
 package com.example.tmts.activities
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -137,12 +138,17 @@ class SerieDetailsActivity : AppCompatActivity() {
     }
 
     private fun updateUI(serie: SerieDetails) {
-        serie.backdropPath?.let {
-            Glide.with(this)
-                .load("https://image.tmdb.org/t/p/w500$it")
-                .placeholder(R.drawable.movie)
-                .into(backdropImageView)
+        serie.backdropPath?.let { backdropPath ->
+            // Verifica se il contesto è un'Activity e se è ancora valida
+            val activity = this as? Activity
+            if (activity != null && !activity.isDestroyed && !activity.isFinishing) {
+                Glide.with(activity)
+                    .load("https://image.tmdb.org/t/p/w500$backdropPath")
+                    .placeholder(R.drawable.movie)
+                    .into(backdropImageView)
+            }
         }
+
 
         // title
         titleTextView.text = serie.title

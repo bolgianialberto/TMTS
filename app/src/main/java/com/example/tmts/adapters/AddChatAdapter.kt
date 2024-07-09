@@ -1,5 +1,6 @@
 package com.example.tmts.adapters
 
+import android.app.Activity
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -37,20 +38,30 @@ class AddChatAdapter(
                 user.id,
                 onSuccess = {
                     it.downloadUrl.addOnSuccessListener { uri ->
-                        Glide.with(context)
-                            .load(uri)
-                            .into(ivUserImage)
-                    }.addOnFailureListener{
+                        val activity = context as? Activity
+                        if (activity != null && !activity.isDestroyed && !activity.isFinishing) {
+                            Glide.with(context)
+                                .load(uri)
+                                .into(ivUserImage)
+                        }
+                    }.addOnFailureListener {
+                        val activity = context as? Activity
+                        if (activity != null && !activity.isDestroyed && !activity.isFinishing) {
+                            Glide.with(context)
+                                .load(R.drawable.account)
+                                .into(ivUserImage)
+                        }
+                    }
+                }, onFailure = {
+                    val activity = context as? Activity
+                    if (activity != null && !activity.isDestroyed && !activity.isFinishing) {
                         Glide.with(context)
                             .load(R.drawable.account)
                             .into(ivUserImage)
                     }
-                }, onFailure = {
-                    Glide.with(context)
-                        .load(R.drawable.account)
-                        .into(ivUserImage)
                 }
             )
+
             tvUsername.text = user.name
             if (!user.biography.isNullOrBlank()) {
                 tvBio.text = user.biography

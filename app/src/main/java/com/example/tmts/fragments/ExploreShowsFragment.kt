@@ -1,5 +1,6 @@
 package com.example.tmts.fragments
 
+import ExploreShowsAdapter
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -17,7 +18,6 @@ import com.example.tmts.activities.MoreShowAccountsActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.activities.UserPageActivity
-import com.example.tmts.adapters.ExploreShowsAdapter
 import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SerieDetails
 import com.example.tmts.beans.User

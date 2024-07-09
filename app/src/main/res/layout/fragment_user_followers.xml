@@ -3,7 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.UserFollowersFragment">
+    tools:context=".fragments.UserFollowersFragment"
+    android:padding="5dp"
+    android:background="@color/lightergray">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_user_followers"

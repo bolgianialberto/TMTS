@@ -75,19 +75,27 @@ class ChatActivity : AppCompatActivity() {
         rvMessage = findViewById(R.id.rv_chat_messages)
         edtMessage = findViewById(R.id.edt_chat_message)
         bttSend = findViewById(R.id.btt_send_message)
-        FirebaseInteraction.getUserProfileImageRef(
-            receiverId!!,
-            onSuccess = {
-                it.downloadUrl.addOnSuccessListener { uri ->
-                    Glide.with(this)
-                        .load(uri)
-                        .into(ivUserImage)
-                }.addOnFailureListener{ exc ->
-                    Log.e("STORAGE DOWNLOAD", "Error: $exc")
+        receiverId?.let { id ->
+            FirebaseInteraction.getUserProfileImageRef(
+                id,
+                onSuccess = { userImageRef ->
+                    userImageRef.downloadUrl.addOnSuccessListener { uri ->
+                        // Verifica se il contesto è un'Activity e se è ancora valida
+                        val activity = this as? Activity
+                        if (activity != null && !activity.isDestroyed && !activity.isFinishing) {
+                            Glide.with(activity)
+                                .load(uri)
+                                .into(ivUserImage)
+                        }
+                    }.addOnFailureListener { exception ->
+                        Log.e("STORAGE DOWNLOAD", "Error: $exception")
+                    }
+                }, onFailure = { errorMessage ->
+                    Log.e("IMAGE ERROR", errorMessage)
                 }
-            }, onFailure = {
-                Log.e("IMAGE ERROR", it)
-            })
+            )
+        }
+
         ivUserImage.setOnClickListener {
             val intent = Intent(this, UserPageActivity::class.java)
             intent.putExtra("uid", receiverId)

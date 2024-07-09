@@ -18,6 +18,10 @@
     </style>
     <style name="exploreAccountRoundedImageView" parent="">
         <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">27dp</item>
+    </style>
+    <style name="chatListRoundedImageView" parent="">
+        <item name="cornerFamily">rounded</item>
         <item name="cornerSize">32dp</item>
     </style>
     <style name="chatAccountRoundedImageView" parent="">

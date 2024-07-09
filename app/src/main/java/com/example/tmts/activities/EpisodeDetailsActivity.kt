@@ -94,11 +94,15 @@ class EpisodeDetailsActivity : AppCompatActivity() {
 
     private fun updateUI(episode: EpisodeDetails){
         episode.posterPath?.let {
-            Glide.with(this)
-                .load("https://image.tmdb.org/t/p/w500$it")
-                .placeholder(R.drawable.movie)
-                .into(ivBackdrop)
+            val activity = this
+            if (!activity.isDestroyed && !activity.isFinishing) {
+                Glide.with(this)
+                    .load("https://image.tmdb.org/t/p/w500$it")
+                    .placeholder(R.drawable.movie)
+                    .into(ivBackdrop)
+            }
         }
+
 
         tvSerieTitle.text = serieName
 
