@@ -82,29 +82,36 @@ class SeasonDetailsActivity : AppCompatActivity() {
         )
     }
 
-    private fun onFetchedSerieDetails(serie: SerieDetails){
+    private fun onFetchedSerieDetails(serie: SerieDetails) {
         tvSerieTitle.text = serie.title
 
         for (nSeason in 1..serie.number_of_seasons) {
             MediaRepository.getSeasonDetails(
                 serie.id,
                 nSeason,
-                onSuccess = {season ->
-                    seasonsList.add(season)
-                    season.serieId = serie.id
-                    season.serieName = serie.title
-                    if (seasonsList.size == serie.number_of_seasons) {
-                        val sortedSeasonList = seasonsList.sortedBy { it.season_number }
-                        seasonAdapter.updateMedia(sortedSeasonList)
+                onSuccess = { season ->
+                    season?.let {
+                        it.serieId = serie.id
+                        it.serieName = serie.title
+
+                        // Verifica se la stagione non è già presente nella lista
+                        if (!seasonsList.contains(season)) {
+                            seasonsList.add(season)
+                        }
+
+                        if (seasonsList.size == serie.number_of_seasons) {
+                            val sortedSeasonList = seasonsList.sortedBy { it.season_number }
+                            seasonAdapter.updateMedia(sortedSeasonList)
+                        }
                     }
                 },
                 onError = {
-                    Log.e("SerieDetailsActivity", "Something went wrong")
+                    Log.e("SerieDetailsActivity", "Error fetching season details")
                 }
             )
         }
-
     }
+
     private fun onError(){
         Log.e("SeasonDetailsActivity", "Something went wrong")
     }
