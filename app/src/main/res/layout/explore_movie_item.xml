@@ -86,7 +86,7 @@
                     android:layout_marginEnd="1dp"
                     android:layout_marginTop="4dp"
                     android:layout_marginBottom="4dp"
-                    android:visibility="gone">
+                    android:visibility="visible">
 
                     <LinearLayout
                         android:layout_width="match_parent"

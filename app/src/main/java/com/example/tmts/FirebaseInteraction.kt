@@ -8,9 +8,13 @@ import android.widget.Toast
 import com.example.tmts.beans.Media
 import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.Message
+import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.Review
+import com.example.tmts.beans.SerieDetails
 import com.example.tmts.beans.User
 import com.example.tmts.beans.Watchlist
+import com.example.tmts.beans.results.ShowDetailsResult
+import com.example.tmts.beans.results.WatchlistDetailsResult
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
@@ -85,6 +89,28 @@ object FirebaseInteraction {
         }
     }
 
+    fun fetchWatchlistsWithShowDetails(onSuccess: (List<WatchlistDetailsResult>) -> Unit, onError: (String) -> Unit) {
+        watchlistRef.get().addOnSuccessListener { snapshot ->
+            val watchlistTasks = snapshot.children.mapNotNull { watchlistSnapshot ->
+                val name = watchlistSnapshot.key ?: return@mapNotNull null
+                val movieIds = watchlistSnapshot.child("movies").children.mapNotNull { it.key?.toIntOrNull() }
+                val seriesIds = watchlistSnapshot.child("series").children.mapNotNull { it.key?.toIntOrNull() }
+
+                fetchShowDetailsForWatchlist(name, movieIds, seriesIds)
+            }
+
+            Tasks.whenAllSuccess<WatchlistDetailsResult>(watchlistTasks)
+                .addOnSuccessListener { watchlists ->
+                    onSuccess(watchlists)
+                }
+                .addOnFailureListener { exception ->
+                    onError(exception.message ?: "Error fetching watchlists")
+                }
+        }.addOnFailureListener { exception ->
+            onError(exception.message ?: "Error fetching watchlists")
+        }
+    }
+
     private fun fetchMediaDetailsForWatchlist(name: String, movieIds: List<Int>, seriesIds: List<Int>): Task<Watchlist> {
         val movieDetailsTasks = movieIds.map { mediaId ->
             fetchMediaDetails(mediaId, "movie")
@@ -100,6 +126,21 @@ object FirebaseInteraction {
         }
     }
 
+    private fun fetchShowDetailsForWatchlist(name: String, movieIds: List<Int>, seriesIds: List<Int>): Task<WatchlistDetailsResult> {
+        val movieDetailsTasks = movieIds.map { mediaId ->
+            fetchShowDetails(mediaId, "movie")
+        }
+
+        val seriesDetailsTasks = seriesIds.map { mediaId ->
+            fetchShowDetails(mediaId, "serie")
+        }
+
+        return Tasks.whenAllSuccess<ShowDetailsResult>(movieDetailsTasks + seriesDetailsTasks).continueWith { task ->
+            val medias = task.result ?: emptyList()
+            WatchlistDetailsResult(name, medias)
+        }
+    }
+
     private fun fetchMediaDetails(mediaId: Int, mediaType: String): Task<MediaDetails> {
         val taskCompletionSource = TaskCompletionSource<MediaDetails>()
         MediaRepository.getMediaDetails(mediaId, mediaType,
@@ -112,6 +153,37 @@ object FirebaseInteraction {
                     posterPath = mediaDetails.posterPath
                 )
                 taskCompletionSource.setResult(media)
+            },
+            onError = {
+                taskCompletionSource.setException(Exception("Failed to fetch media details"))
+            })
+        return taskCompletionSource.task
+    }
+
+    private fun fetchShowDetails(mediaId: Int, mediaType: String): Task<ShowDetailsResult> {
+        val taskCompletionSource = TaskCompletionSource<ShowDetailsResult>()
+        MediaRepository.getMediaDetails(
+            mediaId,
+            mediaType,
+            onSuccess = { mediaDetails ->
+                var result: ShowDetailsResult? = null
+                when (mediaType) {
+                    "movie" -> {
+                         result = ShowDetailsResult(
+                            "MOV",
+                            mediaDetails as MovieDetails,
+                            null
+                        )
+                    }
+                    "serie" -> {
+                        result = ShowDetailsResult(
+                            "SER",
+                            null,
+                            mediaDetails as SerieDetails
+                        )
+                    }
+                }
+                taskCompletionSource.setResult(result)
             },
             onError = {
                 taskCompletionSource.setException(Exception("Failed to fetch media details"))

@@ -124,13 +124,30 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <Button
-            android:id="@+id/btt_follow_unfollow"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="15sp"
-            android:layout_gravity="center"
-            android:background="@drawable/add" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:padding="10dp">
+
+            <Button
+                android:id="@+id/btt_follow_unfollow"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginEnd="20dp"
+                android:background="@drawable/add" />
+
+            <Button
+                android:id="@+id/btt_user_page_chat"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="20dp"
+                android:background="@drawable/chat" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/ll_followed_movies"
@@ -140,7 +157,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/btt_follow_unfollow"
             android:paddingHorizontal="20dp"
-            android:layout_marginTop="30dp">
+            android:layout_marginTop="10dp">
 
             <TextView
                 android:layout_width="wrap_content"
