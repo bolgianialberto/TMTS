@@ -28,6 +28,7 @@ class UserPageActivity: AppCompatActivity() {
     private lateinit var ivAccountIcon: ImageView
     private lateinit var bttBackSearch: Button
     private lateinit var bttFollowUnfollow: Button
+    private lateinit var bttChat: Button
     private lateinit var followedMoviesAdapter: MediaAdapter
     private lateinit var followedSeriesAdapter: MediaAdapter
     private lateinit var llFollowedMovies: LinearLayout
@@ -45,6 +46,7 @@ class UserPageActivity: AppCompatActivity() {
         tvFollowingCount = findViewById(R.id.tv_following_count)
         ivAccountIcon = findViewById(R.id.iv_user_page_icon)
         bttFollowUnfollow = findViewById(R.id.btt_follow_unfollow)
+        bttChat = findViewById(R.id.btt_user_page_chat)
         llFollowedMovies = findViewById(R.id.ll_followed_movies)
         llFollowedSeries = findViewById(R.id.ll_followed_series)
         bttBackSearch = findViewById(R.id.btt_user_page_arrow_back)
@@ -110,6 +112,19 @@ class UserPageActivity: AppCompatActivity() {
         // Setup button listeners and initial state
         bttFollowUnfollow.setOnClickListener{
             followUnfollowUser(uid)
+        }
+
+        bttChat.setOnClickListener {
+            val intent = Intent(this, ChatActivity::class.java)
+            FirebaseInteraction.getUsername(uid,
+                onSuccess = { username ->
+                    intent.putExtra("userId", uid)
+                    intent.putExtra("username", username)
+                    startActivity(intent)
+                },
+                onFailure = {
+                    Log.e("UserChat Error", it)
+                })
         }
 
         bttBackSearch.setOnClickListener {

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -23,16 +24,21 @@ class UserFollowAdapter(
 ) : RecyclerView.Adapter<UserFollowAdapter.UserFollowViewHolder>() {
     inner class UserFollowViewHolder(itemView: View): RecyclerView.ViewHolder(itemView) {
 
+        private lateinit var llUser: LinearLayout
         private lateinit var ivUserImage: ImageView
         private lateinit var tvUsername: TextView
         private lateinit var tvBio: TextView
         private lateinit var chatBtt: Button
         fun bind(user: User) {
+            llUser = itemView. findViewById(R.id.ll_user_follow)
             ivUserImage = itemView.findViewById(R.id.iv_user_follow)
             tvUsername = itemView.findViewById(R.id.tv_user_follow_username)
             tvBio = itemView.findViewById(R.id.tv_user_follow_bio)
             chatBtt = itemView.findViewById(R.id.btt_follow_chat)
 
+            llUser.setOnClickListener {
+                userClickListener.onUserClickListener(user)
+            }
             FirebaseInteraction.getUserProfileImageRef(
                 user.id,
                 onSuccess = {
@@ -54,7 +60,6 @@ class UserFollowAdapter(
             ivUserImage.setOnClickListener {
                 userClickListener.onUserClickListener(user)
             }
-
             tvUsername.text = user.name
             if (!user.biography.isNullOrBlank()) {
                 tvBio.text = user.biography

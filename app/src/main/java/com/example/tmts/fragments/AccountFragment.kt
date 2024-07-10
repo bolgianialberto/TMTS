@@ -35,13 +35,15 @@ import com.example.tmts.activities.MainEmptyActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.activities.UserFollowActivity
-import com.example.tmts.adapters.AddToWatchlistAdapter
 import com.example.tmts.adapters.MediaAdapter
+import com.example.tmts.adapters.WatchlistAdapter
 import com.example.tmts.beans.Media
+import com.example.tmts.beans.results.ShowDetailsResult
+import com.example.tmts.interfaces.OnShowDetailsClickListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
-class AccountFragment : Fragment() {
+class AccountFragment : Fragment(), OnShowDetailsClickListener {
     private lateinit var mAuth: FirebaseAuth
     private lateinit var ivAccountIcon: ImageView
     private lateinit var tvBio: TextView
@@ -51,7 +53,7 @@ class AccountFragment : Fragment() {
     private lateinit var tvFollowingCount: TextView
     private lateinit var watchedMoviesAdapter: MediaAdapter
     private lateinit var watchedSeriesAdapter: MediaAdapter
-    private var watchlistsAdapter: AddToWatchlistAdapter? = null
+    private lateinit var watchlistsAdapter: WatchlistAdapter
     private lateinit var llWatchedMovies: LinearLayout
     private lateinit var llWatchedSeries: LinearLayout
     private lateinit var llWatchlists: LinearLayout
@@ -145,7 +147,7 @@ class AccountFragment : Fragment() {
             startActivity(intent)
         }
 
-        watchlistsAdapter = AddToWatchlistAdapter(requireContext(), emptyList()) {}
+        watchlistsAdapter = WatchlistAdapter(requireContext(), this)
 
         val rvWatchedMovie: RecyclerView = view.findViewById(R.id.rv_watched_movies)
         rvWatchedMovie.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
@@ -175,12 +177,12 @@ class AccountFragment : Fragment() {
             }
         }
 
-        FirebaseInteraction.fetchWatchlistsWithDetails(
-            onSuccess = {watchlists ->
+        FirebaseInteraction.fetchWatchlistsWithShowDetails(
+            onSuccess = { watchlists ->
                 if (watchlists.isNotEmpty()){
                     rvWatchlist.visibility = View.VISIBLE
                     tvNoWatchlists.visibility = View.GONE
-                    watchlistsAdapter!!.updateMedia(watchlists)
+                    watchlistsAdapter.updateWatchlists(ArrayList(watchlists))
                 }
         },
             onError = { errorMessage ->
@@ -446,4 +448,18 @@ class AccountFragment : Fragment() {
         )
     }
 
+    override fun onShowDetailsClickListener(showInfo: ShowDetailsResult) {
+        when (showInfo.showTypeId) {
+            "MOV" -> {
+                val showIntent = Intent(context, MovieDetailsActivity::class.java)
+                showIntent.putExtra("movieId", showInfo.movieDetails!!.id)
+                startActivity(showIntent)
+            }
+            "SER" -> {
+                val showIntent = Intent(context, SerieDetailsActivity::class.java)
+                showIntent.putExtra("serieId", showInfo.serieDetails!!.id)
+                startActivity(showIntent)
+            }
+        }
+    }
 }
