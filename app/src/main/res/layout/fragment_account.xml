@@ -70,7 +70,7 @@
                             android:id="@+id/tv_bio"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="User bio goes here. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eget lectus nec est porttitor maximus."
+                            android:text="User bio goes here."
                             android:textColor="@android:color/black"
                             android:textSize="14sp" />
 
