@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.tmts.FirebaseInteraction
@@ -119,9 +120,10 @@ class MovieHomeFragment : Fragment(), OnCheckButtonClickListener {
         Log.e("MovieDetailsActivity", "Something went wrong")
     }
 
-    override fun onCheckButtonClicked(movieId: String) {
+    override fun onCheckButtonClicked(movieId: String, movieTitle: String) {
         FirebaseInteraction.removeMovieFromFollowing(movieId.toInt()) {
             loadHomeMovies()
+            Toast.makeText(requireContext(), "Congratulations on finishing ${movieTitle}!", Toast.LENGTH_SHORT).show()
         }
 
         FirebaseInteraction.addMovieToWatched(movieId.toInt())

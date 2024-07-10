@@ -128,8 +128,7 @@ class SerieHomeFragment : Fragment(), OnCheckButtonClickListener {
         Log.e("SerieDetailsActivity", "Something went wrong")
     }
 
-    override fun onCheckButtonClicked(serieId: String) {
-
+    override fun onCheckButtonClicked(serieId: String, serieTitle: String) {
         FirebaseInteraction.getNextToSee(serieId.toInt()) {nextToSeePair ->
             FirebaseInteraction.updateNextToSee(
                 requireContext(),

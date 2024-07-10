@@ -1422,7 +1422,8 @@ object FirebaseInteraction {
                                                 if (removeTask.isSuccessful) {
                                                     Log.d("Firebase", "Serie rimossa con successo")
                                                     // Mostra il Toast di congratulazioni
-                                                    Toast.makeText(context, "Congratulations on finishing the series!", Toast.LENGTH_LONG).show()
+                                                    Toast.makeText(context, "Congratulations on finishing the serie!", Toast.LENGTH_LONG).show()
+                                                    callback?.invoke()
                                                 } else {
                                                     Log.e("Firebase", "Errore nella rimozione della serie", removeTask.exception)
                                                 }

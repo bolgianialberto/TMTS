@@ -75,7 +75,7 @@ class HomeSerieAdapter(
 
             buttonCheck.setOnClickListener {
                 val newNextToSee = "${episode.season_number}_${episode.episode_number}"
-                clickListener.onCheckButtonClicked(episode.serieId.toString())
+                clickListener.onCheckButtonClicked(episode.serieId.toString(), episode.serieName!!)
             }
         }
     }

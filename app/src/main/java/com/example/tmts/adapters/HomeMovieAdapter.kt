@@ -73,7 +73,7 @@ class HomeMovieAdapter(
             }
 
             buttonCheck.setOnClickListener {
-                clickListener.onCheckButtonClicked(movie.id.toString())
+                clickListener.onCheckButtonClicked(movie.id.toString(), movie.title)
             }
         }
     }
