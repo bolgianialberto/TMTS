@@ -231,7 +231,7 @@
             app:layout_constraintTop_toBottomOf="@id/ll_overview"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/ll_users_who_follow"
+            app:layout_constraintBottom_toTopOf="@id/ll_movie_followers"
             android:background="@drawable/thick_rounded_border"
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
@@ -265,7 +265,7 @@
 
         <!-- Users Who Follow Section -->
         <LinearLayout
-            android:id="@+id/ll_users_who_follow"
+            android:id="@+id/ll_movie_followers"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toBottomOf="@id/ll_comments"
@@ -309,7 +309,7 @@
             android:padding="10dp"
             android:orientation="vertical"
             app:layout_constraintBottom_toTopOf="@id/ll_cast"
-            app:layout_constraintTop_toBottomOf="@id/ll_users_who_follow"
+            app:layout_constraintTop_toBottomOf="@id/ll_movie_followers"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:background="@drawable/thick_rounded_border"

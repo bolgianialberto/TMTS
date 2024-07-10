@@ -49,7 +49,7 @@ class MoreShowAccountsActivity : AppCompatActivity(), OnUserClickListener, OnCha
         val showType = intent.getStringExtra("showType")!!
         val showId = intent.getStringExtra("showId")!!
         followers = intent.getStringArrayListExtra("retrievedFollowers")!!
-        val loadedFollowers = intent.getStringArrayListExtra("loadedUsers")
+        //val loadedFollowers = intent.getStringArrayListExtra("loadedUsers")
         moreShowAccountsAdapter = MoreShowAccountsAdapter(this, ArrayList(), this, this)
         rvAccounts = findViewById(R.id.rv_more_show_accounts)
         rvAccounts.layoutManager = LinearLayoutManager(this)

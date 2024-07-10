@@ -60,6 +60,7 @@ class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var tvProviders: TextView
     private lateinit var rvCast: RecyclerView
     private lateinit var castAdapter: CastAdapter
+    private lateinit var llFollowers: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,6 +93,7 @@ class SerieDetailsActivity : AppCompatActivity() {
         tvProviders = findViewById(R.id.tv_providers)
         rvCast = findViewById(R.id.rv_cast)
         castAdapter = CastAdapter(this, emptyList())
+        llFollowers = findViewById(R.id.ll_serie_followers)
 
         val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
         backdropImageView.colorFilter = colorFilter
@@ -242,6 +244,16 @@ class SerieDetailsActivity : AppCompatActivity() {
             intent.putExtra("mediaId", serie.id)
             intent.putExtra("mediaType", "serie")
             startActivity(intent)
+        }
+
+        llFollowers.setOnClickListener{
+            FirebaseInteraction.getSerieFollowers(serie.id) {followers ->
+                val intent = Intent(this, MoreShowAccountsActivity::class.java)
+                intent.putExtra("showType", "SER")
+                intent.putExtra("showId", serie.id.toString())
+                intent.putStringArrayListExtra("retrievedFollowers", ArrayList(followers))
+                startActivity(intent)
+            }
         }
 
         // follow/unfollow

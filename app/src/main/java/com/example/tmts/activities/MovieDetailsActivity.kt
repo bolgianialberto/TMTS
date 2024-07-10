@@ -57,6 +57,7 @@ class MovieDetailsActivity : AppCompatActivity() {
     private lateinit var tvProviders: TextView
     private lateinit var rvCast: RecyclerView
     private lateinit var castAdapter: CastAdapter
+    private lateinit var llFollowers: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -88,6 +89,7 @@ class MovieDetailsActivity : AppCompatActivity() {
         tvProviders = findViewById(R.id.tv_providers)
         rvCast = findViewById(R.id.rv_cast)
         castAdapter = CastAdapter(this, emptyList())
+        llFollowers = findViewById(R.id.ll_movie_followers)
 
         val colorFilter = PorterDuffColorFilter(Color.parseColor("#80000000"), PorterDuff.Mode.SRC_ATOP)
         backdropImageView.colorFilter = colorFilter
@@ -214,6 +216,16 @@ class MovieDetailsActivity : AppCompatActivity() {
 
         btnFollowUnfollow.setOnClickListener{
             followUnfollowMovie(movie)
+        }
+
+        llFollowers.setOnClickListener{
+            FirebaseInteraction.getMovieFollowers(movie.id) {followers ->
+                val intent = Intent(this, MoreShowAccountsActivity::class.java)
+                intent.putExtra("showType", "MOV")
+                intent.putExtra("showId", movie.id.toString())
+                intent.putStringArrayListExtra("retrievedFollowers", ArrayList(followers))
+                startActivity(intent)
+            }
         }
 
         llComments.setOnClickListener{

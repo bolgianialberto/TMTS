@@ -142,7 +142,7 @@ class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDet
             "SER" -> intent.putExtra("showId", moreAccountClickResult.serieDetails!!.id.toString())
         }
         intent.putExtra("retrievedFollowers", moreAccountClickResult.retrievedUsers)
-        intent.putExtra("loadedUsers", ArrayList(moreAccountClickResult.loadedUsers.map { it.id }))
+        //intent.putExtra("loadedUsers", ArrayList(moreAccountClickResult.loadedUsers.map { it.id }))
         context?.startActivity(intent)
     }
 
