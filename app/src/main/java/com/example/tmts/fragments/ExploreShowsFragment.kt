@@ -14,7 +14,7 @@ import com.example.tmts.FirebaseInteraction
 import com.example.tmts.FirebaseInteraction.onError
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
-import com.example.tmts.activities.MoreShowAccountsActivity
+import com.example.tmts.activities.ShowFollowersActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
 import com.example.tmts.activities.UserPageActivity
@@ -135,7 +135,7 @@ class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDet
     }
 
     override fun onMoreAccountClickListener(moreAccountClickResult: ShowDetailsResult) {
-        val intent = Intent(this.context, MoreShowAccountsActivity::class.java)
+        val intent = Intent(this.context, ShowFollowersActivity::class.java)
         intent.putExtra("showType", moreAccountClickResult.showTypeId)
         when(moreAccountClickResult.showTypeId) {
             "MOV" -> intent.putExtra("showId", moreAccountClickResult.movieDetails!!.id.toString())

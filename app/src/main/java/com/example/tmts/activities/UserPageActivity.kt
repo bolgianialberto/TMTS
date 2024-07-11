@@ -33,6 +33,12 @@ class UserPageActivity: AppCompatActivity() {
     private lateinit var followedSeriesAdapter: MediaAdapter
     private lateinit var llFollowedMovies: LinearLayout
     private lateinit var llFollowedSeries: LinearLayout
+    private lateinit var arrowFollowedMovies: ImageView
+    private lateinit var arrowFollowedSeries: ImageView
+    private lateinit var llRvTvMovies: LinearLayout
+    private lateinit var llRvTvSeries: LinearLayout
+    private lateinit var tvNoFollowedMovies: TextView
+    private lateinit var tvNofollowedSeries: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,6 +56,12 @@ class UserPageActivity: AppCompatActivity() {
         llFollowedMovies = findViewById(R.id.ll_followed_movies)
         llFollowedSeries = findViewById(R.id.ll_followed_series)
         bttBackSearch = findViewById(R.id.btt_user_page_arrow_back)
+        arrowFollowedMovies = findViewById(R.id.arrow_followed_movies)
+        arrowFollowedSeries = findViewById(R.id.arrow_followed_series)
+        llRvTvMovies = findViewById(R.id.ll_rv_tv_movies)
+        llRvTvSeries = findViewById(R.id.ll_rv_tv_series)
+        tvNoFollowedMovies = findViewById(R.id.tv_no_followed_movies)
+        tvNofollowedSeries = findViewById(R.id.tv_no_followed_series)
 
         followedMoviesAdapter = MediaAdapter(this, emptyList()) { movie ->
             val intent = Intent(this, MovieDetailsActivity::class.java)
@@ -73,39 +85,48 @@ class UserPageActivity: AppCompatActivity() {
         loadUserFollowerData(uid)
 
         FirebaseInteraction.getFollowingMovies(uid) { movies ->
-            val followingMovies = mutableListOf<String>()
+            if (movies.isNotEmpty()) {
+                rvFollowedMovie.visibility = View.VISIBLE
+                tvNoFollowedMovies.visibility = View.GONE
 
-            for (movieId in movies) {
-                followingMovies.add(movieId.first)
+                val followingMovies = mutableListOf<String>()
+                for (movieId in movies) {
+                    followingMovies.add(movieId.first)
+                }
+                onFollowedMoviesFetched(movies.map { it.first })
             }
-            val n =
-
-            onFollowedMoviesFetched(movies.map { it.first })
         }
 
         FirebaseInteraction.getFollowingSeries(uid) { series ->
-            val followingSeries = mutableListOf<String>()
+            if (series.isNotEmpty()){
+                rvFollowedSeries.visibility = View.VISIBLE
+                tvNofollowedSeries.visibility = View.GONE
 
-            for (serieId in series) {
-                followingSeries.add(serieId.first)
+                val followingSeries = mutableListOf<String>()
+                for (serieId in series) {
+                    followingSeries.add(serieId.first)
+                }
+                onFollowedSeriesFetched(followingSeries)
             }
-
-            onFollowedSeriesFetched(followingSeries)
         }
 
         llFollowedMovies.setOnClickListener{
-            if (rvFollowedMovie.visibility == View.GONE) {
-                rvFollowedMovie.visibility = View.VISIBLE
+            if (llRvTvMovies.visibility == View.GONE) {
+                llRvTvMovies.visibility = View.VISIBLE
+                arrowFollowedMovies.setImageResource(R.drawable.arrow_up)
             } else {
-                rvFollowedMovie.visibility = View.GONE
+                llRvTvMovies.visibility = View.GONE
+                arrowFollowedMovies.setImageResource(R.drawable.arrow_down)
             }
         }
 
         llFollowedSeries.setOnClickListener{
-            if (rvFollowedSeries.visibility == View.GONE) {
-                rvFollowedSeries.visibility = View.VISIBLE
+            if (llRvTvSeries.visibility == View.GONE) {
+                llRvTvSeries.visibility = View.VISIBLE
+                arrowFollowedSeries.setImageResource(R.drawable.arrow_up)
             } else {
-                rvFollowedSeries.visibility = View.GONE
+                llRvTvSeries.visibility = View.GONE
+                arrowFollowedSeries.setImageResource(R.drawable.arrow_down)
             }
         }
 
@@ -139,9 +160,12 @@ class UserPageActivity: AppCompatActivity() {
             userId,
             onSuccess = {
                 it.downloadUrl.addOnSuccessListener { uri ->
-                    Glide.with(this)
-                        .load(uri)
-                        .into(ivAccountIcon)
+                    // Controlla che l'attività esista e non sia stata distrutta
+                    if (!isFinishing && !isDestroyed) {
+                        Glide.with(this)
+                            .load(uri)
+                            .into(ivAccountIcon)
+                    }
                 }.addOnFailureListener{
                     Log.e("StorageImg Err", "Image not found")
                 }
