@@ -53,8 +53,6 @@ class MovieHomeFragment : Fragment(), OnCheckButtonClickListener {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.adapter = homeMovieAdapter
 
-        loadHomeMovies()
-
         return view
     }
 
@@ -129,4 +127,10 @@ class MovieHomeFragment : Fragment(), OnCheckButtonClickListener {
         FirebaseInteraction.addMovieToWatched(movieId.toInt())
     }
 
+    override fun onResume() {
+        super.onResume()
+        movieDetailsList.clear()
+        followingMovies.clear()
+        loadHomeMovies()
+    }
 }

@@ -34,6 +34,6 @@
     </style>
     <style name="userPageRoundedImageView" parent="">
         <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">75dp</item>
+        <item name="cornerSize">50dp</item>
     </style>
 </resources>
