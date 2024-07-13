@@ -2,24 +2,23 @@ package com.example.tmts.adapters
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.tmts.FirebaseInteraction
 import com.example.tmts.R
-import com.example.tmts.activities.UserPageActivity
 import com.example.tmts.beans.Review
+import com.example.tmts.interfaces.OnUserIdClickListener
 
 class ReviewAdapter (
     private val context: Context,
-    private var mediaItems: List<Review>
+    private var mediaItems: List<Review>,
+    private val onUserIdClickListener: OnUserIdClickListener
 ) : RecyclerView.Adapter<ReviewAdapter.ViewHolder>(){
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(context).inflate(R.layout.review_item, parent, false)
@@ -108,11 +107,12 @@ class ReviewAdapter (
                 }
             )
 
+            ivUserPhoto.setOnClickListener {
+                onUserIdClickListener.onUserClickListener(review.idUser!!)
+            }
 
             tvUserName.setOnClickListener {
-                val intent = Intent(context, UserPageActivity::class.java)
-                intent.putExtra("uid", review.idUser)
-                startActivity(context, intent, null)
+                onUserIdClickListener.onUserClickListener(review.idUser!!)
             }
         }
     }

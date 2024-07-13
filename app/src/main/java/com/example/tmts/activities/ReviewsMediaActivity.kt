@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
-import android.widget.ScrollView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -19,9 +18,10 @@ import com.example.tmts.Utils
 import com.example.tmts.adapters.ReviewAdapter
 import com.example.tmts.beans.MediaDetails
 import com.example.tmts.beans.MovieDetails
+import com.example.tmts.interfaces.OnUserIdClickListener
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class ReviewsMediaActivity : AppCompatActivity() {
+class ReviewsMediaActivity : AppCompatActivity(), OnUserIdClickListener {
     private lateinit var tvMediaName: TextView
     private lateinit var btnAddComment: FloatingActionButton
     private lateinit var btnArrowBack: Button
@@ -47,7 +47,7 @@ class ReviewsMediaActivity : AppCompatActivity() {
         layout = findViewById(R.id.cl_media_review)
         llNoComment = findViewById(R.id.ll_no_comments)
 
-        reviewsAdapter = ReviewAdapter(this, emptyList()) // Pass an empty list initially
+        reviewsAdapter = ReviewAdapter(this, emptyList(), this) // Pass an empty list initially
         rvReview.layoutManager = LinearLayoutManager(this)
         rvReview.adapter = reviewsAdapter
 
@@ -119,5 +119,11 @@ class ReviewsMediaActivity : AppCompatActivity() {
 
     private fun onError(){
         Log.e("CommentsMovieActivity", "Something went wrong")
+    }
+
+    override fun onUserClickListener(userId: String) {
+        val intent = Intent(this, UserPageActivity::class.java)
+        intent.putExtra("uid", userId)
+        startActivity(intent)
     }
 }
