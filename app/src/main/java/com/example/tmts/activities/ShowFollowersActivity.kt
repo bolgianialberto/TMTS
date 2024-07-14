@@ -24,7 +24,7 @@ import com.example.tmts.interfaces.OnChatClickListener
 import com.example.tmts.interfaces.OnUserClickListener
 import kotlin.math.min
 
-class MoreShowAccountsActivity : AppCompatActivity(), OnUserClickListener, OnChatClickListener {
+class ShowFollowersActivity : AppCompatActivity(), OnUserClickListener, OnChatClickListener {
 
     private val MAX_USERS: Int = 30
     private var movieDetails: MovieDetails? = null

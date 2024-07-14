@@ -220,7 +220,7 @@ class MovieDetailsActivity : AppCompatActivity() {
 
         llFollowers.setOnClickListener{
             FirebaseInteraction.getMovieFollowers(movie.id) {followers ->
-                val intent = Intent(this, MoreShowAccountsActivity::class.java)
+                val intent = Intent(this, ShowFollowersActivity::class.java)
                 intent.putExtra("showType", "MOV")
                 intent.putExtra("showId", movie.id.toString())
                 intent.putStringArrayListExtra("retrievedFollowers", ArrayList(followers))

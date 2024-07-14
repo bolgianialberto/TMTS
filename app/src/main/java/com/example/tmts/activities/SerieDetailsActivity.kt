@@ -32,7 +32,6 @@ import com.example.tmts.adapters.CastAdapter
 import com.example.tmts.adapters.ProviderAdapter
 import com.example.tmts.beans.SerieDetails
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.database.ValueEventListener
 
 class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var ivBackSearch: Button
@@ -248,7 +247,7 @@ class SerieDetailsActivity : AppCompatActivity() {
 
         llFollowers.setOnClickListener{
             FirebaseInteraction.getSerieFollowers(serie.id) {followers ->
-                val intent = Intent(this, MoreShowAccountsActivity::class.java)
+                val intent = Intent(this, ShowFollowersActivity::class.java)
                 intent.putExtra("showType", "SER")
                 intent.putExtra("showId", serie.id.toString())
                 intent.putStringArrayListExtra("retrievedFollowers", ArrayList(followers))
