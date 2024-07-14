@@ -1,3 +1,4 @@
+
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
@@ -139,8 +140,6 @@ class ExploreShowsAdapter(
                             userClickListener.onUserClickListener(user)
                         }
                         cvsUser[index]?.visibility = View.VISIBLE
-                    } else {
-                        cvsUser[index]?.visibility = View.GONE
                     }
                 }
 
@@ -156,7 +155,7 @@ class ExploreShowsAdapter(
                         moreAccountsClickListener.onMoreAccountClickListener(showInfo)
                     }
                     cvsUser[N_USERS - 1]?.visibility = View.VISIBLE
-                } else {
+                } else if (showInfo.retrievedUsers.size < N_USERS) {
                     cvsUser[N_USERS - 1]?.visibility = View.GONE
                 }
             }

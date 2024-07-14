@@ -14,9 +14,9 @@ import com.example.tmts.FirebaseInteraction
 import com.example.tmts.FirebaseInteraction.onError
 import com.example.tmts.MediaRepository
 import com.example.tmts.R
-import com.example.tmts.activities.ShowFollowersActivity
 import com.example.tmts.activities.MovieDetailsActivity
 import com.example.tmts.activities.SerieDetailsActivity
+import com.example.tmts.activities.ShowFollowersActivity
 import com.example.tmts.activities.UserPageActivity
 import com.example.tmts.beans.MovieDetails
 import com.example.tmts.beans.SerieDetails
@@ -25,7 +25,6 @@ import com.example.tmts.beans.results.ShowDetailsResult
 import com.example.tmts.interfaces.OnMoreAccountClickListener
 import com.example.tmts.interfaces.OnShowDetailsClickListener
 import com.example.tmts.interfaces.OnUserClickListener
-import kotlin.math.min
 
 class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDetailsClickListener, OnUserClickListener {
 
@@ -115,20 +114,21 @@ class ExploreShowsFragment() : Fragment(), OnMoreAccountClickListener, OnShowDet
     private fun onShowUsersFetched(show: ShowDetailsResult, follows: List<String>){
         val followers = ArrayList(follows)
         followers.shuffle()
-        if (follows.find { it == loggedUser?.id} != null) {
+        if (followers.find { it == loggedUser?.id} != null) {
             followers.remove(loggedUser!!.id)
         }
         show.retrievedUsers.addAll(followers)
-        val nUsersShowed = if (show.retrievedUsers.size <= 4) min(MAX_USERS_PER_SHOW, show.retrievedUsers.size) else MAX_USERS_PER_SHOW - 1
+        val nUsersShowed = if (show.retrievedUsers.size <= MAX_USERS_PER_SHOW) show.retrievedUsers.size else MAX_USERS_PER_SHOW - 1
         for (i in 1..nUsersShowed) {
             val it = followers[i - 1]
-            FirebaseInteraction.getUserInfo(it,
+            FirebaseInteraction.getUserInfo(
+                it,
                 onSuccess = { user ->
                     show.loadedUsers.add(user)
                     exploreMoviesAdapter.updateShows(show)
                 },
-                onFailure = {
-                    Log.e("Explore Movie Fragment", "Something went wrong")
+                onFailure = { err ->
+                    Log.e("Explore Movie Fragment", "Something went wrong for user $it, error: $err")
                 }
             )
         }
