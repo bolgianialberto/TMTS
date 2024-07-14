@@ -32,6 +32,7 @@ import com.example.tmts.adapters.CastAdapter
 import com.example.tmts.adapters.ProviderAdapter
 import com.example.tmts.beans.SerieDetails
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 
 class SerieDetailsActivity : AppCompatActivity() {
     private lateinit var ivBackSearch: Button
@@ -245,15 +246,28 @@ class SerieDetailsActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-        llFollowers.setOnClickListener{
-            FirebaseInteraction.getSerieFollowers(serie.id) {followers ->
+        llFollowers.setOnClickListener {
+            val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+
+            FirebaseInteraction.getSerieFollowers(serie.id) { followers ->
+                // Converti la lista followers in una MutableList
+                val mutableFollowers = followers.toMutableList()
+
+                // Verifica se l'ID dell'utente corrente è presente nella lista followers
+                if (currentUserUid != null && mutableFollowers.contains(currentUserUid)) {
+                    // Rimuovi l'ID dell'utente corrente dalla lista mutableFollowers
+                    mutableFollowers.remove(currentUserUid)
+                }
+
+                // Crea l'intent per avviare ShowFollowersActivity con i dati aggiornati
                 val intent = Intent(this, ShowFollowersActivity::class.java)
                 intent.putExtra("showType", "SER")
                 intent.putExtra("showId", serie.id.toString())
-                intent.putStringArrayListExtra("retrievedFollowers", ArrayList(followers))
+                intent.putStringArrayListExtra("retrievedFollowers", ArrayList(mutableFollowers))
                 startActivity(intent)
             }
         }
+
 
         // follow/unfollow
         btnFollowUnfollow.setOnClickListener{

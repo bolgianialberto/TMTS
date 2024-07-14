@@ -32,6 +32,7 @@ import com.example.tmts.adapters.CastAdapter
 import com.example.tmts.adapters.ProviderAdapter
 import com.example.tmts.beans.MovieDetails
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 
 class MovieDetailsActivity : AppCompatActivity() {
     private lateinit var ivBackSearch: Button
@@ -218,15 +219,28 @@ class MovieDetailsActivity : AppCompatActivity() {
             followUnfollowMovie(movie)
         }
 
-        llFollowers.setOnClickListener{
-            FirebaseInteraction.getMovieFollowers(movie.id) {followers ->
+        llFollowers.setOnClickListener {
+            val currentUserUid = FirebaseAuth.getInstance().currentUser?.uid
+
+            FirebaseInteraction.getMovieFollowers(movie.id) { followers ->
+                // Converti la lista followers in una MutableList
+                val mutableFollowers = followers.toMutableList()
+
+                // Verifica se l'ID dell'utente corrente è presente nella lista followers
+                if (currentUserUid != null && mutableFollowers.contains(currentUserUid)) {
+                    // Rimuovi l'ID dell'utente corrente dalla lista mutableFollowers
+                    mutableFollowers.remove(currentUserUid)
+                }
+
+                // Crea l'intent per avviare ShowFollowersActivity con i dati aggiornati
                 val intent = Intent(this, ShowFollowersActivity::class.java)
                 intent.putExtra("showType", "MOV")
                 intent.putExtra("showId", movie.id.toString())
-                intent.putStringArrayListExtra("retrievedFollowers", ArrayList(followers))
+                intent.putStringArrayListExtra("retrievedFollowers", ArrayList(mutableFollowers))
                 startActivity(intent)
             }
         }
+
 
         llComments.setOnClickListener{
             val intent = Intent(this, ReviewsMediaActivity::class.java)
