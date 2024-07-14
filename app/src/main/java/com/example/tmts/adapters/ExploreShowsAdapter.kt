@@ -103,6 +103,12 @@ class ExploreShowsAdapter(
                             .into(ivMovie)
                     }
                 }
+                ivMovie.setOnClickListener {
+                    showDetailsClickListener.onShowDetailsClickListener(showInfo)
+                }
+                tvTitle.setOnClickListener {
+                    showDetailsClickListener.onShowDetailsClickListener(showInfo)
+                }
 
                 for (index in 0 until N_USERS) {
                     if (index < showInfo.loadedUsers.size) {

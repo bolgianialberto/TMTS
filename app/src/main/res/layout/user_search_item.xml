@@ -4,58 +4,72 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal"
-    android:padding="5dp">
-
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/iv_search_user_image"
-        android:layout_width="64dp"
-        android:layout_height="64dp"
-        android:layout_marginStart="2dp"
-        android:layout_marginEnd="2dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="2dp"
-        android:scaleType="centerCrop"
-        app:srcCompat="@drawable/account"
-        app:shapeAppearanceOverlay="@style/exploreAccountRoundedImageView" />
+    android:orientation="vertical">
 
     <LinearLayout
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:orientation="vertical">
+        android:orientation="horizontal"
+        android:padding="5dp">
 
-        <TextView
-            android:id="@+id/tv_search_user_username"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:layout_marginStart="6dp"
-            android:text="Name placeholder"
-            android:textSize="17sp"
-            android:textStyle="bold" />
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/iv_search_user_image"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_margin="2dp"
+            android:scaleType="centerCrop"
+            app:srcCompat="@drawable/account"
+            app:shapeAppearanceOverlay="@style/userSearchImageView" />
 
-        <TextView
-            android:id="@+id/tv_search_user_info"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:layout_marginStart="6dp"
-            android:text="Info..."
-            android:textSize="14sp"
-            android:ellipsize="end"
-            android:maxLines="2" />
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_search_user_username"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:text="Name placeholder"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/tv_search_user_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:text="Info..."
+                android:textSize="14sp"
+                android:ellipsize="end"
+                android:maxLines="2" />
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btt_search_user_chat"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginBottom="4dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/chat" />
 
     </LinearLayout>
 
-    <Button
-        android:id="@+id/btt_search_user_chat"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center_vertical"
-        android:layout_marginBottom="4dp"
-        android:layout_marginStart="5dp"
-        android:layout_marginEnd="15dp"
-        android:background="@drawable/chat" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        android:layout_marginTop="2dp" />
 
 </LinearLayout>
